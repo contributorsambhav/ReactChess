@@ -28,27 +28,84 @@ const ChessboardComponent = () => {
   useEffect(() => {
     const game = new Chess(); // Create a new Chess instance
 
-    // Function to handle piece drop events
+    const onDragStart = (source, piece, position, orientation) => {
+      // Do not pick up pieces if the game is over
+      if (game.isGameOver()) {
+        console.log("Game over");
+        return false;
+      }
+
+      // Only pick up pieces for the side to move
+      if ((game.turn() === 'w' && piece.search(/^b/) !== -1) ||
+          (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
+        return false;
+      }
+    };
+
     const onDrop = (source, target) => {
-      const move = game.move({
-        from: source,
-        to: target,
-        promotion: 'q' // Automatically promote to a queen for simplicity
-      });
+      try {
+        let move = game.move({
+          from: source,
+          to: target,
+          promotion: 'q' // Automatically promote to a queen for simplicity
+        });
 
-      if (move === null) return 'snapback'; // If the move is illegal, snap the piece back
+        // Log the move result
+        console.log("The move returns: " + JSON.stringify(move));
 
-      // Update board position after the piece snap
+        // If the move is illegal, return 'snapback'
+        if (move === null) return "snapback";
+
+      } catch (error) {
+        console.log(error);
+        return "snapback";
+      }
+
+      updateStatus(); // Update the game status
+    };
+
+    // Update the board position after the piece snap for castling, en passant, pawn promotion
+    const onSnapEnd = () => {
       boardRef.current.position(game.fen());
     };
 
-    // Configuration object for Chessboard.js
+    const updateStatus = () => {
+      let status = '';
+      let moveColor = 'White';
+
+      if (game.turn() === 'b') {
+        moveColor = 'Black';
+      }
+
+      // Checkmate?
+      if (game.isCheckmate()) {
+        status = 'Game over, ' + moveColor + ' is in checkmate.';
+      } else if (game.isDraw()) {
+        status = 'Game over, drawn position';
+      } else {
+        status = moveColor + ' to move';
+
+        // Check?
+        if (game.isCheck()) {
+          status += ', ' + moveColor + ' is in check';
+        }
+      }
+
+      // Update the status, FEN, and PGN
+      console.log(status);
+      console.log(game.fen());
+      console.log(game.pgn());
+    };
+
     const config = {
       draggable: true,
       position: 'start',
+      onDragStart: onDragStart,
       onDrop: onDrop,
-      dropOffBoard: 'snapback',
-      pieceTheme: (piece) => pieceImages[piece]
+      onSnapEnd: onSnapEnd,
+      pieceTheme: (piece) => pieceImages[piece],
+      snapbackSpeed: 500,
+      snapSpeed: 100
     };
 
     // Initialize Chessboard.js
