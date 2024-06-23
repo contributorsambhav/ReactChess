@@ -1,20 +1,22 @@
 import React from 'react';
-import './App.css';
-import Board from './components/ChessBoard';
-
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import Login from './components/Login';
+import Home from './components/Home';
+import SignUp from './components/SignUp';
 function App() {
-  return (
-    <div className="w-full flex mx-[5vw] 2xl:flex-row flex-col ">
-      <div className='mx-auto align-middle justify-center h-[100vh]'>
-        <div className='my-auto'>
-          <Board />
-        </div>
-      </div>
-      <div className='w-[40vw] min-h-screen'>
-        Spade for move table
-      </div>
-    </div>
-  );
+    return (
+        <Router>
+            <div>
+                <Navbar />
+                <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/signup" element={<SignUp />} />
+                    <Route path="/login" element={<Login />} />
+                </Routes>
+            </div>
+        </Router>
+    );
 }
 
 export default App;

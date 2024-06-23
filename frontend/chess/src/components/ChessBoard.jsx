@@ -120,7 +120,9 @@ const ChessboardComponent = () => {
   }, []);
 
   return (
-    <div ref={chessRef} className="mx-auto my-auto mt-20" style={{ width: window.innerWidth > 1536 ? '40vw' : '70vw' }}></div>
+    <div >
+      <div ref={chessRef} className="mx-auto my-auto mt-20" style={{ width: window.innerWidth > 1536 ? '40vw' : '70vw' }}></div>
+    </div>
   );
 };
 
