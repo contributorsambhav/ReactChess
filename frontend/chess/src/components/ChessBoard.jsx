@@ -63,7 +63,7 @@ const ChessboardComponent = () => {
   }, []);
 
   return (
-    <div ref={chessRef} style={{ width: '700px' }}></div>
+    <div ref={chessRef} className="mx-auto my-auto mt-20" style={{ width: window.innerWidth > 1536 ? '40vw' : '70vw' }}></div>
   );
 };
 
