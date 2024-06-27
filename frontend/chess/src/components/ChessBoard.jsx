@@ -61,8 +61,7 @@ const ChessboardComponent = () => {
         if (move === null) return "snapback";
 
         // Update moves state with the latest move
-        setMoves([...moves, { from: move.from, to: move.to }]);
-
+        setMoves(prevMoves => [...prevMoves, { from: move.from, to: move.to }]);
       } catch (error) {
         console.log(error);
         return "snapback";
@@ -122,8 +121,6 @@ const ChessboardComponent = () => {
 
       // Update the status, FEN, and PGN
       setCurrentStatus(status);
-      console.log(game.fen());
-      console.log(game.pgn());
     };
 
     const removeGreySquares = () => {
@@ -171,7 +168,7 @@ const ChessboardComponent = () => {
         </div>
         <div className='ml-4 w-1/3'>
           <div className='rounded-xl text-center p-6 px-16 w-full text-2xl bg-green-700 text-white flex-shrink-0'>
-            Current Status: {currentStatus?currentStatus:"White to move"}
+            Current Status: {currentStatus ? currentStatus : "White to move"}
           </div>
           <div className='mt-4'>
             <table className='w-full border-collapse border border-gray-700 rounded-lg overflow-hidden'>
@@ -196,8 +193,7 @@ const ChessboardComponent = () => {
         </div>
       </div>
     </div>
-
-              )
-            }
+  );
+};
 
 export default ChessboardComponent;
