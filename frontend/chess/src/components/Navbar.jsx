@@ -4,7 +4,7 @@ import wN from './pieces/wN.png';
 
 function Navbar() {
     return (
-        <nav className="absolute left-0 top-0 w-full bg-purple-500 bg-opacity-10 p-2">
+        <nav className="w-full bg-purple-300 bg-opacity-10 p-2">
             <div className="container mx-auto flex justify-between items-center">
                 <div className="text-white text-2xl font-semibold">
                     <Link to="/" >
@@ -34,6 +34,14 @@ function Navbar() {
                             className="text-white text-xl hover:text-purple-300 transition duration-300 ease-in-out"
                         >
                             Login
+                        </Link>
+                    </li>
+                    <li>
+                        <Link
+                            to="/modeselector"
+                            className="text-white text-xl hover:text-purple-300 transition duration-300 ease-in-out"
+                        >
+                            Game Mode
                         </Link>
                     </li>
                 </ul>
