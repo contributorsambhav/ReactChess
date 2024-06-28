@@ -6,6 +6,7 @@ import Home from './components/Home';
 import SignUp from './components/SignUp';
 import ChessboardComponent from './components/ChessBoard';
 import GameModeSelector from './components/GameModeSelector';
+import ChessdbMode from './components/ChessdbMode';
 
 function App() {
   return (
@@ -18,7 +19,8 @@ function App() {
             <Route path="/signup" element={<SignUp />} />
             <Route path="/login" element={<Login />} />
             <Route path="/modeselector" element={<GameModeSelector />} />
-            <Route path="/local-multiplayer" element={<ChessboardComponent />} />
+            <Route path="/against-stockfish" element={<ChessdbMode />} />
+            <Route path="/local-multiplayer" element={<ChessdbMode />} />
 
           </Routes>
         </div>

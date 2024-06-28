@@ -1,10 +1,10 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const dbConnector = require('./connect');
-const axios = require("axios")
+const axios = require('axios');
 
 dotenv.config();
+const dbConnector = require('./connect');
 dbConnector();
 
 const port = process.env.PORT || 3000;
@@ -17,49 +17,38 @@ const corsOptions = {
     origin: 'http://localhost:5173', // URL of the client application
     optionsSuccessStatus: 200 // Some legacy browsers choke on 204
 };
-
 app.use(cors(corsOptions));
 
-// Import and use user routes
-const userRoutes = require("./routes/userRoutes");
-
+// Example route to verify server is running
 app.get("/", (req, res) => {
     res.end("HI");
 });
 
-
+// Route to fetch best move from external API (Stockfish)
 app.get("/stockfish", async (req, res) => {
     try {
-        const apiUrl = "https://www.chessdb.cn/cdb.php"; 
-        const payload = {
-            action: "querybest",
-            board: "rnbqkbnr/ppp1pppp/3p4/8/8/4PQ2/PPPP1PPP/RNB1KBNR b KQkq - 1 2"
-        };
-
+        const apiUrl = "https://stockfish.online/api/s/v2.php";
+        
+        // Make a GET request to Stockfish API
         const response = await axios.get(apiUrl, {
-            params: payload
+            params: req.query // Pass query parameters received from the client
         });
+        console.log(response);
 
-        if (response.data.includes("move:")) {
-            // Extract the move and sanitize it by removing the null character
-            const bestMove = response.data.split("move:")[1].trim().replace('\u0000', '');
-            res.json({
-                bestMove: bestMove
-            });
-        } else {
-            res.status(400).json({
-                error: "Request failed",
-                details: response.data
-            });
-        }
+        // Extract the best move from the response
+        const bestMove = response.data.bestmove;
+
+        // Send the best move back to the client
+        res.json({
+            bestMove: bestMove
+        });
     } catch (error) {
+        // Handle errors if the request fails
         res.status(500).send(`Error: ${error.message}`);
     }
 });
 
-
-app.use('/api/users', userRoutes);
-
+// Start the server
 app.listen(port, () => {
     console.log(`Server started at http://localhost:${port}`);
 });
