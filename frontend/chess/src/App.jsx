@@ -4,10 +4,14 @@ import Navbar from './components/Navbar';
 import Login from './components/Login';
 import Home from './components/Home';
 import SignUp from './components/SignUp';
-import ChessboardComponent from './components/ChessBoard';
 import GameModeSelector from './components/GameModeSelector';
-import ChessdbMode from './components/ChessdbMode';
-import RandomPlay from './components/RandomPlay';
+
+//Modes Import
+import RandomPlay from './components/Modes/RandomPlay';
+import LocalMultiplayer from './components/Modes/LocalMultiplayer';
+import GlobalMultiplayer from './components/Modes/GlobalMultiplayer';
+import AgainstFriend from './components/Modes/AgainstFriend';
+import AgainstStockfish from './components/Modes/AgainstStockfish';
 
 function App() {
   return (
@@ -20,10 +24,12 @@ function App() {
             <Route path="/signup" element={<SignUp />} />
             <Route path="/login" element={<Login />} />
             <Route path="/modeselector" element={<GameModeSelector />} />
-            
-            <Route path="/against-stockfish" element={<ChessdbMode />} />
-            <Route path="/local-multiplayer" element={<ChessdbMode />} />
-            <Route path="/random" element={<RandomPlay />} />
+
+            <Route path="/random-play" element={<RandomPlay />} />
+            <Route path="/local-multiplayer" element={<LocalMultiplayer />} />
+            <Route path="/global-multiplayer" element={<GlobalMultiplayer />} />
+            <Route path="/against-friend" element={<AgainstFriend />} />
+            <Route path="/against-stockfish" element={<AgainstStockfish />} />
 
           </Routes>
         </div>
