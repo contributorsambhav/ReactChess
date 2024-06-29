@@ -7,6 +7,7 @@ import SignUp from './components/SignUp';
 import ChessboardComponent from './components/ChessBoard';
 import GameModeSelector from './components/GameModeSelector';
 import ChessdbMode from './components/ChessdbMode';
+import RandomPlay from './components/RandomPlay';
 
 function App() {
   return (
@@ -19,8 +20,10 @@ function App() {
             <Route path="/signup" element={<SignUp />} />
             <Route path="/login" element={<Login />} />
             <Route path="/modeselector" element={<GameModeSelector />} />
+            
             <Route path="/against-stockfish" element={<ChessdbMode />} />
             <Route path="/local-multiplayer" element={<ChessdbMode />} />
+            <Route path="/random" element={<RandomPlay />} />
 
           </Routes>
         </div>
