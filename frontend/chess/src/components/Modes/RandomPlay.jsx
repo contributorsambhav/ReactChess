@@ -63,7 +63,7 @@ const ChessboardComponent = () => {
       // Update moves state with the latest move
       setMoves(prevMoves => [...prevMoves, { from: possibleMoves[randomIdx].split('-')[0], to: possibleMoves[randomIdx].split('-')[1] }]);
     } catch (error) {
-        setCurrentStatus("Black Submits : White Won")
+        setCurrentStatus("Black says :Help me move please in am overwhelmed")
       } 
     };
 

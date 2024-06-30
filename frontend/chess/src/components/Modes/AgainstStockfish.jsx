@@ -3,7 +3,6 @@ import { Chess } from 'chess.js';
 import Chessboard from 'chessboardjs';
 import axios from 'axios';
 
-// Import chess piece images
 import bB from '../pieces/bB.png';
 import bK from '../pieces/bK.png';
 import bN from '../pieces/bN.png';
@@ -32,10 +31,10 @@ const AgainstStockfish = () => {
         }
       });
       console.log('Response from server:', response.data);
-      return response.data.bestMove; // Return the best move from the response
+      return response.data.bestMove; 
     } catch (error) {
       console.error('Error fetching move from stockfish:', error);
-      return null; // Return null in case of error
+      return null; 
     }
   };
 
@@ -83,7 +82,7 @@ const AgainstStockfish = () => {
 
           if (bestMoveResponse) {
             console.log(bestMoveResponse);
-            const bestMove = bestMoveResponse.split(' ')[1].trim(); // Extract the best move and trim any extra spaces
+            const bestMove = bestMoveResponse.split(' ')[1].trim();
 
             move = game.move({
               from: bestMove.slice(0, 2),

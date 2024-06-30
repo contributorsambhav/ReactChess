@@ -9,4 +9,4 @@ const dbConnector = async () => {
     })
 
 }
-module.exports = dbConnector
+module.exports =  dbConnector
