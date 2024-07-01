@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
 
 const register = async (req, res) => {
+  console.log(req.body);
   const { username, password, email } = req.body;
 
   try {
@@ -45,11 +46,27 @@ const login = async (req, res) => {
       expiresIn: '1h'
     });
 
-    res.status(200).json({ message: 'Login successful', token });
+    res.cookie('token', token, {
+      httpOnly: true,
+      maxAge: 3600000,
+    });
+
+    res.status(200).json({
+      token,
+      "username": user.username,
+      "email": user.email,
+      "matchHistory": user.matchHistory,
+      "wins": user.wins,
+      "loses": user.loses,
+      "draws": user.draws
+
+    });
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
+
 
 const getUserById = async (req, res) => {
   const { userId } = req.params;

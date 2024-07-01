@@ -1,9 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Navbar from './components/Navbar';
-import Login from './components/Login';
+import Login from './components/Auth/Login';
 import Home from './components/Home';
-import SignUp from './components/SignUp';
+import SignUp from './components/Auth/SignUp';
 import GameModeSelector from './components/GameModeSelector';
 
 //Modes Import
@@ -12,10 +12,14 @@ import LocalMultiplayer from './components/Modes/LocalMultiplayer';
 import GlobalMultiplayer from './components/Modes/GlobalMultiplayer';
 import AgainstFriend from './components/Modes/AgainstFriend';
 import AgainstStockfish from './components/Modes/AgainstStockfish';
+import { Provider } from 'react-redux';
+import store from './store/store';
 
 function App() {
   return (
     <>
+    <Provider store={store}>
+
       <Router>
         <div>
           <Navbar />
@@ -34,6 +38,8 @@ function App() {
           </Routes>
         </div>
       </Router>
+      </Provider>
+
     </>
   );
 }

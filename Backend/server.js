@@ -4,9 +4,11 @@ const express =require ('express');
 const  cors = require('cors');
 const dotenv = require('dotenv');
 const axios = require ('axios');
-
+const userRoutes = require("./routes/userRoutes.js")
+const cookieParser = require("cookie-parser");
+const {restrictToLoginUserOnly} = require("./middlewares/auth.js")
 dotenv.config();
-const  dbConnector =require ('./connect.js')
+const  dbConnector =require ('./connect.js');
 dbConnector();
 
 const port = process.env.PORT || 3000;
@@ -18,10 +20,14 @@ const corsOptions = {
   methods: ['GET', 'POST'],
 };
 app.use(cors(corsOptions));
+app.use(express.json())
+app.use(cookieParser())
 
 app.get("/", (req, res) => {
     res.end("HI");
 });
+
+app.use("/user",userRoutes)
 
 app.get("/stockfish", async (req, res) => {
     try {
