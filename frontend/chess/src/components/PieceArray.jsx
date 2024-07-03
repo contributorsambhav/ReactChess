@@ -11,6 +11,7 @@ import wN from './pieces/wN.png';
 import wP from './pieces/wP.png';
 import wQ from './pieces/wQ.png';
 import wR from './pieces/wR.png';
+import { useSelector, useDispatch } from 'react-redux';
 
 function PieceArray() {
   return (

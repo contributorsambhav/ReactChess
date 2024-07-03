@@ -8,7 +8,7 @@ const userRoutes = require("./routes/userRoutes.js")
 const cookieParser = require("cookie-parser");
 const {restrictToLoginUserOnly} = require("./middlewares/auth.js")
 dotenv.config();
-const  dbConnector =require ('./connect.js');
+const  dbConnector =require ('./config/connect.js');
 const profileRoutes = require("./routes/profileRoutes.js")
 dbConnector();
 

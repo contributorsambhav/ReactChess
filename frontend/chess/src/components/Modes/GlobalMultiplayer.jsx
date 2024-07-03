@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Chess } from 'chess.js';
 import Chessboard from 'chessboardjs';
 import socketIOClient from 'socket.io-client';
+import { useSelector } from 'react-redux';
 
 import bB from '../pieces/bB.png';
 import bK from '../pieces/bK.png';
@@ -22,6 +23,8 @@ const pieceImages = {
 };
 
 const GlobalMultiplayer = () => {
+  const user = useSelector(state => state.auth.userData.username);
+  console.log(user);
   const chessRef = useRef(null); 
   const boardRef = useRef(null);
   const [currentStatus, setCurrentStatus] = useState(null);

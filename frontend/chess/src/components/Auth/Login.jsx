@@ -1,21 +1,31 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { login } from '../../store/authSlice';
 import bgImage from '../../assets/bgImage.jpg';
 import PieceArray from '../PieceArray';
-
+import axios from "axios"
+import { login } from '../../store/authSlice';
 function Login() {
     const dispatch = useDispatch();
-    const authStatus = useSelector(state => state.auth.status);
-    const userData = useSelector(state => state.auth.userData);
-
+    
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
-
+    React.useEffect(() => {
+        axios.get("http://localhost:8123/profile", {
+            withCredentials: true
+        })
+            .then(res => {
+                const data = res.data;
+                dispatch(login(data));
+                console.log(data);
+            })
+            .catch(error => {
+                console.error('Error fetching profile:', error);
+            });
+    }, [dispatch]);
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
@@ -33,7 +43,6 @@ function Login() {
     
             const data = await response.json();
             if (response.ok) {
-                dispatch(login(data)); 
                 navigate('/modeselector');
             } else {
                 setError(data.error || 'Login failed');

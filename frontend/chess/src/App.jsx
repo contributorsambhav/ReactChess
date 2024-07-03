@@ -14,6 +14,7 @@ import AgainstFriend from './components/Modes/AgainstFriend';
 import AgainstStockfish from './components/Modes/AgainstStockfish';
 import { Provider } from 'react-redux';
 import store from './store/store';
+import Profile from './components/Profile';
 
 function App() {
   return (
@@ -28,6 +29,8 @@ function App() {
             <Route path="/signup" element={<SignUp />} />
             <Route path="/login" element={<Login />} />
             <Route path="/modeselector" element={<GameModeSelector />} />
+            <Route path="/profile" element={<Profile />} />
+
 
             <Route path="/random-play" element={<RandomPlay />} />
             <Route path="/local-multiplayer" element={<LocalMultiplayer />} />
