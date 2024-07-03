@@ -9,6 +9,7 @@ const cookieParser = require("cookie-parser");
 const {restrictToLoginUserOnly} = require("./middlewares/auth.js")
 dotenv.config();
 const  dbConnector =require ('./connect.js');
+const profileRoutes = require("./routes/profileRoutes.js")
 dbConnector();
 
 const port = process.env.PORT || 3000;
@@ -18,6 +19,7 @@ const httpServer = createServer(app);
 const corsOptions = {
   origin: 'http://localhost:5173', 
   methods: ['GET', 'POST'],
+  credentials : true
 };
 app.use(cors(corsOptions));
 app.use(express.json())
@@ -28,6 +30,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/user",userRoutes)
+app.use('/profile',restrictToLoginUserOnly,profileRoutes);
 
 app.get("/stockfish", async (req, res) => {
     try {

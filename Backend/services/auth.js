@@ -1,7 +1,6 @@
+require('dotenv').config();
 const jwt = require('jsonwebtoken');
-const secret = process.env.JWT_SECRET; 
-
-
+const secret = process.env.JWT_SECRET;
 
 function getUser(token) {
     if (!token) {

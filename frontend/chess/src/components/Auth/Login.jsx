@@ -18,7 +18,6 @@ function Login() {
 
     const handleLogin = async (e) => {
         e.preventDefault();
-
         try {
             const response = await fetch('http://localhost:8123/user/login', {
                 method: 'POST',
@@ -28,14 +27,14 @@ function Login() {
                 body: JSON.stringify({
                     email: email,
                     password: password
-                })
+                }),
+                credentials: 'include'
             });
-
+    
             const data = await response.json();
             if (response.ok) {
                 dispatch(login(data)); 
                 navigate('/modeselector');
-                console.log(authStatus,userData);
             } else {
                 setError(data.error || 'Login failed');
             }

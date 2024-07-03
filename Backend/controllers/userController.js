@@ -42,31 +42,33 @@ const login = async (req, res) => {
       return res.status(400).json({ error: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({
+      userId: user._id,
+      username: user.username,
+      email: user.email,
+      matchHistory: user.matchHistory,
+      wins: user.wins,
+      loses: user.loses,
+      draws: user.draws
+    }, process.env.JWT_SECRET, {
       expiresIn: '1h'
     });
 
+    console.log(token);
     res.cookie('token', token, {
       httpOnly: true,
       maxAge: 3600000,
+      secure : false
     });
 
     res.status(200).json({
       token,
-      "username": user.username,
-      "email": user.email,
-      "matchHistory": user.matchHistory,
-      "wins": user.wins,
-      "loses": user.loses,
-      "draws": user.draws
-
     });
 
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
-
 
 const getUserById = async (req, res) => {
   const { userId } = req.params;
