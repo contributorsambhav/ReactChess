@@ -3,6 +3,7 @@ import { Chess } from 'chess.js';
 import Chessboard from 'chessboardjs';
 import socketIOClient from 'socket.io-client';
 import { useSelector } from 'react-redux';
+import WaitQueue from '../WaitQueue';
 
 import bB from '../pieces/bB.png';
 import bK from '../pieces/bK.png';
@@ -23,24 +24,32 @@ const pieceImages = {
 };
 
 const GlobalMultiplayer = () => {
-  const user = useSelector(state => state.auth.userData.username);
-  console.log(user);
-  const chessRef = useRef(null); 
+  const user = useSelector((state) => state.auth.userData.username);
+  const chessRef = useRef(null);
   const boardRef = useRef(null);
   const [currentStatus, setCurrentStatus] = useState(null);
-  const [moves, setMoves] = useState([]); 
-  const [socket, setSocket] = useState(null)
-const [game,setGame] = useState(null)
+  const [moves, setMoves] = useState([]);
+  const [socket, setSocket] = useState(null);
+  const [game, setGame] = useState(null);
+  const [gameCreated, setGameCreated] = useState(false);
+  const [playerColor, setPlayerColor] = useState(null);
+
   useEffect(() => {
-    const newgame = new Chess();
-    setGame(newgame)
-    const newSocket = socketIOClient('http://localhost:8123'); // Replace with your backend URL
+    const newGame = new Chess();
+    setGame(newGame);
+    const newSocket = socketIOClient('http://localhost:8123');
     setSocket(newSocket);
+
+    newSocket.on('color', (color) => {
+      setPlayerColor(color);
+      setGameCreated(true);
+    });
+
     return () => newSocket.disconnect();
   }, []);
 
   useEffect(() => {
-    if (socket) {
+    if (socket && gameCreated) {
       socket.on('move', ({ from, to }) => {
         try {
           const move = game.move({ from, to, promotion: 'q' });
@@ -62,24 +71,29 @@ const [game,setGame] = useState(null)
         onSnapEnd: onSnapEnd,
         pieceTheme: (piece) => pieceImages[piece],
         snapbackSpeed: 500,
-        snapSpeed: 100
+        snapSpeed: 100,
+        orientation : playerColor
       });
     }
-  }, [socket]);
+  }, [socket, gameCreated]);
 
   const onDrop = (source, target) => {
-    try {
-      const move = game.move({ from: source, to: target, promotion: 'q' });
-      if (move) {
-        boardRef.current.position(game.fen());
-        updateStatus();
-        socket.emit('move', { from: source, to: target });
-        setMoves(prevMoves => [...prevMoves, { from: move.from, to: move.to }]);
-      } else {
-        console.log('Invalid move:', source, target);
+    if ((playerColor === 'white' && game.turn() === 'w') || (playerColor === 'black' && game.turn() === 'b')) {
+      try {
+        const move = game.move({ from: source, to: target, promotion: 'q' });
+        if (move) {
+          boardRef.current.position(game.fen());
+          updateStatus();
+          socket.emit('move', { from: source, to: target });
+          setMoves((prevMoves) => [...prevMoves, { from: move.from, to: move.to }]);
+        } else {
+          console.log('Invalid move:', source, target);
+        }
+      } catch (error) {
+        console.error('Error making move:', error);
       }
-    } catch (error) {
-      console.error('Error making move:', error);
+    } else {
+      console.log('Not your turn');
     }
   };
 
@@ -87,7 +101,7 @@ const [game,setGame] = useState(null)
     const moves = game.moves({ square, verbose: true });
     if (moves.length > 0) {
       greySquare(square);
-      moves.forEach(move => greySquare(move.to));
+      moves.forEach((move) => greySquare(move.to));
     }
   };
 
@@ -103,7 +117,7 @@ const [game,setGame] = useState(null)
     let status = '';
     if (game.isCheckmate()) {
       status = 'Game over, checkmate.';
-    } else if (game.isDraw) {
+    } else if (game.isDraw()) {
       status = 'Game over, draw.';
     } else {
       let turn = 'White';
@@ -111,14 +125,13 @@ const [game,setGame] = useState(null)
         turn = 'Black';
       }
       status = `Turn: ${turn}`;
-      
     }
     setCurrentStatus(status);
   };
 
   const removeGreySquares = () => {
     const squares = document.querySelectorAll('.square-55d63');
-    squares.forEach(square => square.style.background = '');
+    squares.forEach((square) => (square.style.background = ''));
   };
 
   const greySquare = (square) => {
@@ -130,38 +143,44 @@ const [game,setGame] = useState(null)
   };
 
   return (
-    <div className='flex flex-col items-center h-screen'>
-      <div className='w-screen flex mx-auto my-auto'>
-        <div className='mx-16 w-1/2'>
-          <div ref={chessRef} style={{ width: window.innerWidth > 1536 ? '40vw' : '70vw' }}></div>
-        </div>
-        <div className='ml-4 w-1/3'>
-          <div className='rounded-xl text-center p-6 px-16 w-full text-2xl bg-green-700 text-white flex-shrink-0'>
-            Current Status: {currentStatus ? currentStatus : "White to move"}
+    <>
+      {!gameCreated ? (
+        <WaitQueue />
+      ) : (
+        <div className='flex flex-col items-center h-screen'>
+          <div className='w-screen flex mx-auto my-auto'>
+            <div className='mx-16 w-1/2'>
+              <div id='myBoard' ref={chessRef} style={{ width: window.innerWidth > 1536 ? '40vw' : '70vw' }}></div>
+            </div>
+            <div className='ml-4 w-1/3'>
+              <div className='rounded-xl text-center p-6 px-16 w-full text-2xl bg-green-700 text-white flex-shrink-0'>
+                Current Status: {currentStatus ? currentStatus : 'White to move'}
+              </div>
+              <div className='mt-4'>
+                <table className='w-full border-collapse border border-gray-700 rounded-lg overflow-hidden'>
+                  <thead>
+                    <tr className='bg-gray-800 text-center text-white'>
+                      <th className='border border-gray-700 px-6 py-3'>Move</th>
+                      <th className='border border-gray-700 px-6 py-3'>From</th>
+                      <th className='border border-gray-700 px-6 py-3'>To</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {moves.map((move, index) => (
+                      <tr key={index} className={index % 2 === 0 ? 'bg-gray-700 text-white text-center' : 'bg-gray-600 text-gray-200 text-center'}>
+                        <td className='border border-gray-700 px-6 py-4'>{index + 1}</td>
+                        <td className='border border-gray-700 px-6 py-4'>{move.from}</td>
+                        <td className='border border-gray-700 px-6 py-4'>{move.to}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
-          <div className='mt-4'>
-            <table className='w-full border-collapse border border-gray-700 rounded-lg overflow-hidden'>
-              <thead>
-                <tr className='bg-gray-800 text-center text-white'>
-                  <th className='border border-gray-700 px-6 py-3'>Move</th>
-                  <th className='border border-gray-700 px-6 py-3'>From</th>
-                  <th className='border border-gray-700 px-6 py-3'>To</th>
-                </tr>
-              </thead>
-              <tbody>
-                {moves.map((move, index) => (
-                  <tr key={index} className={index % 2 === 0 ? 'bg-gray-700 text-white text-center' : 'bg-gray-600 text-gray-200 text-center'}>
-                    <td className='border border-gray-700 px-6 py-4'>{index + 1}</td>
-                    <td className='border border-gray-700 px-6 py-4'>{move.from}</td>
-                    <td className='border border-gray-700 px-6 py-4'>{move.to}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
         </div>
-      </div>
-    </div>
+      )}
+    </>
   );
 };
 
