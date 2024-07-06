@@ -48,6 +48,18 @@ function GameModeSelector() {
             </div>
           </div>
 
+          <div className={`game-mode ${animate ? 'animate-slide-in delay-500' : ''}`}>
+            <div className="bg-gray-200 bg-opacity-10 backdrop-filter backdrop-blur-xl border border-gray-500 p-2 md:p-4 lg:p-5 my-4 rounded-xl shadow-lg w-11/12 max-w-md mx-auto">
+              <Link to="/against-stockfish" className="text-gray-700 text-xl md:text-2xl lg:text-3xl text-center block">Championship of 8</Link>
+            </div>
+          </div>
+
+          <div className={`game-mode ${animate ? 'animate-slide-in delay-500' : ''}`}>
+            <div className="bg-gray-200 bg-opacity-10 backdrop-filter backdrop-blur-xl border border-gray-500 p-2 md:p-4 lg:p-5 my-4 rounded-xl shadow-lg w-11/12 max-w-md mx-auto">
+              <Link to="/against-stockfish" className="text-gray-700 text-xl md:text-2xl lg:text-3xl text-center block">Puzzles</Link>
+            </div>
+          </div>
+
           
           </div>
           

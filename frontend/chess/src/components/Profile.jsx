@@ -22,18 +22,41 @@ function Profile() {
             });
     }, [dispatch]);
 
+    const renderMatchHistory = (matchHistory) => {
+        return (
+            <div className="mt-4 text-black">
+                <h2 className="text-xl font-bold">Match History</h2>
+                {Object.entries(matchHistory).map(([key, value]) => (
+                    <div key={key} className="mb-2">
+                        <span className="font-bold capitalize">{key}:</span> {JSON.stringify(value)}
+                    </div>
+                ))}
+            </div>
+        );
+    };
+
     return (
         <div className="w-screen h-screen flex items-center justify-center">
             <div className="w-96 items-center p-4 mx-auto bg-gradient-to-r from-gray-900 to-gray-100 rounded-lg shadow-md">
-                <h1 className=" text-gray-100 text-2xl font-bold mb-4">User Profile</h1>
+                <h1 className="text-gray-100 text-2xl font-bold mb-4">User Profile</h1>
                 <div className="w-[50%] bg-gray-200 bg-opacity-75 p-4 rounded-lg shadow-md">
                     <p className="text-lg font-semibold">Status: {authStatus}</p>
                     <div className="mt-4 text-black">
-                        {userData && Object.entries(userData).map(([key, value]) => (
-                            <div key={key} className="mb-2">
-                                <span className="font-bold capitalize">{key}:</span> {value}
-                            </div>
-                        ))}
+                        {userData && Object.entries(userData).map(([key, value]) => {
+                            if (key === 'matchHistory' && typeof value === 'object') {
+                                return (
+                                    <div key={key} className="mb-2">
+                                        {renderMatchHistory(value)}
+                                    </div>
+                                );
+                            } else {
+                                return (
+                                    <div key={key} className="mb-2">
+                                        <span className="font-bold capitalize">{key}:</span> {value}
+                                    </div>
+                                );
+                            }
+                        })}
                     </div>
                 </div>
             </div>

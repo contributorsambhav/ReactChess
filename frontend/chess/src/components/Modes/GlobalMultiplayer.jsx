@@ -49,6 +49,7 @@ const GlobalMultiplayer = () => {
 
     newSocket.on('opponent', (opponent) => {
       setOpponent(opponent);
+      console.log(opponent);
     });
 
     return () => newSocket.disconnect();
@@ -171,6 +172,14 @@ const GlobalMultiplayer = () => {
     }
   };
 
+  const calculateRating = (wins, loses, draws) => {
+    const totalGames = wins + loses + draws;
+    if (totalGames === 0) return 0;
+    const winRatio = wins / totalGames;
+    const baseRating = 900;
+    return Math.round(baseRating + (winRatio * 2100));
+  };
+
   return (
     <>
       {!gameCreated ? (
@@ -182,7 +191,7 @@ const GlobalMultiplayer = () => {
               {opponent && (
                 <div className="flex justify-between text-center text-xl mb-4">
                   <p>Opponent: {opponent.username}</p>
-                  <p>Rating- : {((opponent.wins+opponent.loses)/200)*2800}</p>
+                  <p>Rating: {calculateRating(opponent.wins, opponent.loses, opponent.draws)}</p>
                 </div>
               )}
               <div id='myBoard' ref={chessRef} style={{ width: window.innerWidth > 1536 ? '40vw' : '70vw' }}></div>
