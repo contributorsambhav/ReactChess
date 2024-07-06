@@ -135,10 +135,18 @@ const GlobalMultiplayer = () => {
     if (game.isCheckmate()) {
       if (turn === 'White') {
         status = 'Game over, Black wins by checkmate.';
-        addMatchToHistory(user.userId, opponent, 'lose');
+        if (playerColor === "white"){
+          addMatchToHistory(user.userId, opponent, 'lose');
+        }else{
+          addMatchToHistory(user.userId, opponent, 'win');
+        }
       } else {
         status = 'Game over, White wins by checkmate.';
-        addMatchToHistory(user.userId, opponent, 'win');
+        if (playerColor === "black"){
+          addMatchToHistory(user.userId, opponent, 'lose');
+        }else{
+          addMatchToHistory(user.userId, opponent, 'win');
+        }
       }
     } else if (game.isDraw()) {
       status = 'Game over, draw.';
@@ -173,8 +181,8 @@ const GlobalMultiplayer = () => {
             <div className='mx-16 w-1/2'>
               {opponent && (
                 <div className="flex justify-between text-center text-xl mb-4">
-                  <p>Username: {opponent.username}</p>
-                  <p>Win %age - : {opponent.wins}</p>
+                  <p>Opponent: {opponent.username}</p>
+                  <p>Rating- : {((opponent.wins+opponent.loses)/200)*2800}</p>
                 </div>
               )}
               <div id='myBoard' ref={chessRef} style={{ width: window.innerWidth > 1536 ? '40vw' : '70vw' }}></div>
