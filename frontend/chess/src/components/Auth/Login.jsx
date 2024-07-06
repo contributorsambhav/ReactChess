@@ -43,7 +43,7 @@ function Login() {
     
             const data = await response.json();
             if (response.ok) {
-                navigate('/modeselector');
+                navigate('/profile');
             } else {
                 setError(data.error || 'Login failed');
             }

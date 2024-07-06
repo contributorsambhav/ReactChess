@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useSelector } from 'react-redux';  // Import useSelector from react-redux
+import { useSelector } from 'react-redux';  
 import wN from './pieces/wN.png';
 
 function Navbar() {

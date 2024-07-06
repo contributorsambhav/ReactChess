@@ -1,5 +1,5 @@
 const createServer = require("http").createServer;
-const Server = require('socket.io').Server;
+const { Server } = require('socket.io');
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
@@ -55,14 +55,20 @@ const io = new Server(httpServer, {
 });
 
 let pendingUser = null;
+
 io.on('connection', (socket) => {
-  console.log('Client connected');
+  const user = JSON.parse(socket.handshake.query.user);
+  console.log('User connected:', user);
+
   if (pendingUser) {
-    // Assign colors
     const player1 = pendingUser;
     const player2 = socket;
+
     player1.emit('color', 'white');
     player2.emit('color', 'black');
+
+    player1.emit('opponent', user);
+    player2.emit('opponent', JSON.parse(player1.handshake.query.user));
 
     pendingUser = null;
 

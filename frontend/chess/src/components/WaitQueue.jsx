@@ -2,8 +2,8 @@ import React from 'react';
 
 function WaitQueue({ length = 2 }) {
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      <div className="text-2xl font-semibold text-gray-800">
+    <div className="w-screen text-center align-middle flex flex-col items-center justify-center h-screen">
+      <div className="text-2xl font-semibold text-gray-100">
         Waiting for {length - 1} more player(s) to join...
       </div>
     </div>

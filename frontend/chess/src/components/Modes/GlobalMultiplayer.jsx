@@ -4,27 +4,25 @@ import Chessboard from 'chessboardjs';
 import socketIOClient from 'socket.io-client';
 import { useSelector } from 'react-redux';
 import WaitQueue from '../WaitQueue';
-
-import bB from '../pieces/bB.png';
-import bK from '../pieces/bK.png';
-import bN from '../pieces/bN.png';
-import bP from '../pieces/bP.png';
-import bQ from '../pieces/bQ.png';
-import bR from '../pieces/bR.png';
-import wB from '../pieces/wB.png';
-import wK from '../pieces/wK.png';
-import wN from '../pieces/wN.png';
-import wP from '../pieces/wP.png';
-import wQ from '../pieces/wQ.png';
-import wR from '../pieces/wR.png';
-
-const pieceImages = {
-  bB, bK, bN, bP, bQ, bR,
-  wB, wK, wN, wP, wQ, wR,
-};
+import { useNavigate } from 'react-router-dom';
+import pieceImages from '../pieceImages';
+import axios from 'axios';
 
 const GlobalMultiplayer = () => {
-  const user = useSelector((state) => state.auth.userData.username);
+  const addMatchToHistory = async (userId, opponent, status) => {
+    try {
+      console.log('Sending data:', { userId, opponent: opponent.username, status });
+      const response = await axios.post(`http://localhost:8123/user/${userId}/match-history`, {
+        opponent: opponent.username,
+        status,
+      });
+      console.log('Match history added:', response.data);
+    } catch (error) {
+      console.error('Error adding match to history:', error.response?.data || error.message);
+    }
+  };
+
+  const user = useSelector((state) => state.auth.userData);
   const chessRef = useRef(null);
   const boardRef = useRef(null);
   const [currentStatus, setCurrentStatus] = useState(null);
@@ -33,11 +31,15 @@ const GlobalMultiplayer = () => {
   const [game, setGame] = useState(null);
   const [gameCreated, setGameCreated] = useState(false);
   const [playerColor, setPlayerColor] = useState(null);
+  const [opponent, setOpponent] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const newGame = new Chess();
     setGame(newGame);
-    const newSocket = socketIOClient('http://localhost:8123');
+    const newSocket = socketIOClient('http://localhost:8123', {
+      query: { user: JSON.stringify(user) }
+    });
     setSocket(newSocket);
 
     newSocket.on('color', (color) => {
@@ -45,8 +47,12 @@ const GlobalMultiplayer = () => {
       setGameCreated(true);
     });
 
+    newSocket.on('opponent', (opponent) => {
+      setOpponent(opponent);
+    });
+
     return () => newSocket.disconnect();
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     if (socket && gameCreated) {
@@ -62,6 +68,11 @@ const GlobalMultiplayer = () => {
         }
       });
 
+      socket.on('opponentDisconnected', () => {
+        alert('Opponent has been disconnected');
+        navigate('/modeselector');
+      });
+
       boardRef.current = Chessboard(chessRef.current, {
         draggable: true,
         position: 'start',
@@ -72,10 +83,10 @@ const GlobalMultiplayer = () => {
         pieceTheme: (piece) => pieceImages[piece],
         snapbackSpeed: 500,
         snapSpeed: 100,
-        orientation : playerColor
+        orientation: playerColor
       });
     }
-  }, [socket, gameCreated]);
+  }, [socket, gameCreated, game, playerColor]);
 
   const onDrop = (source, target) => {
     if ((playerColor === 'white' && game.turn() === 'w') || (playerColor === 'black' && game.turn() === 'b')) {
@@ -115,17 +126,27 @@ const GlobalMultiplayer = () => {
 
   const updateStatus = () => {
     let status = '';
+    let turn = 'White';
+
+    if (game.turn() === 'b') {
+      turn = 'Black';
+    }
+
     if (game.isCheckmate()) {
-      status = 'Game over, checkmate.';
+      if (turn === 'White') {
+        status = 'Game over, Black wins by checkmate.';
+        addMatchToHistory(user.userId, opponent, 'lose');
+      } else {
+        status = 'Game over, White wins by checkmate.';
+        addMatchToHistory(user.userId, opponent, 'win');
+      }
     } else if (game.isDraw()) {
       status = 'Game over, draw.';
+      addMatchToHistory(user.userId, opponent, 'draw');
     } else {
-      let turn = 'White';
-      if (game.turn() === 'b') {
-        turn = 'Black';
-      }
-      status = `Turn: ${turn}`;
+      status = `${turn} to move`;
     }
+
     setCurrentStatus(status);
   };
 
@@ -150,6 +171,12 @@ const GlobalMultiplayer = () => {
         <div className='flex flex-col items-center h-screen'>
           <div className='w-screen flex mx-auto my-auto'>
             <div className='mx-16 w-1/2'>
+              {opponent && (
+                <div className="flex justify-between text-center text-xl mb-4">
+                  <p>Username: {opponent.username}</p>
+                  <p>Win %age - : {opponent.wins}</p>
+                </div>
+              )}
               <div id='myBoard' ref={chessRef} style={{ width: window.innerWidth > 1536 ? '40vw' : '70vw' }}></div>
             </div>
             <div className='ml-4 w-1/3'>
