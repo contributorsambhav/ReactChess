@@ -35,6 +35,14 @@ function Navbar() {
                             </li>
                             <li>
                                 <Link
+                                    to="/puzzle"
+                                    className="text-white text-xl hover:text-purple-300 transition duration-300 ease-in-out"
+                                >
+                                    Puzzles
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
                                     to="/profile"
                                     className="text-white text-xl hover:text-purple-300 transition duration-300 ease-in-out"
                                 >

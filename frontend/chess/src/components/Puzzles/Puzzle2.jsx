@@ -243,7 +243,7 @@ const Puzzle2 = () => {
             </div>
           </div>
           <button onClick={toggleVideo} className='mt-4 bg-green-700 text-white px-4 py-2 rounded-t-lg w-full'>
-            {isVideoCollapsed ? 'Show Video Solution' : 'Hide Video Solution'}
+            {isVideoCollapsed ? 'Hide Video Solution' : 'Show Video Solution'}
           </button>
           {isVideoCollapsed && (
             <iframe
