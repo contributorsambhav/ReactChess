@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import bgImage from '../../assets/bgImage.jpg';
 import PieceArray from '../PieceArray';
 import axios from "axios"
