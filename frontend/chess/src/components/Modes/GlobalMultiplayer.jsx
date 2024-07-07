@@ -203,6 +203,12 @@ const GlobalMultiplayer = () => {
                 </div>
               )}
               <div id='myBoard' ref={chessRef} style={{ width: window.innerWidth > 1536 ? '40vw' : '70vw' }}></div>
+              {user && (
+                <div className="flex justify-between text-center text-xl mb-4">
+                  <p>You  ({user.username})</p>
+                  <p>Rating: {calculateRating(user.wins, user.loses, user.draws)}</p>
+                </div>
+              )}
             </div>
             <div className='ml-4 w-1/3'>
               <div className='rounded-xl text-center p-6 px-16 w-full text-2xl bg-green-700 text-white flex-shrink-0'>
