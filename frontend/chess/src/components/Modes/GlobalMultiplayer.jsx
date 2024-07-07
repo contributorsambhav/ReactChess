@@ -9,11 +9,11 @@ import pieceImages from '../pieceImages';
 import axios from 'axios';
 
 const GlobalMultiplayer = () => {
-  const addMatchToHistory = async (userId, opponent, status) => {
+  const addMatchToHistory = async (userId, opponentName, status) => {
     try {
-      console.log('Sending data:', { userId, opponent: opponent.username, status });
+      console.log('Sending data:', { userId, opponentName, status });
       const response = await axios.post(`http://localhost:8123/user/${userId}/match-history`, {
-        opponent: opponent.username,
+        opponent: opponentName,
         status,
       });
       console.log('Match history added:', response.data);
@@ -47,13 +47,19 @@ const GlobalMultiplayer = () => {
       setGameCreated(true);
     });
 
-    newSocket.on('opponent', (opponent) => {
-      setOpponent(opponent);
-      console.log(opponent);
+    newSocket.on('opponent', (obtainedOpponent) => {
+      console.log(obtainedOpponent);
+      setOpponent(obtainedOpponent);
     });
 
     return () => newSocket.disconnect();
   }, [user]);
+
+  useEffect(() => {
+    if (opponent) {
+      console.log(opponent);
+    }
+  }, [opponent]);
 
   useEffect(() => {
     if (socket && gameCreated) {
@@ -136,22 +142,24 @@ const GlobalMultiplayer = () => {
     if (game.isCheckmate()) {
       if (turn === 'White') {
         status = 'Game over, Black wins by checkmate.';
-        if (playerColor === "white"){
-          addMatchToHistory(user.userId, opponent, 'lose');
-        }else{
-          addMatchToHistory(user.userId, opponent, 'win');
+        if (playerColor === "white" && opponent) {
+          addMatchToHistory(user.userId, opponent.username, 'lose');
+        } else if (opponent) {
+          addMatchToHistory(user.userId, opponent.username, 'win');
         }
       } else {
         status = 'Game over, White wins by checkmate.';
-        if (playerColor === "black"){
-          addMatchToHistory(user.userId, opponent, 'lose');
-        }else{
-          addMatchToHistory(user.userId, opponent, 'win');
+        if (playerColor === "black" && opponent) {
+          addMatchToHistory(user.userId, opponent.username, 'lose');
+        } else if (opponent) {
+          addMatchToHistory(user.userId, opponent.username, 'win');
         }
       }
     } else if (game.isDraw()) {
       status = 'Game over, draw.';
-      addMatchToHistory(user.userId, opponent, 'draw');
+      if (opponent) {
+        addMatchToHistory(user.userId, opponent.username, 'draw');
+      }
     } else {
       status = `${turn} to move`;
     }
