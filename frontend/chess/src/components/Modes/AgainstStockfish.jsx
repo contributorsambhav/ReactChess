@@ -52,6 +52,11 @@ const AgainstStockfish = () => {
         return false;
       }
 
+      if (game.turn() === 'b') {
+        console.log("It's not White's turn");
+        return false;
+      }
+
       if ((game.turn() === 'w' && piece.search(/^b/) !== -1) ||
         (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
         return false;
