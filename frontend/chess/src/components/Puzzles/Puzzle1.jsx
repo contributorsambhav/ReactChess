@@ -4,6 +4,16 @@ import Chessboard from 'chessboardjs';
 import axios from 'axios';
 import pieceImages from "../pieceImages";
 
+const debounce = (func, delay) => {
+  let timeoutId;
+  return (...args) => {
+    if (timeoutId) clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      func(...args);
+    }, delay);
+  };
+};
+
 const Puzzle1 = () => {
   const puzzleFEN = "8/3P3k/n2K3p/2p3n1/1b4N1/2p1p1P1/8/3B4 w - - 0 1";
 
@@ -58,7 +68,7 @@ const Puzzle1 = () => {
       let move = game.move({
         from: source,
         to: target,
-        promotion: promotionPiece // Use the selected promotion piece
+        promotion: promotionPiece
       });
 
       if (move === null) return "snapback";
@@ -118,7 +128,7 @@ const Puzzle1 = () => {
       boardRef.current.position(game.fen());
     };
 
-    const updateStatus = () => {
+    const updateStatus = debounce(() => {
       let status = '';
       let moveColor = 'White';
 
@@ -137,7 +147,7 @@ const Puzzle1 = () => {
       }
 
       setCurrentStatus(status);
-    };
+    }, 100);
 
     const removeGreySquares = () => {
       const squares = document.querySelectorAll('.square-55d63');
@@ -172,7 +182,7 @@ const Puzzle1 = () => {
         boardRef.current.destroy();
       }
     };
-  }, [puzzleFEN]);
+  }, [puzzleFEN, promotionPiece]);
 
   const toggleTable = () => {
     setIsTableCollapsed(!isTableCollapsed);
@@ -196,6 +206,8 @@ const Puzzle1 = () => {
           This is one of the hardest puzzles ever composed as leave alone Grandmasters, engines could not solve it either!
           Everyone thinks that Black is winning with passed pawns and a knights. Yet white can force a win soon...
         </p>
+        <p>If board position changes to original after promotion, just attempt an  illegal move</p>
+
       </div>
       <div className='w-screen flex flex-col md:flex-row mx-auto my-auto'>
         <div className='mx-16 w-full md:w-1/2'>

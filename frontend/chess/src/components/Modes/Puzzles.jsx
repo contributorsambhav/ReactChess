@@ -26,7 +26,7 @@ const Puzzles = () => {
             Puzzle 3
           </Link>
 
-          <h3>Mate in one move</h3>
+          <h3 className='text-gray-900 text-center'>Mate in one move</h3>
           <Link 
             to="/puzzle4" 
             className="text-gray-200 block w-full px-6 py-4 text-center hover:text-white bg-green-600 hover:bg-green-700 rounded-lg">

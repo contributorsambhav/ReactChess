@@ -4,7 +4,6 @@ import Chessboard from 'chessboardjs';
 import axios from 'axios';
 import pieceImages from "../pieceImages";
 
-
 const debounce = (func, delay) => {
   let timeoutId;
   return (...args) => {
@@ -15,9 +14,8 @@ const debounce = (func, delay) => {
   };
 };
 
-
-const Puzzle2 = () => {
-  const puzzleFEN = "8/8/8/2p5/1pp5/brpp4/qpprpK1P/1nkbn3 w - - 0 1";
+const Puzzle6 = () => {
+  const puzzleFEN = "r6r/ppp4Q/3qb3/3p4/3P2kP/5R2/P3B1P1/5RK1 w - - 7 29"
 
   const fetchBestMove = async (FEN) => {
     try {
@@ -200,19 +198,9 @@ const Puzzle2 = () => {
 
   return (
     <div className='w-full flex flex-col items-center h-screen'>
-      <h1 className='text-3xl font-bold mt-4'>The Mighty Knight</h1>
+      <h1 className='text-3xl font-bold mt-4'>Mate in one move (normal)</h1>
       <div className='w-[80%] p-4 text-lg'>
-        <p>
-          This puzzle was composed by Ottó Bláthy in 1922. This involves a lot of chess thinking in
-          terms of strategy, tactics, moves & ideas. White has just one pawn and a king whereas,
-          black has all his pieces. But still White can win this game. White needs to find the best
-          moves & ideas in which white can trap black in the corner and checkmate the black king.
-          This is a really interesting & unique puzzle and we can learn some important chess concepts
-          out of this brilliant endgame composition. This will help us in move calculation &
-          emphasize on the idea of restriction in chess.
-        </p>
-        <p>If board position changes to original after promotion, just attempt an  illegal move</p>
-
+       
       </div>
       <div className='w-screen flex flex-col md:flex-row mx-auto my-auto'>
         <div className='mx-16 w-full md:w-1/2'>
@@ -257,20 +245,10 @@ const Puzzle2 = () => {
             </div>
           </div>
           <button onClick={toggleVideo} className='mt-4 bg-green-700 text-white px-4 py-2 rounded-t-lg w-full'>
-            {isVideoCollapsed ? 'Hide Video Solution' : 'Show Video Solution'}
+            {isVideoCollapsed ? 'Hide  Solution' : 'Show  Solution'}
           </button>
           {isVideoCollapsed && (
-            <iframe
-              width="640"
-              height="360"
-              src="https://www.youtube.com/embed/WqenJgw7ZIc?si=nrbDwkdaHz8EnfDE"
-              title="YouTube video player"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              referrerPolicy="strict-origin-when-cross-origin"
-              allowFullScreen
-              className="mt-4 mx-auto"
-            ></iframe>
+            <div className='text-2xl mt-2 text-center'>Rook to b3</div>
           )}
         </div>
       </div>
@@ -278,4 +256,4 @@ const Puzzle2 = () => {
   );
 };
 
-export default Puzzle2;
+export default Puzzle6;

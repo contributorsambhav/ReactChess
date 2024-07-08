@@ -4,6 +4,20 @@ import Chessboard from 'chessboardjs';
 import axios from 'axios';
 import pieceImages from "../pieceImages";
 
+
+
+const debounce = (func, delay) => {
+  let timeoutId;
+  return (...args) => {
+    if (timeoutId) clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      func(...args);
+    }, delay);
+  };
+};
+
+
+
 const Puzzle3 = () => {
   const puzzleFEN = "k1b5/Pp1p4/1P1Pp3/4Pp2/5Pp1/6P1/P6P/6K1 w - - 0 1";
 
@@ -118,7 +132,7 @@ const Puzzle3 = () => {
       boardRef.current.position(game.fen());
     };
 
-    const updateStatus = () => {
+    const updateStatus = debounce(() => {
       let status = '';
       let moveColor = 'White';
 
@@ -137,8 +151,8 @@ const Puzzle3 = () => {
       }
 
       setCurrentStatus(status);
-    };
-
+    }, 100);
+    
     const removeGreySquares = () => {
       const squares = document.querySelectorAll('.square-55d63');
       squares.forEach(square => square.style.background = '');
@@ -195,6 +209,7 @@ const Puzzle3 = () => {
           White faces a challenging position against Black's resilient defense. Can you find the winning sequence?<br></br>
           This one is dubbed as the "Stairway to Heaven". White may have some positional advantage, yet if he is not careful, it's going to be a stalemate.
         </p>
+        <p>If board position changes to original after promotion, just attempt an  illegal move</p>
       </div>
       <div className='w-screen flex flex-col md:flex-row mx-auto my-auto'>
         <div className='mx-16 w-full md:w-1/2'>
