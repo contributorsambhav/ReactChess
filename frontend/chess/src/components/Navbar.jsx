@@ -2,9 +2,9 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';  
 import wN from './pieces/wN.png';
-
 function Navbar() {
     const authStatus = useSelector(state => state.auth.status);
+    const userData = useSelector(state => state.auth.userData);
 
     return (
         <nav className="w-full bg-purple-300 bg-opacity-10 p-2">
@@ -46,7 +46,7 @@ function Navbar() {
                                     to="/profile"
                                     className="text-white text-xl hover:text-purple-300 transition duration-300 ease-in-out"
                                 >
-                                    Profile
+                                    {userData.username}
                                 </Link>
                             </li>
                         </>

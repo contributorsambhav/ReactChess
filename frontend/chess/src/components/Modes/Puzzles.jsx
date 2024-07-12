@@ -38,7 +38,7 @@ const Puzzles = () => {
             NORMAL
           </Link>
           <Link 
-            to="/puzzle5" 
+            to="/puzzle6" 
             className="text-gray-200 block w-full px-6 py-4 text-center hover:text-white bg-green-600 hover:bg-green-700 rounded-lg">
             HARD
           </Link>

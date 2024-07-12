@@ -39,7 +39,7 @@ const Puzzle5 = () => {
   const [moves, setMoves] = useState([]);
   const gameRef = useRef(new Chess(puzzleFEN));
   const [isTableCollapsed, setIsTableCollapsed] = useState(true);
-  const [isVideoCollapsed, setIsVideoCollapsed] = useState(true);
+  const [isVideoCollapsed, setIsVideoCollapsed] = useState(false);
   const [promotionPiece, setPromotionPiece] = useState('q');
 
   useEffect(() => {
