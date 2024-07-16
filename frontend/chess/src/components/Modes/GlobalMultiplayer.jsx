@@ -32,7 +32,13 @@ const GlobalMultiplayer = () => {
   const [gameCreated, setGameCreated] = useState(false);
   const [playerColor, setPlayerColor] = useState(null);
   const [opponent, setOpponent] = useState(null);
+  const [promotionPiece, setPromotionPiece] = useState('q');
+  const [isTableCollapsed, setIsTableCollapsed] = useState(true);
   const navigate = useNavigate();
+
+  const toggleTable = () => {
+    setIsTableCollapsed(!isTableCollapsed);
+  };
 
   useEffect(() => {
     const newGame = new Chess();
@@ -63,13 +69,13 @@ const GlobalMultiplayer = () => {
 
   useEffect(() => {
     if (socket && gameCreated) {
-      socket.on('move', ({ from, to }) => {
+      socket.on('move', ({ from, to, promotion }) => {
         try {
-          const move = game.move({ from, to, promotion: 'q' });
+          const move = game.move({ from, to, promotion: promotion || 'q' }); // Use the provided promotion piece or default to 'q'
           if (move) {
             boardRef.current.position(game.fen());
             updateStatus();
-            setMoves((prevMoves) => [...prevMoves, { from: move.from, to: move.to }]);
+            setMoves((prevMoves) => [...prevMoves, { from: move.from, to: move.to, promotion: move.promotion }]);
           }
         } catch (error) {
           console.error('Invalid move received:', error);
@@ -99,12 +105,12 @@ const GlobalMultiplayer = () => {
   const onDrop = (source, target) => {
     if ((playerColor === 'white' && game.turn() === 'w') || (playerColor === 'black' && game.turn() === 'b')) {
       try {
-        const move = game.move({ from: source, to: target, promotion: 'q' });
+        const move = game.move({ from: source, to: target, promotion: promotionPiece }); // Use selected promotion piece
         if (move) {
           boardRef.current.position(game.fen());
           updateStatus();
-          socket.emit('move', { from: source, to: target });
-          setMoves((prevMoves) => [...prevMoves, { from: move.from, to: move.to }]);
+          socket.emit('move', { from: source, to: target, promotion: promotionPiece });
+          setMoves((prevMoves) => [...prevMoves, { from: move.from, to: move.to, promotion: promotionPiece }]);
         } else {
           console.log('Invalid move:', source, target);
         }
@@ -143,16 +149,16 @@ const GlobalMultiplayer = () => {
     if (game.isCheckmate()) {
       if (turn === 'White') {
         status = 'Game over, Black wins by checkmate.';
-        if (playerColor === "white" ) {
+        if (playerColor === "white") {
           addMatchToHistory(user.userId, opponent?.username, 'lose');
-        } else{
+        } else {
           addMatchToHistory(user.userId, opponent?.username, 'win');
         }
       } else {
         status = 'Game over, White wins by checkmate.';
-        if (playerColor === "black" ) {
+        if (playerColor === "black") {
           addMatchToHistory(user.userId, opponent?.username, 'lose');
-        } else{
+        } else {
           addMatchToHistory(user.userId, opponent?.username, 'win');
         }
       }
@@ -189,6 +195,10 @@ const GlobalMultiplayer = () => {
     return Math.round(baseRating + (winRatio * 2100));
   };
 
+  const handlePromotionChange = (e) => {
+    setPromotionPiece(e.target.value);
+  };
+
   return (
     <>
       {!gameCreated ? (
@@ -216,24 +226,38 @@ const GlobalMultiplayer = () => {
                 Current Status: {currentStatus ? currentStatus : 'White to move'}
               </div>
               <div className='mt-4'>
-                <table className='w-full border-collapse border border-gray-700 rounded-lg overflow-hidden'>
-                  <thead>
-                    <tr className='bg-gray-800 text-center text-white'>
-                      <th className='border border-gray-700 px-6 py-3'>Move</th>
-                      <th className='border border-gray-700 px-6 py-3'>From</th>
-                      <th className='border border-gray-700 px-6 py-3'>To</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {moves.map((move, index) => (
-                      <tr key={index} className={index % 2 === 0 ? 'bg-gray-700 text-white text-center' : 'bg-gray-600 text-gray-200 text-center'}>
-                        <td className='border border-gray-700 px-6 py-4'>{index + 1}</td>
-                        <td className='border border-gray-700 px-6 py-4'>{move.from}</td>
-                        <td className='border border-gray-700 px-6 py-4'>{move.to}</td>
+                <label className='mr-2 text-white'>Promotion Piece:</label>
+                <select value={promotionPiece} onChange={handlePromotionChange} className='bg-green-700 text-white px-4 py-2 rounded-lg w-full'>
+                  <option value="q">Queen</option>
+                  <option value="r">Rook</option>
+                  <option value="b">Bishop</option>
+                  <option value="n">Knight</option>
+                </select>
+              </div>
+              <button onClick={toggleTable} className='mt-4 bg-green-700 text-white px-4 py-2 rounded-t-lg w-full'>
+                {isTableCollapsed ? 'Show Moves' : 'Hide Moves'}
+              </button>
+              <div style={{ maxHeight: isTableCollapsed ? '0' : '40vh', transition: 'max-height 0.3s ease-in-out', overflow: 'scroll' }}>
+                <div style={{ height: '100%', overflowY: 'auto' }}>
+                  <table className='w-full border-collapse border border-gray-700 rounded-lg'>
+                    <thead>
+                      <tr className='bg-gray-800 text-center text-white'>
+                        <th className='border border-gray-700 px-6 py-3'>Move</th>
+                        <th className='border border-gray-700 px-6 py-3'>From</th>
+                        <th className='border border-gray-700 px-6 py-3'>To</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {moves.map((move, index) => (
+                        <tr key={index} className={index % 2 === 0 ? 'bg-gray-700 text-white text-center' : 'bg-gray-600 text-gray-200 text-center'}>
+                          <td className='border border-gray-700 px-6 py-4'>{index + 1}</td>
+                          <td className='border border-gray-700 px-6 py-4'>{move.from}</td>
+                          <td className='border border-gray-700 px-6 py-4'>{move.to}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
