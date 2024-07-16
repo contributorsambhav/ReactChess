@@ -8,7 +8,6 @@ import GameModeSelector from './components/GameModeSelector';
 import RandomPlay from './components/Modes/RandomPlay';
 import LocalMultiplayer from './components/Modes/LocalMultiplayer';
 import GlobalMultiplayer from './components/Modes/GlobalMultiplayer';
-import AgainstFriend from './components/Modes/AgainstFriend';
 import AgainstStockfish from './components/Modes/AgainstStockfish';
 import { Provider } from 'react-redux';
 import store from './store/store';
