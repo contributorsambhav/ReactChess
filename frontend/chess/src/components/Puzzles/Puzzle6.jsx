@@ -198,7 +198,7 @@ const Puzzle6 = () => {
 
   return (
     <div className='w-full flex flex-col items-center h-screen'>
-      <h1 className='text-3xl font-bold mt-4'>Mate in one move (normal)</h1>
+      <h1 className='text-3xl font-bold mt-4'>Mate in one move (hard)</h1>
       <div className='w-[80%] p-4 text-lg'>
        
       </div>
