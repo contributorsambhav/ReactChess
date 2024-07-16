@@ -69,6 +69,7 @@ const GlobalMultiplayer = () => {
           if (move) {
             boardRef.current.position(game.fen());
             updateStatus();
+            setMoves((prevMoves) => [...prevMoves, { from: move.from, to: move.to }]);
           }
         } catch (error) {
           console.error('Invalid move received:', error);
@@ -142,23 +143,23 @@ const GlobalMultiplayer = () => {
     if (game.isCheckmate()) {
       if (turn === 'White') {
         status = 'Game over, Black wins by checkmate.';
-        if (playerColor === "white" && opponent) {
-          addMatchToHistory(user.userId, opponent.username, 'lose');
-        } else if (opponent) {
-          addMatchToHistory(user.userId, opponent.username, 'win');
+        if (playerColor === "white" ) {
+          addMatchToHistory(user.userId, opponent?.username, 'lose');
+        } else{
+          addMatchToHistory(user.userId, opponent?.username, 'win');
         }
       } else {
         status = 'Game over, White wins by checkmate.';
-        if (playerColor === "black" && opponent) {
-          addMatchToHistory(user.userId, opponent.username, 'lose');
-        } else if (opponent) {
-          addMatchToHistory(user.userId, opponent.username, 'win');
+        if (playerColor === "black" ) {
+          addMatchToHistory(user.userId, opponent?.username, 'lose');
+        } else{
+          addMatchToHistory(user.userId, opponent?.username, 'win');
         }
       }
     } else if (game.isDraw()) {
       status = 'Game over, draw.';
       if (opponent) {
-        addMatchToHistory(user.userId, opponent.username, 'draw');
+        addMatchToHistory(user.userId, opponent?.username, 'draw');
       }
     } else {
       status = `${turn} to move`;
