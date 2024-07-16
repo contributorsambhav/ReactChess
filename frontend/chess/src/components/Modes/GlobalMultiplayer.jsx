@@ -37,7 +37,7 @@ const GlobalMultiplayer = () => {
   useEffect(() => {
     const newGame = new Chess();
     setGame(newGame);
-    const newSocket = socketIOClient('http://localhost:8123', {
+    const newSocket = socketIOClient('http://localhost:8123/twoplayer', {
       query: { user: JSON.stringify(user) }
     });
     setSocket(newSocket);
@@ -74,7 +74,7 @@ const GlobalMultiplayer = () => {
           console.error('Invalid move received:', error);
         }
       });
-
+      
       socket.on('opponentDisconnected', () => {
         alert('Opponent has been disconnected');
         navigate('/modeselector');

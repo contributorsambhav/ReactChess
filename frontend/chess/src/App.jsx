@@ -13,6 +13,7 @@ import AgainstStockfish from './components/Modes/AgainstStockfish';
 import { Provider } from 'react-redux';
 import store from './store/store';
 import Profile from './components/Profile';
+import Championship from "./components/Modes/Championship"
 
 import Puzzles from './components/Modes/Puzzles';
 import Puzzle1 from './components/Puzzles/Puzzle1';
@@ -20,6 +21,7 @@ import Puzzle2 from './components/Puzzles/Puzzle2';
 import Puzzle3 from './components/Puzzles/Puzzle3';
 import Puzzle4 from './components/Puzzles/Puzzle4';
 import Puzzle5 from './components/Puzzles/Puzzle5';
+import Puzzle6 from './components/Puzzles/Puzzle6';
 
 function App() {
   return (
@@ -39,12 +41,15 @@ function App() {
             <Route path="/global-multiplayer" element={<GlobalMultiplayer />} />
             <Route path="/puzzle" element={<Puzzles />} />
             <Route path="/against-stockfish" element={<AgainstStockfish />} />
+            <Route path="/championship" element={<Championship />} />
 
             <Route path="/puzzle1" element={<Puzzle1 />} />
             <Route path="/puzzle2" element={<Puzzle2 />} />
             <Route path="/puzzle3" element={<Puzzle3 />} />
             <Route path="/puzzle4" element={<Puzzle4 />} />
             <Route path="/puzzle5" element={<Puzzle5 />} />
+            <Route path="/puzzle6" element={<Puzzle6 />} />
+
           </Routes>
         </div>
       </Router>

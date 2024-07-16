@@ -3,7 +3,6 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
 
 const register = async (req, res) => {
-  console.log(req.body);
   const { username, password, email } = req.body;
 
   try {
@@ -51,10 +50,9 @@ const login = async (req, res) => {
       loses: user.loses,
       draws: user.draws
     }, process.env.JWT_SECRET, {
-      expiresIn: '1h'
+      expiresIn: '10000h'
     });
 
-    console.log(token);
     res.cookie('token', token, {
       httpOnly: true,
       maxAge: 3600000,

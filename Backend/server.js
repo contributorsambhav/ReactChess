@@ -56,9 +56,10 @@ const io = new Server(httpServer, {
 
 let pendingUser = null;
 
-io.on('connection', (socket) => {
+const twoplayer = io.of("/twoplayer")
+twoplayer.on('connection', (socket) => {
   const user = JSON.parse(socket.handshake.query.user);
-  console.log('User connected:', user);
+  console.log('User connected');
 
   if (pendingUser) {
     const player1 = pendingUser;
@@ -96,6 +97,39 @@ io.on('connection', (socket) => {
     });
   }
 });
+
+const championship = io.of("/championship");
+const players = [];
+
+championship.on("connection", (socket) => {
+  players.push({
+    "socket": socket,
+    "won": false,
+    "qualify": false,
+    "user" : JSON.parse(socket.handshake.query.user)
+  });
+
+  socket.on('disconnect', () => {
+    const index = players.findIndex(player => player.socket.id === socket.id);
+    if (index !== -1) players.splice(index, 1);
+    emitPlayerList();
+  });
+
+  emitPlayerList();
+});
+
+const emitPlayerList = () => {
+  const playerList = players.map(player => {
+    const user = JSON.parse(player.socket.handshake.query.user);
+    return user
+  });
+
+  championship.emit("list", playerList);
+};
+
+if (players.length == 8) {
+
+}
 
 httpServer.listen(port, () => {
   console.log(`Server started at http://localhost:${port}`);
