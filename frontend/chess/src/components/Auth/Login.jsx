@@ -26,32 +26,36 @@ function Login() {
                 console.error('Error fetching profile:', error);
             });
     }, [dispatch]);
+   
     const handleLogin = async (e) => {
-        e.preventDefault();
-        try {
-            const response = await fetch('http://localhost:8123/user/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    email: email,
-                    password: password
-                }),
-                credentials: 'include'
-            });
-    
-            const data = await response.json();
-            if (response.ok) {
-                navigate('/profile');
-            } else {
-                setError(data.error || 'Login failed');
-            }
-        } catch (error) {
-            console.error('Error during login:', error);
-            setError('Internal server error');
+    e.preventDefault();
+    try {
+        const response = await fetch('http://localhost:8123/user/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: email,
+                password: password
+            }),
+            credentials: 'include'
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+            localStorage.setItem('authToken', data.token);  // Save token to localStorage
+            dispatch(login(data));  // Dispatch login action with user data
+            navigate('/profile');
+        } else {
+            setError(data.error || 'Login failed');
         }
-    };
+    } catch (error) {
+        console.error('Error during login:', error);
+        setError('Internal server error');
+    }
+};
+
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);

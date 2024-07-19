@@ -1,10 +1,22 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useSelector } from 'react-redux';  
+import { useSelector, useDispatch } from 'react-redux';
 import wN from './pieces/wN.png';
+import { login } from '../store/authSlice';
+
 function Navbar() {
+    const dispatch = useDispatch();
     const authStatus = useSelector(state => state.auth.status);
     const userData = useSelector(state => state.auth.userData);
+
+    // Check for authentication status in localStorage on component mount
+    React.useEffect(() => {
+        const token = localStorage.getItem('authToken');
+        if (token) {
+            // If token exists, dispatch login action with user data
+            dispatch(login({ token }));
+        }
+    }, [dispatch]);
 
     return (
         <nav className="w-full bg-purple-300 bg-opacity-10 p-2">
@@ -23,7 +35,7 @@ function Navbar() {
                             Home
                         </Link>
                     </li>
-                    {authStatus === "true" ? (
+                    {authStatus ? (
                         <>
                             <li>
                                 <Link
@@ -46,7 +58,7 @@ function Navbar() {
                                     to="/profile"
                                     className="text-white text-xl hover:text-purple-300 transition duration-300 ease-in-out"
                                 >
-                                    {userData.username}
+                                    {userData ? userData.username : "Profile"}
                                 </Link>
                             </li>
                         </>
