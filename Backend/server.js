@@ -72,8 +72,8 @@ io.on('connection', (socket) => {
 
     pendingUser = null;
 
-    player1.on('move', ({ from, to }) => {
-      player2.emit('move', { from, to });
+    player1.on('move', ({ from, to ,obtainedPromotion}) => {
+      player2.emit('move', { from, to ,obtainedPromotion});
     });
 
     player2.on('move', ({ from, to }) => {

@@ -69,13 +69,13 @@ const GlobalMultiplayer = () => {
 
   useEffect(() => {
     if (socket && gameCreated) {
-      socket.on('move', ({ from, to, promotion }) => {
+      socket.on('move', ({ from, to, obtainedPromotion }) => {
         try {
-          const move = game.move({ from, to, promotion: promotion || 'q' }); // Use the provided promotion piece or default to 'q'
+          const move = game.move({ from, to, promotion: obtainedPromotion }); // Use the provided promotion piece or default to 'q'
           if (move) {
             boardRef.current.position(game.fen());
             updateStatus();
-            setMoves((prevMoves) => [...prevMoves, { from: move.from, to: move.to, promotion: move.promotion }]);
+            setMoves((prevMoves) => [...prevMoves, { from: move.from, to: move.to, promotion: move.obtainedPromotion }]);
           }
         } catch (error) {
           console.error('Invalid move received:', error);
@@ -105,11 +105,11 @@ const GlobalMultiplayer = () => {
   const onDrop = (source, target) => {
     if ((playerColor === 'white' && game.turn() === 'w') || (playerColor === 'black' && game.turn() === 'b')) {
       try {
-        const move = game.move({ from: source, to: target, promotion: promotionPiece }); // Use selected promotion piece
+        const move = game.move({ from: source, to: target, promotion: promotionPiece });
         if (move) {
           boardRef.current.position(game.fen());
           updateStatus();
-          socket.emit('move', { from: source, to: target, promotion: promotionPiece });
+          socket.emit('move', { from: source, to: target, obtainedPromotion: promotionPiece });
           setMoves((prevMoves) => [...prevMoves, { from: move.from, to: move.to, promotion: promotionPiece }]);
         } else {
           console.log('Invalid move:', source, target);
@@ -197,6 +197,7 @@ const GlobalMultiplayer = () => {
 
   const handlePromotionChange = (e) => {
     setPromotionPiece(e.target.value);
+    alert(promotionPiece);
   };
 
   return (
