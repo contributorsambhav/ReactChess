@@ -76,8 +76,8 @@ io.on('connection', (socket) => {
       player2.emit('move', { from, to ,obtainedPromotion});
     });
 
-    player2.on('move', ({ from, to }) => {
-      player1.emit('move', { from, to });
+    player2.on('move', ({ from, to , obtainedPromotion}) => {
+      player1.emit('move', { from, to, obtainedPromotion });
     });
 
     player1.on('disconnect', () => {

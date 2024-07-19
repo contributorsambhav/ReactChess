@@ -71,11 +71,11 @@ const GlobalMultiplayer = () => {
     if (socket && gameCreated) {
       socket.on('move', ({ from, to, obtainedPromotion }) => {
         try {
-          const move = game.move({ from, to, promotion: obtainedPromotion }); // Use the provided promotion piece or default to 'q'
+          const move = game.move({ from, to, promotion: obtainedPromotion });
           if (move) {
             boardRef.current.position(game.fen());
             updateStatus();
-            setMoves((prevMoves) => [...prevMoves, { from: move.from, to: move.to, promotion: move.obtainedPromotion }]);
+            setMoves((prevMoves) => [...prevMoves, { from: move.from, to: move.to, promotion: obtainedPromotion }]);
           }
         } catch (error) {
           console.error('Invalid move received:', error);
@@ -89,7 +89,7 @@ const GlobalMultiplayer = () => {
 
       boardRef.current = Chessboard(chessRef.current, {
         draggable: true,
-        position: 'start',
+        position: game.fen() || 'start',
         onDrop: onDrop,
         onMouseoverSquare: onMouseoverSquare,
         onMouseoutSquare: onMouseoutSquare,
@@ -100,7 +100,7 @@ const GlobalMultiplayer = () => {
         orientation: playerColor
       });
     }
-  }, [socket, gameCreated, game, playerColor]);
+  }, [socket, gameCreated, game, playerColor,promotionPiece]);
 
   const onDrop = (source, target) => {
     if ((playerColor === 'white' && game.turn() === 'w') || (playerColor === 'black' && game.turn() === 'b')) {
