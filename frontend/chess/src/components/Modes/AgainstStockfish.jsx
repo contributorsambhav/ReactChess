@@ -2,10 +2,24 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Chess } from 'chess.js';
 import Chessboard from 'chessboardjs';
 import axios from 'axios';
+import pieceImages from "../pieceImages";
 
-import pieceImages from "../pieceImages"
+
+
+const debounce = (func, delay) => {
+  let timeoutId;
+  return (...args) => {
+    if (timeoutId) clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      func(...args);
+    }, delay);
+  };
+};
+
+
 
 const AgainstStockfish = () => {
+
   const fetchBestMove = async (FEN) => {
     try {
       const response = await axios.get('http://localhost:8123/stockfish', {
@@ -15,10 +29,10 @@ const AgainstStockfish = () => {
         }
       });
       console.log('Response from server:', response.data);
-      return response.data.bestMove; 
+      return response.data.bestMove;
     } catch (error) {
       console.error('Error fetching move from stockfish:', error);
-      return null; 
+      return null;
     }
   };
 
@@ -26,9 +40,12 @@ const AgainstStockfish = () => {
   const boardRef = useRef(null);
   const [currentStatus, setCurrentStatus] = useState(null);
   const [moves, setMoves] = useState([]);
+  const gameRef = useRef(new Chess());
+  const [isTableCollapsed, setIsTableCollapsed] = useState(true);
+  const [promotionPiece, setPromotionPiece] = useState('q');
 
   useEffect(() => {
-    const game = new Chess();
+    const game = gameRef.current;
 
     const onDragStart = (source, piece, position, orientation) => {
       if (game.isGameOver()) {
@@ -53,13 +70,12 @@ const AgainstStockfish = () => {
       let move = game.move({
         from: source,
         to: target,
-        promotion: 'q'
+        promotion: promotionPiece // Use the selected promotion piece
       });
 
       if (move === null) return "snapback";
 
       setMoves(prevMoves => [...prevMoves, { from: move.from, to: move.to }]);
-
       updateStatus();
 
       if (game.turn() === 'b') {
@@ -76,7 +92,7 @@ const AgainstStockfish = () => {
             move = game.move({
               from: bestMove.slice(0, 2),
               to: bestMove.slice(2, 4),
-              promotion: 'q'
+              promotion: promotionPiece // Use the selected promotion piece
             });
 
             if (move !== null) {
@@ -114,7 +130,7 @@ const AgainstStockfish = () => {
       boardRef.current.position(game.fen());
     };
 
-    const updateStatus = () => {
+    const updateStatus = debounce(() => {
       let status = '';
       let moveColor = 'White';
 
@@ -133,8 +149,8 @@ const AgainstStockfish = () => {
       }
 
       setCurrentStatus(status);
-    };
-
+    }, 100);
+    
     const removeGreySquares = () => {
       const squares = document.querySelectorAll('.square-55d63');
       squares.forEach(square => square.style.background = '');
@@ -150,7 +166,7 @@ const AgainstStockfish = () => {
 
     const config = {
       draggable: true,
-      position: 'start',
+      position: "start",
       onDragStart: onDragStart,
       onDrop: onDrop,
       onMouseoverSquare: onMouseoverSquare,
@@ -168,38 +184,69 @@ const AgainstStockfish = () => {
         boardRef.current.destroy();
       }
     };
-  }, []);
+  }, [promotionPiece]);
+
+  const toggleTable = () => {
+    setIsTableCollapsed(!isTableCollapsed);
+  };
+
+
+
+  const handlePromotionChange = (e) => {
+    setPromotionPiece(e.target.value);
+  };
 
   return (
-    <div className='flex flex-col items-center h-screen'>
-      <div className='w-screen flex mx-auto my-auto'>
-        <div className='mx-16 w-1/2'>
+    <div className='w-full flex flex-col items-center h-screen'>
+      
+      <div className='w-screen flex flex-col md:flex-row mx-auto my-auto'>
+        <div className='mx-16 w-full md:w-1/2'>
           <div ref={chessRef} style={{ width: window.innerWidth > 1536 ? '40vw' : '70vw' }}></div>
         </div>
-        <div className='ml-4 w-1/3'>
+        <div className='ml-4 w-full md:w-1/3 mt-4 md:mt-0'>
           <div className='rounded-xl text-center p-6 px-16 w-full text-2xl bg-green-700 text-white flex-shrink-0'>
             Current Status: {currentStatus ? currentStatus : "White to move"}
           </div>
           <div className='mt-4'>
-            <table className='w-full border-collapse border border-gray-700 rounded-lg overflow-hidden'>
-              <thead>
-                <tr className='bg-gray-800 text-center text-white'>
-                  <th className='border border-gray-700 px-6 py-3'>Move</th>
-                  <th className='border border-gray-700 px-6 py-3'>From</th>
-                  <th className='border border-gray-700 px-6 py-3'>To</th>
-                </tr>
-              </thead>
-              <tbody>
-                {moves.map((move, index) => (
-                  <tr key={index} className={index % 2 === 0 ? 'bg-gray-700 text-white text-center' : 'bg-gray-600 text-gray-200 text-center'}>
-                    <td className='border border-gray-700 px-6 py-4'>{index + 1}</td>
-                    <td className='border border-gray-700 px-6 py-4'>{move.from}</td>
-                    <td className='border border-gray-700 px-6 py-4'>{move.to}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <label className='mr-2 text-white'>Promotion Piece:</label>
+            <select value={promotionPiece} onChange={handlePromotionChange} className='bg-green-700 text-white px-4 py-2 rounded-lg w-full'>
+              <option value="q">Queen</option>
+              <option value="r">Rook</option>
+              <option value="b">Bishop</option>
+              <option value="n">Knight</option>
+            </select>
+
+            <p className='text-weight-500 mx-2 mt-3 text-center text-xl text-red-500'>If board position changes to original after promotion, just attempt an  illegal move ,</p>
+            <p className='text-weight-500 mx-2 mt-3 text-center text-xl text-green-500'> Though its rare as stockfish won't give you a chance to promote. </p>
+
           </div>
+          <button onClick={toggleTable} className='mt-4 bg-green-700 text-white px-4 py-2 rounded-t-lg w-full'>
+            {isTableCollapsed ? 'Show Moves' : 'Hide Moves'}
+          </button>
+          <div style={{ maxHeight: isTableCollapsed ? '0' : '40vh', transition: 'max-height 0.3s ease-in-out', overflow: 'scroll' }}>
+            <div style={{ height: '100%', overflowY: 'auto' }}>
+              <table className='w-full border-collapse border border-gray-700 rounded-lg'>
+                <thead>
+                  <tr className='bg-gray-800 text-center text-white'>
+                    <th className='border border-gray-700 px-6 py-3'>Move</th>
+                    <th className='border border-gray-700 px-6 py-3'>From</th>
+                    <th className='border border-gray-700 px-6 py-3'>To</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {moves.map((move, index) => (
+                    <tr key={index} className={index % 2 === 0 ? 'bg-gray-700 text-white text-center' : 'bg-gray-600 text-gray-200 text-center'}>
+                      <td className='border border-gray-700 px-6 py-4'>{index + 1}</td>
+                      <td className='border border-gray-700 px-6 py-4'>{move.from}</td>
+                      <td className='border border-gray-700 px-6 py-4'>{move.to}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          
         </div>
       </div>
     </div>

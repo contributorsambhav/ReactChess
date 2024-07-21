@@ -175,6 +175,9 @@ const ChessboardComponent = () => {
             Current Status: {currentStatus ? currentStatus : "White to move"}
           </div>
           <div className='mt-4'>
+
+          <p className='text-weight-500 mx-2 mx-3 text-center text-xl text-green-500'>Always promotes to queen.</p>
+
             <table className='w-full border-collapse border border-gray-700 rounded-lg overflow-hidden'>
               <thead>
                 <tr className='bg-gray-800 text-center text-white'>

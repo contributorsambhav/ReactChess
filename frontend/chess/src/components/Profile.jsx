@@ -1,7 +1,8 @@
 import React from 'react';
 import axios from 'axios';
 import { useSelector, useDispatch } from 'react-redux';
-import { login } from '../store/authSlice';
+import { login, logout } from '../store/authSlice';
+import Cookies from 'js-cookie';
 
 function Profile() {
     const authStatus = useSelector(state => state.auth.status);
@@ -35,11 +36,16 @@ function Profile() {
         );
     };
 
+    const handleLogout = () => {
+        Cookies.remove('token', { path: '/' });
+        dispatch(logout());
+    };
+
     return (
         <div className="w-screen h-screen flex items-center justify-center">
-            <div className="w-96 items-center p-4 mx-auto bg-gradient-to-r from-gray-900 to-gray-100 rounded-lg shadow-md">
-                <h1 className="text-gray-100 text-2xl font-bold mb-4">User Profile</h1>
-                <div className="w-[50%] bg-gray-200 bg-opacity-75 p-4 rounded-lg shadow-md">
+            <div className="w-96 items-center p-4 mx-auto bg-gradient-to-r from-white to-green-400 opacity-90 rounded-lg shadow-md">
+                <h1 className="text-green-900 text-2xl font-bold mb-4">User Profile</h1>
+                <div className="w-full bg-green-200 bg-opacity-75 p-4 rounded-lg shadow-md">
                     <p className="text-lg font-semibold">Status: {authStatus}</p>
                     <div className="mt-4 text-black">
                         {userData && Object.entries(userData).map(([key, value]) => {
@@ -59,6 +65,12 @@ function Profile() {
                         })}
                     </div>
                 </div>
+                <button 
+                    onClick={handleLogout}
+                    className="mt-4 bg-green-500 text-white font-bold py-2 px-4 rounded hover:bg-green-600"
+                >
+                    Logout
+                </button>
             </div>
         </div>
     );
