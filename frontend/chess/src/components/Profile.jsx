@@ -3,11 +3,13 @@ import axios from 'axios';
 import { useSelector, useDispatch } from 'react-redux';
 import { login, logout } from '../store/authSlice';
 import Cookies from 'js-cookie';
+import { useNavigate } from 'react-router-dom';
 
 function Profile() {
     const authStatus = useSelector(state => state.auth.status);
     const userData = useSelector(state => state.auth.userData);
     const dispatch = useDispatch();
+    const navigate = useNavigate()
 
     React.useEffect(() => {
         axios.get("http://localhost:8123/profile", {
@@ -39,6 +41,7 @@ function Profile() {
     const handleLogout = () => {
         Cookies.remove('token', { path: '/' });
         dispatch(logout());
+        navigate("/login")
     };
 
     return (
