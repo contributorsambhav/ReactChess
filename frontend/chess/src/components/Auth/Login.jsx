@@ -44,7 +44,6 @@ function Login() {
 
         const data = await response.json();
         if (response.ok) {
-            localStorage.setItem('authToken', data.token);  // Save token to localStorage
             dispatch(login(data));  // Dispatch login action with user data
             navigate('/profile');
         } else {

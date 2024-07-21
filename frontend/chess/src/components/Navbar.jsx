@@ -3,20 +3,26 @@ import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import wN from './pieces/wN.png';
 import { login } from '../store/authSlice';
+import axios from 'axios';
 
 function Navbar() {
     const dispatch = useDispatch();
     const authStatus = useSelector(state => state.auth.status);
     const userData = useSelector(state => state.auth.userData);
 
-    // Check for authentication status in localStorage on component mount
     React.useEffect(() => {
-        const token = localStorage.getItem('authToken');
-        if (token) {
-            // If token exists, dispatch login action with user data
-            dispatch(login({ token }));
-        }
-    }, [dispatch]);
+        axios.get("http://localhost:8123/profile", {
+            withCredentials: true
+        })
+            .then(res => {
+                const data = res.data;
+                dispatch(login(data));
+                console.log(data);
+            })
+            .catch(error => {
+                console.error('Error fetching profile:', error);
+            });
+    }, [dispatch]);    
 
     return (
         <nav className="w-full bg-purple-300 bg-opacity-10 p-2">
@@ -35,7 +41,7 @@ function Navbar() {
                             Home
                         </Link>
                     </li>
-                    {authStatus ? (
+                    {authStatus ==="true" ? (
                         <>
                             <li>
                                 <Link

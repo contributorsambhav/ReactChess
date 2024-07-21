@@ -197,7 +197,6 @@ const GlobalMultiplayer = () => {
 
   const handlePromotionChange = (e) => {
     setPromotionPiece(e.target.value);
-    alert(promotionPiece);
   };
 
   return (
