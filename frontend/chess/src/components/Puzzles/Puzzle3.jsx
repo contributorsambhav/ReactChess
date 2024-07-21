@@ -186,7 +186,7 @@ const Puzzle3 = () => {
         boardRef.current.destroy();
       }
     };
-  }, [puzzleFEN]);
+  }, [puzzleFEN,promotionPiece]);
 
   const toggleTable = () => {
     setIsTableCollapsed(!isTableCollapsed);
@@ -209,7 +209,7 @@ const Puzzle3 = () => {
           White faces a challenging position against Black's resilient defense. Can you find the winning sequence?<br></br>
           This one is dubbed as the "Stairway to Heaven". White may have some positional advantage, yet if he is not careful, it's going to be a stalemate.
         </p>
-        <p>If board position changes to original after promotion, just attempt an  illegal move</p>
+        <p className='text-weight-500 mx-2 mt-3 text-center text-xl text-red-500'>If board position changes to original after promotion, just attempt an  illegal move</p>
       </div>
       <div className='w-screen flex flex-col md:flex-row mx-auto my-auto'>
         <div className='mx-16 w-full md:w-1/2'>

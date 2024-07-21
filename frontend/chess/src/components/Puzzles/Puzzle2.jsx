@@ -211,7 +211,7 @@ const Puzzle2 = () => {
           out of this brilliant endgame composition. This will help us in move calculation &
           emphasize on the idea of restriction in chess.
         </p>
-        <p>If board position changes to original after promotion, just attempt an  illegal move</p>
+        <p className='text-weight-500 mx-2 mt-3 text-center text-xl text-red-500'>If board position changes to original after promotion, just attempt an  illegal move</p>
 
       </div>
       <div className='w-screen flex flex-col md:flex-row mx-auto my-auto'>
