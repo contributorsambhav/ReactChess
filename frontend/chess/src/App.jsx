@@ -25,7 +25,7 @@ function App() {
   return (
     <Provider store={store}>
       <Router>
-        <div>
+        <div className='w-[100vw] h-[100vh] '>
           <Navbar />
           <Routes>
             <Route path="/" element={<Home />} />

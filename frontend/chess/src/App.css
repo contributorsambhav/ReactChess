@@ -18,3 +18,4 @@
 .board-row:nth-child(even) div:nth-child(odd) {
   background-color: #b58863; /* Dark square color */
 }
+

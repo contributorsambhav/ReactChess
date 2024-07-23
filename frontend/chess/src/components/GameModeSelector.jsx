@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import ModeSelectorImage from '../assets/ModeSelectorImage.png';
+import ModeSelectorImage from '../assets/selector2.jpg';
 
 function GameModeSelector() {
   const [animate, setAnimate] = useState(false);
@@ -18,16 +18,15 @@ function GameModeSelector() {
   ];
 
   return (
-    <div className='flex h-screen items-center w-screen'>
-      <div className='w-1/2 h-screen'></div>
-      <div className="w-1/2 h-screen bg-cover bg-center relative overflow-hidden"
+    <div className='flex h-screen items-center justify-center w-screen'>
+      <div className="w-full h-screen bg-cover bg-center relative overflow-hidden"
         style={{ backgroundImage: `url(${ModeSelectorImage})` }}>
         
-        <div className='mt-16 transform w-full'>
+        <div className='flex flex-col items-center justify-center h-full w-full'>
           {gameModes.map(({ path, label, delay }) => (
-            <div key={path} className={`game-mode ${animate ? `animate-slide-in ${delay}` : ''}`}>
-              <div className="bg-gray-200 bg-opacity-10 backdrop-filter backdrop-blur-xl border border-gray-500 p-2 md:p-4 lg:p-5 my-4 rounded-xl shadow-lg w-11/12 max-w-md mx-auto">
-                <Link to={path} className="text-gray-700 text-xl md:text-2xl lg:text-3xl text-center block">{label}</Link>
+            <div key={path} className={` w-1/3 game-mode ${animate ? `animate-slide-in ${delay}` : ''}`}>
+              <div className="bg-gray-800 bg-opacity-40 backdrop-filter backdrop-blur-xl border border-gray-500 p-2 md:p-4 lg:p-5 my-4 rounded-xl shadow-lg w-full w-[40vw] mx-auto">
+                <Link to={path} className="text-gray-100 text-xl md:text-2xl lg:text-3xl text-border-black text-center block">{label}</Link>
               </div>
             </div>
           ))}

@@ -25,7 +25,7 @@ function Navbar() {
     }, [dispatch]);    
 
     return (
-        <nav className="w-full absolute top-0 z-10 bg-purple-800 bg-opacity-10 p-2">
+        <nav className="w-full absolute top-0 z-10 bg-purple-900 bg-opacity-40 p-2">
             <div className="container mx-auto flex justify-between items-center">
                 <div className="text-gray-800 text-2xl font-semibold">
                     <Link to="/" >
