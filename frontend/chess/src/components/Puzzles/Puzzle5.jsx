@@ -3,6 +3,11 @@ import { Chess } from 'chess.js';
 import Chessboard from 'chessboardjs';
 import axios from 'axios';
 import pieceImages from "../pieceImages";
+import { Howl } from 'howler';
+import moveSoundFile from '../../assets/sounds/move.mp3';
+import captureSoundFile from '../../assets/sounds/capture.mp3';
+import checkSoundFile from '../../assets/sounds/check.mp3';
+import checkmateSoundFile from '../../assets/sounds/checkmate.mp3';
 
 const debounce = (func, delay) => {
   let timeoutId;
@@ -14,8 +19,14 @@ const debounce = (func, delay) => {
   };
 };
 
+// Initialize sound effects
+const moveSound = new Howl({ src: [moveSoundFile] });
+const captureSound = new Howl({ src: [captureSoundFile] });
+const checkSound = new Howl({ src: [checkSoundFile] });
+const checkmateSound = new Howl({ src: [checkmateSoundFile] });
+
 const Puzzle5 = () => {
-  const puzzleFEN = "r2q4/pb1r1k2/1p4RQ/2n1pN1B/2p1P3/2P5/PP6/1K3R2 w - - 6 33"
+  const puzzleFEN = "r2q4/pb1r1k2/1p4RQ/2n1pN1B/2p1P3/2P5/PP6/1K3R2 w - - 6 33";
 
   const fetchBestMove = async (FEN) => {
     try {
@@ -68,13 +79,20 @@ const Puzzle5 = () => {
       let move = game.move({
         from: source,
         to: target,
-        promotion: promotionPiece
+        promotion: promotionPiece // Use the selected promotion piece
       });
 
       if (move === null) return "snapback";
 
       setMoves(prevMoves => [...prevMoves, { from: move.from, to: move.to }]);
       updateStatus();
+
+      // Play sound based on move type
+      if (move.captured) {
+        captureSound.play();
+      } else {
+        moveSound.play();
+      }
 
       if (game.turn() === 'b') {
         try {
@@ -97,6 +115,13 @@ const Puzzle5 = () => {
               setMoves(prevMoves => [...prevMoves, { from: move.from, to: move.to }]);
               boardRef.current.position(game.fen());
               updateStatus();
+
+              // Play sound based on move type
+              if (move.captured) {
+                captureSound.play();
+              } else {
+                moveSound.play();
+              }
             }
           }
         } catch (error) {
@@ -138,11 +163,13 @@ const Puzzle5 = () => {
 
       if (game.isGameOver()) {
         status = 'Game over';
+        checkmateSound.play();
       } else {
         status = moveColor + ' to move';
 
         if (game.isCheckmate()) {
           status += ', ' + moveColor + ' is in check';
+          checkSound.play();
         }
       }
 
@@ -245,7 +272,7 @@ const Puzzle5 = () => {
             </div>
           </div>
           <button onClick={toggleVideo} className='mt-4 bg-green-700 text-white px-4 py-2 rounded-t-lg w-full'>
-            {isVideoCollapsed ? 'Hide  Solution' : 'Show  Solution'}
+            {isVideoCollapsed ? 'Hide Solution' : 'Show Solution'}
           </button>
           {isVideoCollapsed && (
             <div className='text-2xl mt-2 text-center'>Rook anywhere between g1 to g5</div>

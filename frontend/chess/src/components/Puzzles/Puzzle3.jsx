@@ -3,8 +3,11 @@ import { Chess } from 'chess.js';
 import Chessboard from 'chessboardjs';
 import axios from 'axios';
 import pieceImages from "../pieceImages";
-
-
+import { Howl } from 'howler';
+import moveSoundFile from '../../assets/sounds/move.mp3';
+import captureSoundFile from '../../assets/sounds/capture.mp3';
+import checkSoundFile from '../../assets/sounds/check.mp3';
+import checkmateSoundFile from '../../assets/sounds/checkmate.mp3';
 
 const debounce = (func, delay) => {
   let timeoutId;
@@ -16,7 +19,11 @@ const debounce = (func, delay) => {
   };
 };
 
-
+// Initialize sound effects
+const moveSound = new Howl({ src: [moveSoundFile] });
+const captureSound = new Howl({ src: [captureSoundFile] });
+const checkSound = new Howl({ src: [checkSoundFile] });
+const checkmateSound = new Howl({ src: [checkmateSoundFile] });
 
 const Puzzle3 = () => {
   const puzzleFEN = "k1b5/Pp1p4/1P1Pp3/4Pp2/5Pp1/6P1/P6P/6K1 w - - 0 1";
@@ -80,6 +87,13 @@ const Puzzle3 = () => {
       setMoves(prevMoves => [...prevMoves, { from: move.from, to: move.to }]);
       updateStatus();
 
+      // Play sound based on move type
+      if (move.captured) {
+        captureSound.play();
+      } else {
+        moveSound.play();
+      }
+
       if (game.turn() === 'b') {
         try {
           const fen = game.fen();
@@ -101,6 +115,13 @@ const Puzzle3 = () => {
               setMoves(prevMoves => [...prevMoves, { from: move.from, to: move.to }]);
               boardRef.current.position(game.fen());
               updateStatus();
+
+              // Play sound based on move type
+              if (move.captured) {
+                captureSound.play();
+              } else {
+                moveSound.play();
+              }
             }
           }
         } catch (error) {
@@ -142,11 +163,13 @@ const Puzzle3 = () => {
 
       if (game.isGameOver()) {
         status = 'Game over';
+        checkmateSound.play();
       } else {
         status = moveColor + ' to move';
 
         if (game.isCheckmate()) {
           status += ', ' + moveColor + ' is in check';
+          checkSound.play();
         }
       }
 
@@ -186,7 +209,7 @@ const Puzzle3 = () => {
         boardRef.current.destroy();
       }
     };
-  }, [puzzleFEN,promotionPiece]);
+  }, [puzzleFEN, promotionPiece]);
 
   const toggleTable = () => {
     setIsTableCollapsed(!isTableCollapsed);
@@ -209,7 +232,7 @@ const Puzzle3 = () => {
           White faces a challenging position against Black's resilient defense. Can you find the winning sequence?<br></br>
           This one is dubbed as the "Stairway to Heaven". White may have some positional advantage, yet if he is not careful, it's going to be a stalemate.
         </p>
-        <p className='text-weight-500 mx-2 mt-3 text-center text-xl text-red-500'>If board position changes to original after promotion, just attempt an  illegal move</p>
+        <p className='text-weight-500 mx-2 mt-3 text-center text-xl text-red-500'>If board position changes to original after promotion, just attempt an illegal move</p>
       </div>
       <div className='w-screen flex flex-col md:flex-row mx-auto my-auto'>
         <div className='mx-16 w-full md:w-1/2'>

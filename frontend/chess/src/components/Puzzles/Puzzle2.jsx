@@ -3,7 +3,11 @@ import { Chess } from 'chess.js';
 import Chessboard from 'chessboardjs';
 import axios from 'axios';
 import pieceImages from "../pieceImages";
-
+import { Howl } from 'howler';
+import moveSoundFile from '../../assets/sounds/move.mp3';
+import captureSoundFile from '../../assets/sounds/capture.mp3';
+import checkSoundFile from '../../assets/sounds/check.mp3';
+import checkmateSoundFile from '../../assets/sounds/checkmate.mp3';
 
 const debounce = (func, delay) => {
   let timeoutId;
@@ -15,6 +19,11 @@ const debounce = (func, delay) => {
   };
 };
 
+// Initialize sound effects
+const moveSound = new Howl({ src: [moveSoundFile] });
+const captureSound = new Howl({ src: [captureSoundFile] });
+const checkSound = new Howl({ src: [checkSoundFile] });
+const checkmateSound = new Howl({ src: [checkmateSoundFile] });
 
 const Puzzle2 = () => {
   const puzzleFEN = "8/8/8/2p5/1pp5/brpp4/qpprpK1P/1nkbn3 w - - 0 1";
@@ -78,6 +87,13 @@ const Puzzle2 = () => {
       setMoves(prevMoves => [...prevMoves, { from: move.from, to: move.to }]);
       updateStatus();
 
+      // Play sound based on move type
+      if (move.captured) {
+        captureSound.play();
+      } else {
+        moveSound.play();
+      }
+
       if (game.turn() === 'b') {
         try {
           const fen = game.fen();
@@ -99,6 +115,13 @@ const Puzzle2 = () => {
               setMoves(prevMoves => [...prevMoves, { from: move.from, to: move.to }]);
               boardRef.current.position(game.fen());
               updateStatus();
+
+              // Play sound based on move type
+              if (move.captured) {
+                captureSound.play();
+              } else {
+                moveSound.play();
+              }
             }
           }
         } catch (error) {
@@ -140,11 +163,13 @@ const Puzzle2 = () => {
 
       if (game.isGameOver()) {
         status = 'Game over';
+        checkmateSound.play();
       } else {
         status = moveColor + ' to move';
 
         if (game.isCheckmate()) {
           status += ', ' + moveColor + ' is in check';
+          checkSound.play();
         }
       }
 
@@ -211,7 +236,7 @@ const Puzzle2 = () => {
           out of this brilliant endgame composition. This will help us in move calculation &
           emphasize on the idea of restriction in chess.
         </p>
-        <p className='text-weight-500 mx-2 mt-3 text-center text-xl text-red-500'>If board position changes to original after promotion, just attempt an  illegal move</p>
+        <p className='text-weight-500 mx-2 mt-3 text-center text-xl text-red-500'>If board position changes to original after promotion, just attempt an illegal move</p>
 
       </div>
       <div className='w-screen flex flex-col md:flex-row mx-auto my-auto'>

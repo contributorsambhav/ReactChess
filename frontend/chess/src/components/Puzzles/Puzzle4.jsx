@@ -3,6 +3,11 @@ import { Chess } from 'chess.js';
 import Chessboard from 'chessboardjs';
 import axios from 'axios';
 import pieceImages from "../pieceImages";
+import { Howl } from 'howler';
+import moveSoundFile from '../../assets/sounds/move.mp3';
+import captureSoundFile from '../../assets/sounds/capture.mp3';
+import checkSoundFile from '../../assets/sounds/check.mp3';
+import checkmateSoundFile from '../../assets/sounds/checkmate.mp3';
 
 const debounce = (func, delay) => {
   let timeoutId;
@@ -14,8 +19,14 @@ const debounce = (func, delay) => {
   };
 };
 
+// Initialize sound effects
+const moveSound = new Howl({ src: [moveSoundFile] });
+const captureSound = new Howl({ src: [captureSoundFile] });
+const checkSound = new Howl({ src: [checkSoundFile] });
+const checkmateSound = new Howl({ src: [checkmateSoundFile] });
+
 const Puzzle4 = () => {
-  const puzzleFEN = "r5r1/2pn4/1p1p2n1/3Pp2R/1pP1BkP1/2N2P2/P2K4/8 w - - 0 35"
+  const puzzleFEN = "r5r1/2pn4/1p1p2n1/3Pp2R/1pP1BkP1/2N2P2/P2K4/8 w - - 0 35";
 
   const fetchBestMove = async (FEN) => {
     try {
@@ -76,6 +87,13 @@ const Puzzle4 = () => {
       setMoves(prevMoves => [...prevMoves, { from: move.from, to: move.to }]);
       updateStatus();
 
+      // Play sound based on move type
+      if (move.captured) {
+        captureSound.play();
+      } else {
+        moveSound.play();
+      }
+
       if (game.turn() === 'b') {
         try {
           const fen = game.fen();
@@ -97,6 +115,13 @@ const Puzzle4 = () => {
               setMoves(prevMoves => [...prevMoves, { from: move.from, to: move.to }]);
               boardRef.current.position(game.fen());
               updateStatus();
+
+              // Play sound based on move type
+              if (move.captured) {
+                captureSound.play();
+              } else {
+                moveSound.play();
+              }
             }
           }
         } catch (error) {
@@ -138,11 +163,13 @@ const Puzzle4 = () => {
 
       if (game.isGameOver()) {
         status = 'Game over';
+        checkmateSound.play();
       } else {
         status = moveColor + ' to move';
 
         if (game.isCheckmate()) {
           status += ', ' + moveColor + ' is in check';
+          checkSound.play();
         }
       }
 

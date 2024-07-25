@@ -3,7 +3,13 @@ import { Chess } from 'chess.js';
 import Chessboard from 'chessboardjs';
 import axios from 'axios';
 import pieceImages from "../pieceImages";
+import { Howl } from 'howler';
+import moveSoundFile from '../../assets/sounds/move.mp3';
+import captureSoundFile from '../../assets/sounds/capture.mp3';
+import checkSoundFile from '../../assets/sounds/check.mp3';
+import checkmateSoundFile from '../../assets/sounds/checkmate.mp3';
 
+// Debounce function to limit the rate at which a function can fire
 const debounce = (func, delay) => {
   let timeoutId;
   return (...args) => {
@@ -14,9 +20,16 @@ const debounce = (func, delay) => {
   };
 };
 
-const Puzzle6 = () => {
-  const puzzleFEN = "r6r/ppp4Q/3qb3/3p4/3P2kP/5R2/P3B1P1/5RK1 w - - 7 29"
+// Initialize sound effects
+const moveSound = new Howl({ src: [moveSoundFile] });
+const captureSound = new Howl({ src: [captureSoundFile] });
+const checkSound = new Howl({ src: [checkSoundFile] });
+const checkmateSound = new Howl({ src: [checkmateSoundFile] });
 
+const Puzzle6 = () => {
+  const puzzleFEN = "r6r/ppp4Q/3qb3/3p4/3P2kP/5R2/P3B1P1/5RK1 w - - 7 29";
+
+  // Fetch best move from Stockfish engine
   const fetchBestMove = async (FEN) => {
     try {
       const response = await axios.get('http://localhost:8123/stockfish', {
@@ -45,6 +58,7 @@ const Puzzle6 = () => {
   useEffect(() => {
     const game = gameRef.current;
 
+    // Handler for when a drag starts
     const onDragStart = (source, piece, position, orientation) => {
       if (game.isGameOver()) {
         console.log("Start a new game from the menu");
@@ -62,13 +76,14 @@ const Puzzle6 = () => {
       }
     };
 
+    // Handler for when a piece is dropped
     const onDrop = async (source, target) => {
       removeGreySquares();
 
       let move = game.move({
         from: source,
         to: target,
-        promotion: promotionPiece
+        promotion: promotionPiece // Use the selected promotion piece
       });
 
       if (move === null) return "snapback";
@@ -76,6 +91,14 @@ const Puzzle6 = () => {
       setMoves(prevMoves => [...prevMoves, { from: move.from, to: move.to }]);
       updateStatus();
 
+      // Play sound based on move type
+      if (move.captured) {
+        captureSound.play();
+      } else {
+        moveSound.play();
+      }
+
+      // If it's Black's turn, fetch the best move from Stockfish
       if (game.turn() === 'b') {
         try {
           const fen = game.fen();
@@ -97,6 +120,13 @@ const Puzzle6 = () => {
               setMoves(prevMoves => [...prevMoves, { from: move.from, to: move.to }]);
               boardRef.current.position(game.fen());
               updateStatus();
+
+              // Play sound based on move type
+              if (move.captured) {
+                captureSound.play();
+              } else {
+                moveSound.play();
+              }
             }
           }
         } catch (error) {
@@ -105,7 +135,8 @@ const Puzzle6 = () => {
       }
     };
 
-    const onMouseoverSquare = (square, piece) => {
+    // Highlight squares on mouseover
+    const onMouseoverSquare = (square) => {
       const moves = game.moves({
         square: square,
         verbose: true
@@ -120,14 +151,17 @@ const Puzzle6 = () => {
       }
     };
 
-    const onMouseoutSquare = (square, piece) => {
+    // Remove highlight on mouseout
+    const onMouseoutSquare = () => {
       removeGreySquares();
     };
 
+    // Update board position on snap end
     const onSnapEnd = () => {
       boardRef.current.position(game.fen());
     };
 
+    // Update game status and play sounds
     const updateStatus = debounce(() => {
       let status = '';
       let moveColor = 'White';
@@ -138,22 +172,26 @@ const Puzzle6 = () => {
 
       if (game.isGameOver()) {
         status = 'Game over';
+        checkmateSound.play();
       } else {
         status = moveColor + ' to move';
 
         if (game.isCheckmate()) {
           status += ', ' + moveColor + ' is in check';
+          checkSound.play();
         }
       }
 
       setCurrentStatus(status);
     }, 100);
 
+    // Remove grey squares highlighting
     const removeGreySquares = () => {
       const squares = document.querySelectorAll('.square-55d63');
       squares.forEach(square => square.style.background = '');
     };
 
+    // Highlight squares
     const greySquare = (square) => {
       const squareEl = document.querySelector(`.square-${square}`);
       if (squareEl) {
@@ -162,6 +200,7 @@ const Puzzle6 = () => {
       }
     };
 
+    // Chessboard configuration
     const config = {
       draggable: true,
       position: puzzleFEN,
@@ -175,8 +214,10 @@ const Puzzle6 = () => {
       snapSpeed: 100
     };
 
+    // Initialize Chessboard
     boardRef.current = Chessboard(chessRef.current, config);
 
+    // Cleanup on component unmount
     return () => {
       if (boardRef.current) {
         boardRef.current.destroy();
@@ -184,14 +225,17 @@ const Puzzle6 = () => {
     };
   }, [puzzleFEN, promotionPiece]);
 
+  // Toggle move table visibility
   const toggleTable = () => {
     setIsTableCollapsed(!isTableCollapsed);
   };
 
+  // Toggle video solution visibility
   const toggleVideo = () => {
     setIsVideoCollapsed(!isVideoCollapsed);
   };
 
+  // Handle promotion piece change
   const handlePromotionChange = (e) => {
     setPromotionPiece(e.target.value);
   };
@@ -200,7 +244,7 @@ const Puzzle6 = () => {
     <div className='w-full flex flex-col items-center h-screen'>
       <h1 className='text-3xl font-bold mt-4'>Mate in one move (hard)</h1>
       <div className='w-[80%] p-4 text-lg'>
-       
+        {/* Puzzle description or additional information */}
       </div>
       <div className='w-screen flex flex-col md:flex-row mx-auto my-auto'>
         <div className='mx-16 w-full md:w-1/2'>
@@ -245,7 +289,7 @@ const Puzzle6 = () => {
             </div>
           </div>
           <button onClick={toggleVideo} className='mt-4 bg-green-700 text-white px-4 py-2 rounded-t-lg w-full'>
-            {isVideoCollapsed ? 'Hide  Solution' : 'Show  Solution'}
+            {isVideoCollapsed ? 'Hide Solution' : 'Show Solution'}
           </button>
           {isVideoCollapsed && (
             <div className='text-2xl mt-2 text-center'>Rook to b3</div>

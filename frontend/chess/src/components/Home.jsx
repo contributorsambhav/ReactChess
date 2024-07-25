@@ -21,7 +21,7 @@ function Home() {
         <h1 className="text-5xl tracking-normal font-bold font-mono text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600 mb-6">
           <Typing 
             text={['Welcome to Chess Master']} 
-            speed={150} 
+            speed={100} 
             eraseSpeed={50} 
             typingDelay={200} 
             eraseDelay={5000}
