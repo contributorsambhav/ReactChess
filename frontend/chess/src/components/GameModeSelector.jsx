@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import ModeSelectorImage from '../assets/selector2.jpg';
+import ModeSelectorImage from '../assets/images/selector2.jpg';
 
 function GameModeSelector() {
   const [animate, setAnimate] = useState(false);

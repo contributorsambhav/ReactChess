@@ -7,6 +7,17 @@ import WaitQueue from '../WaitQueue';
 import { useNavigate } from 'react-router-dom';
 import pieceImages from '../pieceImages';
 import axios from 'axios';
+import { Howl } from 'howler';
+import moveSoundFile from '../../assets/sounds/move.mp3';
+import captureSoundFile from '../../assets/sounds/capture.mp3';
+import checkSoundFile from '../../assets/sounds/check.mp3';
+import checkmateSoundFile from '../../assets/sounds/checkmate.mp3';
+
+// Initialize sound effects
+const moveSound = new Howl({ src: [moveSoundFile] });
+const captureSound = new Howl({ src: [captureSoundFile] });
+const checkSound = new Howl({ src: [checkSoundFile] });
+const checkmateSound = new Howl({ src: [checkmateSoundFile] });
 
 const GlobalMultiplayer = () => {
   const addMatchToHistory = async (userId, opponentName, status) => {
@@ -76,6 +87,13 @@ const GlobalMultiplayer = () => {
             boardRef.current.position(game.fen());
             updateStatus();
             setMoves((prevMoves) => [...prevMoves, { from: move.from, to: move.to, promotion: obtainedPromotion }]);
+
+            // Play sound based on move type
+            if (move.captured) {
+              captureSound.play();
+            } else {
+              moveSound.play();
+            }
           }
         } catch (error) {
           console.error('Invalid move received:', error);
@@ -100,7 +118,7 @@ const GlobalMultiplayer = () => {
         orientation: playerColor
       });
     }
-  }, [socket, gameCreated, game, playerColor,promotionPiece]);
+  }, [socket, gameCreated, game, playerColor, promotionPiece]);
 
   const onDrop = (source, target) => {
     if ((playerColor === 'white' && game.turn() === 'w') || (playerColor === 'black' && game.turn() === 'b')) {
@@ -111,6 +129,13 @@ const GlobalMultiplayer = () => {
           updateStatus();
           socket.emit('move', { from: source, to: target, obtainedPromotion: promotionPiece });
           setMoves((prevMoves) => [...prevMoves, { from: move.from, to: move.to, promotion: promotionPiece }]);
+
+          // Play sound based on move type
+          if (move.captured) {
+            captureSound.play();
+          } else {
+            moveSound.play();
+          }
         } else {
           console.log('Invalid move:', source, target);
         }
@@ -149,6 +174,7 @@ const GlobalMultiplayer = () => {
     if (game.isCheckmate()) {
       if (turn === 'White') {
         status = 'Game over, Black wins by checkmate.';
+        checkmateSound.play();
         if (playerColor === "white") {
           addMatchToHistory(user.userId, opponent?.username, 'lose');
         } else {
@@ -156,6 +182,7 @@ const GlobalMultiplayer = () => {
         }
       } else {
         status = 'Game over, White wins by checkmate.';
+        checkmateSound.play();
         if (playerColor === "black") {
           addMatchToHistory(user.userId, opponent?.username, 'lose');
         } else {
@@ -164,11 +191,15 @@ const GlobalMultiplayer = () => {
       }
     } else if (game.isDraw()) {
       status = 'Game over, draw.';
+      checkSound.play();
       if (opponent) {
         addMatchToHistory(user.userId, opponent?.username, 'draw');
       }
     } else {
       status = `${turn} to move`;
+      if (game.inCheck()) {
+        checkSound.play();
+      }
     }
 
     setCurrentStatus(status);

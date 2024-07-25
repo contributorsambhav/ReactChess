@@ -4,8 +4,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { login, logout } from "../store/authSlice";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
-import svg from "../assets/base.png";
-import bg from "../assets/bgprofile.jpg";
+import svg from "../assets/images/base.png";
+import bg from "../assets/images/bgprofile.jpg";
 
 function Profile() {
   const authStatus = useSelector((state) => state.auth.status);

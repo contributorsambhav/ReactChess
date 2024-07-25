@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import bgImage from '../../assets/bgImage.jpg';
+import bgImage from '../../assets/images/bgImage.jpg';
 
 function SignUp() {
     const navigate = useNavigate();

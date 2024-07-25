@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import Typing from 'react-typing-effect';
-import bgImage from '../assets/bgImage.jpg';
+import bgImage from '../assets/images/bgImage.jpg';
 
 function Home() {
   const authStatus = useSelector(state => state.auth.status);

@@ -2,9 +2,17 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Chess } from 'chess.js';
 import Chessboard from 'chessboardjs';
 import axios from 'axios';
+import { Howl } from 'howler';
 import pieceImages from "../pieceImages";
+import moveSoundFile from '../../assets/sounds/move.mp3';
+import captureSoundFile from '../../assets/sounds/capture.mp3';
+import checkSoundFile from '../../assets/sounds/check.mp3';
+import checkmateSoundFile from '../../assets/sounds/checkmate.mp3';
 
-
+const moveSound = new Howl({ src: [moveSoundFile] });
+const captureSound = new Howl({ src: [captureSoundFile] });
+const checkSound = new Howl({ src: [checkSoundFile] });
+const checkmateSound = new Howl({ src: [checkmateSoundFile] });
 
 const debounce = (func, delay) => {
   let timeoutId;
@@ -16,10 +24,7 @@ const debounce = (func, delay) => {
   };
 };
 
-
-
 const AgainstStockfish = () => {
-
   const fetchBestMove = async (FEN) => {
     try {
       const response = await axios.get('http://localhost:8123/stockfish', {
@@ -77,6 +82,13 @@ const AgainstStockfish = () => {
 
       setMoves(prevMoves => [...prevMoves, { from: move.from, to: move.to }]);
       updateStatus();
+
+      // Play sound based on move type
+      if (move.captured) {
+        captureSound.play();
+      } else {
+        moveSound.play();
+      }
 
       if (game.turn() === 'b') {
         try {
@@ -145,6 +157,10 @@ const AgainstStockfish = () => {
 
         if (game.isCheckmate()) {
           status += ', ' + moveColor + ' is in check';
+          checkmateSound.play();
+        } else if (game.inCheck()) {
+          status += ', ' + moveColor + ' is in check';
+          checkSound.play();
         }
       }
 
@@ -190,15 +206,12 @@ const AgainstStockfish = () => {
     setIsTableCollapsed(!isTableCollapsed);
   };
 
-
-
   const handlePromotionChange = (e) => {
     setPromotionPiece(e.target.value);
   };
 
   return (
     <div className='w-full flex flex-col items-center h-screen'>
-      
       <div className='w-screen flex flex-col md:flex-row mx-auto my-auto'>
         <div className='mx-16 w-full md:w-1/2'>
           <div ref={chessRef} style={{ width: window.innerWidth > 1536 ? '40vw' : '70vw' }}></div>
@@ -215,10 +228,8 @@ const AgainstStockfish = () => {
               <option value="b">Bishop</option>
               <option value="n">Knight</option>
             </select>
-
             <p className='text-weight-500 mx-2 mt-3 text-center text-xl text-red-500'>If board position changes to original after promotion, just attempt an  illegal move ,</p>
             <p className='text-weight-500 mx-2 mt-3 text-center text-xl text-green-500'> Though its rare as stockfish won't give you a chance to promote. </p>
-
           </div>
           <button onClick={toggleTable} className='mt-4 bg-green-700 text-white px-4 py-2 rounded-t-lg w-full'>
             {isTableCollapsed ? 'Show Moves' : 'Hide Moves'}
@@ -235,18 +246,19 @@ const AgainstStockfish = () => {
                 </thead>
                 <tbody>
                   {moves.map((move, index) => (
-                    <tr key={index} className={index % 2 === 0 ? 'bg-gray-700 text-white text-center' : 'bg-gray-600 text-gray-200 text-center'}>
-                      <td className='border border-gray-700 px-6 py-4'>{index + 1}</td>
-                      <td className='border border-gray-700 px-6 py-4'>{move.from}</td>
-                      <td className='border border-gray-700 px-6 py-4'>{move.to}</td>
+                    <tr key={index} className='bg-gray-700 text-center text-white'>
+                      <td className='border border-gray-700 px-6 py-3'>{index + 1}</td>
+                      <td className='border border-gray-700 px-6 py-3'>{move.from}</td>
+                      <td className='border border-gray-700 px-6 py-3'>{move.to}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           </div>
-          
-          
+          <div className='mt-4 text-white text-center'>
+            <button onClick={() => window.location.reload()} className='bg-green-700 text-white px-4 py-2 rounded-b-lg w-full'>Restart</button>
+          </div>
         </div>
       </div>
     </div>

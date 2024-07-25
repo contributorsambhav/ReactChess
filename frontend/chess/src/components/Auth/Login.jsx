@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import bgImage from '../../assets/bgImage.jpg';
+import bgImage from '../../assets/images/bgImage.jpg';
 import PieceArray from '../PieceArray';
 import axios from "axios"
 import { login } from '../../store/authSlice';

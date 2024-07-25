@@ -1,8 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Chess } from 'chess.js';
 import Chessboard from 'chessboardjs';
+import { Howl } from 'howler';
+import moveSoundFile from '../../assets/sounds/move.mp3';
+import captureSoundFile from '../../assets/sounds/capture.mp3';
+import checkSoundFile from '../../assets/sounds/check.mp3';
+import checkmateSoundFile from '../../assets/sounds/checkmate.mp3';
+import pieceImages from "../pieceImages";
 
-import pieceImages from "../pieceImages"
+// Initialize sound effects
+const moveSound = new Howl({ src: [moveSoundFile] });
+const captureSound = new Howl({ src: [captureSoundFile] });
+const checkSound = new Howl({ src: [checkSoundFile] });
+const checkmateSound = new Howl({ src: [checkmateSoundFile] });
 
 const ChessboardComponent = () => {
   const chessRef = useRef(null); // Reference to the DOM element for the chessboard
@@ -38,16 +48,21 @@ const ChessboardComponent = () => {
       // Randomly select a move
       const randomIdx = Math.floor(Math.random() * possibleMoves.length);
       try {
-        game.move(possibleMoves[randomIdx]);
+        const move = game.move(possibleMoves[randomIdx]);
+        boardRef.current.position(game.fen());
 
-      
-      boardRef.current.position(game.fen());
+        // Play sound based on move type
+        if (move.captured) {
+          captureSound.play();
+        } else {
+          moveSound.play();
+        }
 
-      // Update moves state with the latest move
-      setMoves(prevMoves => [...prevMoves, { from: possibleMoves[randomIdx].split('-')[0], to: possibleMoves[randomIdx].split('-')[1] }]);
-    } catch (error) {
-        setCurrentStatus("Black says :Help me move please in am overwhelmed")
-      } 
+        // Update moves state with the latest move
+        setMoves(prevMoves => [...prevMoves, { from: move.from, to: move.to }]);
+      } catch (error) {
+        setCurrentStatus("Black says: Help me move please, I'm overwhelmed");
+      }
     };
 
     const onDrop = (source, target) => {
@@ -66,6 +81,13 @@ const ChessboardComponent = () => {
         // If the move is illegal, return 'snapback'
         if (move === null) return "snapback";
 
+        // Play sound based on move type
+        if (move.captured) {
+          captureSound.play();
+        } else {
+          moveSound.play();
+        }
+
         // Update moves state with the latest move
         setMoves(prevMoves => [...prevMoves, { from: move.from, to: move.to }]);
       } catch (error) {
@@ -77,7 +99,9 @@ const ChessboardComponent = () => {
 
       // After white's move, make random move for black
       if (game.turn() === 'b') {
-        setTimeout(makeRandomMove, 250);
+        setTimeout(() => {
+          makeRandomMove();
+        }, 250); // Delay to ensure that the sound plays before the computer's move
       }
     };
 
@@ -119,8 +143,12 @@ const ChessboardComponent = () => {
       // Checkmate?
       if (game.isCheckmate()) {
         status = 'Game over, ' + moveColor + ' is in checkmate.';
-      }  else {
-        status = moveColor + ' to move';      
+        checkmateSound.play();
+      } else if (game.inCheck()) {
+        status = moveColor + ' to move, ' + moveColor + ' is in check';
+        checkSound.play();
+      } else {
+        status = moveColor + ' to move';
       }
 
       // Update the status
@@ -175,8 +203,7 @@ const ChessboardComponent = () => {
             Current Status: {currentStatus ? currentStatus : "White to move"}
           </div>
           <div className='mt-4'>
-
-          <p className='text-weight-500 mx-2 mx-3 text-center text-xl text-green-500'>Always promotes to queen.</p>
+            <p className='text-weight-500 mx-2 mx-3 text-center text-xl text-green-500'>Always promotes to queen.</p>
 
             <table className='w-full border-collapse border border-gray-700 rounded-lg overflow-hidden'>
               <thead>

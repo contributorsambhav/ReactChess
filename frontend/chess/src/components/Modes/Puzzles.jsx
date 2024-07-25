@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import bg from "../../assets/bgpuzzle.jpg";
+import bg from "../../assets/images/bgpuzzle.jpg";
 
 const Puzzles = () => {
   const [animate, setAnimate] = useState(false);

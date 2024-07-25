@@ -2,9 +2,17 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Chess } from 'chess.js';
 import Chessboard from 'chessboardjs';
 import axios from 'axios';
+import { Howl } from 'howler';
+import moveSoundFile from '../../assets/sounds/move.mp3';
+import captureSoundFile from '../../assets/sounds/capture.mp3';
+import checkSoundFile from '../../assets/sounds/check.mp3';
+import checkmateSoundFile from '../../assets/sounds/checkmate.mp3';
 import pieceImages from "../pieceImages";
 
-
+const moveSound = new Howl({ src: [moveSoundFile] });
+const captureSound = new Howl({ src: [captureSoundFile] });
+const checkSound = new Howl({ src: [checkSoundFile] });
+const checkmateSound = new Howl({ src: [checkmateSoundFile] });
 
 const debounce = (func, delay) => {
   let timeoutId;
@@ -16,10 +24,7 @@ const debounce = (func, delay) => {
   };
 };
 
-
-
 const LocalMultiplayer = () => {
-
   const fetchBestMove = async (FEN) => {
     try {
       const response = await axios.get('http://localhost:8123/stockfish', {
@@ -53,8 +58,6 @@ const LocalMultiplayer = () => {
         return false;
       }
 
-      
-
       if ((game.turn() === 'w' && piece.search(/^b/) !== -1) ||
         (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
         return false;
@@ -75,7 +78,12 @@ const LocalMultiplayer = () => {
       setMoves(prevMoves => [...prevMoves, { from: move.from, to: move.to }]);
       updateStatus();
 
-     
+      // Play sound based on move type
+      if (move.captured) {
+        captureSound.play();
+      } else {
+        moveSound.play();
+      }
     };
 
     const onMouseoverSquare = (square, piece) => {
@@ -116,6 +124,10 @@ const LocalMultiplayer = () => {
 
         if (game.isCheckmate()) {
           status += ', ' + moveColor + ' is in check';
+          checkmateSound.play();
+        } else if (game.inCheck()) {
+          status += ', ' + moveColor + ' is in check';
+          checkSound.play();
         }
       }
 
@@ -160,8 +172,6 @@ const LocalMultiplayer = () => {
   const toggleTable = () => {
     setIsTableCollapsed(!isTableCollapsed);
   };
-
-
 
   const handlePromotionChange = (e) => {
     setPromotionPiece(e.target.value);
@@ -213,8 +223,6 @@ const LocalMultiplayer = () => {
               </table>
             </div>
           </div>
-          
-          
         </div>
       </div>
     </div>
