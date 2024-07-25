@@ -8,6 +8,7 @@ import captureSoundFile from '../../assets/sounds/capture.mp3';
 import checkSoundFile from '../../assets/sounds/check.mp3';
 import checkmateSoundFile from '../../assets/sounds/checkmate.mp3';
 import pieceImages from "../pieceImages";
+import boardbg from '../../assets/images/bgboard.jpg';
 
 const moveSound = new Howl({ src: [moveSoundFile] });
 const captureSound = new Howl({ src: [captureSoundFile] });
@@ -123,7 +124,7 @@ const LocalMultiplayer = () => {
         status = moveColor + ' to move';
 
         if (game.isCheckmate()) {
-          status += ', ' + moveColor + ' is in check';
+          status += ', ' + moveColor + ' is in checkmate';
           checkmateSound.play();
         } else if (game.inCheck()) {
           status += ', ' + moveColor + ' is in check';
@@ -178,45 +179,47 @@ const LocalMultiplayer = () => {
   };
 
   return (
-    <div className='w-full flex flex-col items-center h-screen'>    
+    <div className="flex h-screen items-center justify-center w-screen"
+         style={{ backgroundImage: `url(${boardbg})`, backgroundSize: 'cover' }}>
       <div className='w-screen flex flex-col md:flex-row mx-auto my-auto'>
         <div className='mx-16 w-full md:w-1/2'>
           <div ref={chessRef} style={{ width: window.innerWidth > 1536 ? '40vw' : '70vw' }}></div>
         </div>
         <div className='ml-4 w-full md:w-1/3 mt-4 md:mt-0'>
-          <div className='rounded-xl text-center p-6 px-16 w-full text-2xl bg-green-700 text-white flex-shrink-0'>
+          <div className='rounded-xl text-center p-8 px-16 w-full text-4xl bg-gray-400 bg-opacity-30 text-white border border-white flex-shrink-0'>
             Current Status: {currentStatus ? currentStatus : "White to move"}
           </div>
-
           <div className='mt-4'>
-            <label className='mr-2 text-white'>Promotion Piece:</label>
-            <select value={promotionPiece} onChange={handlePromotionChange} className='bg-green-700 text-white px-4 py-2 rounded-lg w-full'>
-              <option value="q">Queen</option>
-              <option value="r">Rook</option>
-              <option value="b">Bishop</option>
-              <option value="n">Knight</option>
+            <label className='mr-2 text-white text-xl'>Promotion Piece:</label>
+            <select value={promotionPiece} onChange={handlePromotionChange} className='bg-gray-400 bg-opacity-30 text-white px-4 py-2 rounded-lg w-full text-lg'>
+              <option className="bg-blue-900 bg-opacity-50 bg-transparent text-white" value="q">Queen</option>
+              <option className="bg-blue-900 bg-opacity-50 bg-transparent text-white" value="r">Rook</option>
+              <option className="bg-blue-900 bg-opacity-50 bg-transparent text-white" value="b">Bishop</option>
+              <option className="bg-blue-900 bg-opacity-50 bg-transparent text-white" value="n">Knight</option>
             </select>
           </div>
-          <div className='text-weight-500 mx-2 mt-3 text-center text-xl text-red-500'>If the game goes to start after promotion piece change, just attempt an illegal move,it will get OK so relax</div>
-          <button onClick={toggleTable} className='mt-4 bg-green-700 text-white px-4 py-2 rounded-t-lg w-full'>
+          <div className='mx-2 mt-3 text-center text-2xl text-white bg-black bg-opacity-20 p-4 rounded-lg'>
+            If the game goes to start after promotion piece change, just attempt an illegal move, it will get OK so relax
+          </div>
+          <button onClick={toggleTable} className='mt-4 bg-gray-400 bg-opacity-30 text-white border border-white px-6 py-3 rounded-lg w-full text-xl'>
             {isTableCollapsed ? 'Show Moves' : 'Hide Moves'}
           </button>
           <div style={{ maxHeight: isTableCollapsed ? '0' : '40vh', transition: 'max-height 0.3s ease-in-out', overflow: 'scroll' }}>
             <div style={{ height: '100%', overflowY: 'auto' }}>
-              <table className='w-full border-collapse border border-gray-700 rounded-lg'>
+              <table className='w-full border-collapse border border-gray-700 rounded-lg bg-gray-400 bg-opacity-30 text-white'>
                 <thead>
-                  <tr className='bg-gray-800 text-center text-white'>
-                    <th className='border border-gray-700 px-6 py-3'>Move</th>
-                    <th className='border border-gray-700 px-6 py-3'>From</th>
-                    <th className='border border-gray-700 px-6 py-3'>To</th>
+                  <tr className='bg-gray-800 bg-opacity-30 text-center text-white'>
+                    <th className='border border-white px-6 py-3 text-xl'>Move</th>
+                    <th className='border border-white px-6 py-3 text-xl'>From</th>
+                    <th className='border border-white px-6 py-3 text-xl'>To</th>
                   </tr>
                 </thead>
                 <tbody>
                   {moves.map((move, index) => (
-                    <tr key={index} className={index % 2 === 0 ? 'bg-gray-700 text-white text-center' : 'bg-gray-600 text-gray-200 text-center'}>
-                      <td className='border border-gray-700 px-6 py-4'>{index + 1}</td>
-                      <td className='border border-gray-700 px-6 py-4'>{move.from}</td>
-                      <td className='border border-gray-700 px-6 py-4'>{move.to}</td>
+                    <tr key={index} className={index % 2 === 0 ? 'bg-gray-700 bg-opacity-30 text-white text-center' : 'bg-gray-600 bg-opacity-30 text-gray-200 text-center'}>
+                      <td className='border border-white px-6 py-4 text-xl'>{index + 1}</td>
+                      <td className='border border-white px-6 py-4 text-xl'>{move.from}</td>
+                      <td className='border border-white px-6 py-4 text-xl'>{move.to}</td>
                     </tr>
                   ))}
                 </tbody>
