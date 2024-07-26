@@ -10,9 +10,9 @@ const Puzzles = () => {
   }, []);
 
   const puzzles = [
-    { path: "/puzzle1", label: "Puzzle 1", delay: "delay-100" },
-    { path: "/puzzle2", label: "Puzzle 2", delay: "delay-200" },
-    { path: "/puzzle3", label: "Puzzle 3", delay: "delay-300" },
+    { path: "/puzzle1", label: "The Magician's Puzzle", delay: "delay-100" },
+    { path: "/puzzle2", label: "The Mighty Night", delay: "delay-200" },
+    { path: "/puzzle3", label: "The Enigmatic Puzzle", delay: "delay-300" },
     { path: "/puzzle4", label: "EASY", delay: "delay-100" },
     { path: "/puzzle5", label: "NORMAL", delay: "delay-200" },
     { path: "/puzzle6", label: "HARD", delay: "delay-300" }

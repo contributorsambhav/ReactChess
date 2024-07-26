@@ -12,6 +12,7 @@ import moveSoundFile from '../../assets/sounds/move.mp3';
 import captureSoundFile from '../../assets/sounds/capture.mp3';
 import checkSoundFile from '../../assets/sounds/check.mp3';
 import checkmateSoundFile from '../../assets/sounds/checkmate.mp3';
+import boardbg from '../../assets/images/bgboard.jpeg';
 
 // Initialize sound effects
 const moveSound = new Howl({ src: [moveSoundFile] });
@@ -44,7 +45,7 @@ const GlobalMultiplayer = () => {
   const [playerColor, setPlayerColor] = useState(null);
   const [opponent, setOpponent] = useState(null);
   const [promotionPiece, setPromotionPiece] = useState('q');
-  const [isTableCollapsed, setIsTableCollapsed] = useState(true);
+  const [isTableCollapsed, setIsTableCollapsed] = useState(false);
   const navigate = useNavigate();
 
   const toggleTable = () => {
@@ -235,61 +236,73 @@ const GlobalMultiplayer = () => {
       {!gameCreated ? (
         <WaitQueue />
       ) : (
-        <div className='flex flex-col items-center h-screen'>
-          <div className='w-screen flex mx-auto my-auto'>
-            <div className='mx-16 w-1/2'>
-              {opponent && (
+        <div
+          className="flex  h-screen items-center justify-center w-screen"
+          style={{ backgroundImage: `url(${boardbg})`, backgroundSize: "cover" }}
+        >
+          <div className="w-screen mt-16 flex flex-col md:flex-row mx-auto my-auto">
+            <div className="mx-16 w-full md:w-1/2">
+            {user && (
                 <div className="flex justify-between text-center text-xl mb-4">
+                  <p>You ({user.username})</p>
+                  <p>Rating: {calculateRating(user.wins, user.loses, user.draws)}</p>
+                </div>
+              )}
+
+              <div
+                ref={chessRef}
+                style={{ width: window.innerWidth > 1536 ? "40vw" : "70vw" }}
+              ></div>
+             
+              {opponent && (
+                <div className="flex justify-between text-center text-xl">
                   <p>Opponent: {opponent.username}</p>
                   <p>Rating: {calculateRating(opponent.wins, opponent.loses, opponent.draws)}</p>
                 </div>
               )}
-              <div id='myBoard' ref={chessRef} style={{ width: window.innerWidth > 1536 ? '40vw' : '70vw' }}></div>
-              {user && (
-                <div className="flex justify-between text-center text-xl mb-4">
-                  <p>You  ({user.username})</p>
-                  <p>Rating: {calculateRating(user.wins, user.loses, user.draws)}</p>
-                </div>
-              )}
+              
             </div>
-            <div className='ml-4 w-1/3'>
-              <div className='rounded-xl text-center p-6 px-16 w-full text-2xl bg-green-700 text-white flex-shrink-0'>
-                Current Status: {currentStatus ? currentStatus : 'White to move'}
-              </div>
-              <div className='mt-4'>
-                <label className='mr-2 text-white'>Promotion Piece:</label>
-                <select value={promotionPiece} onChange={handlePromotionChange} className='bg-green-700 text-white px-4 py-2 rounded-lg w-full'>
+            <div className="w-full md:w-1/3">
+            <div className="flex flex-col justify-between text-center text-xl">
+              <label className='mt-2 text-gray-100 '>Promotion piece</label>
+                <select
+                  className="mt-2 text-gray-800 py-2 w-full text-center text-xl bg-gray-200 border border-gray-400 rounded"
+                  value={promotionPiece}
+                  onChange={handlePromotionChange}
+                >
                   <option value="q">Queen</option>
                   <option value="r">Rook</option>
                   <option value="b">Bishop</option>
                   <option value="n">Knight</option>
                 </select>
               </div>
-              <button onClick={toggleTable} className='mt-4 bg-green-700 text-white px-4 py-2 rounded-t-lg w-full'>
+              <div className="text-center text-2xl mb-4 mt-8">{currentStatus?currentStatus :"White to move"}</div>
+              <button
+                onClick={toggleTable}
+                className="mb-4 w-full bg-gray-200 text-black py-2 px-4 rounded shadow-md hover:bg-gray-200"
+              >
                 {isTableCollapsed ? 'Show Moves' : 'Hide Moves'}
               </button>
-              <div style={{ maxHeight: isTableCollapsed ? '0' : '40vh', transition: 'max-height 0.3s ease-in-out', overflow: 'scroll' }}>
-                <div style={{ height: '100%', overflowY: 'auto' }}>
-                  <table className='w-full border-collapse border border-gray-700 rounded-lg'>
-                    <thead>
-                      <tr className='bg-gray-800 text-center text-white'>
-                        <th className='border border-gray-700 px-6 py-3'>Move</th>
-                        <th className='border border-gray-700 px-6 py-3'>From</th>
-                        <th className='border border-gray-700 px-6 py-3'>To</th>
+              {!isTableCollapsed && (
+                <table className="table-auto text-lg font-semibold w-full">
+                  <thead>
+                    <tr>
+                      <th className="px-4 py-2">Move #</th>
+                      <th className="px-4 py-2">From</th>
+                      <th className="px-4 py-2">To</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {moves.map((move, index) => (
+                      <tr key={index}>
+                        <td className="border px-4 py-2">{index + 1}</td>
+                        <td className="border px-4 py-2">{move.from}</td>
+                        <td className="border px-4 py-2">{move.to}</td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {moves.map((move, index) => (
-                        <tr key={index} className={index % 2 === 0 ? 'bg-gray-700 text-white text-center' : 'bg-gray-600 text-gray-200 text-center'}>
-                          <td className='border border-gray-700 px-6 py-4'>{index + 1}</td>
-                          <td className='border border-gray-700 px-6 py-4'>{move.from}</td>
-                          <td className='border border-gray-700 px-6 py-4'>{move.to}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </div>
         </div>

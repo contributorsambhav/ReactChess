@@ -8,6 +8,7 @@ import moveSoundFile from '../../assets/sounds/move.mp3';
 import captureSoundFile from '../../assets/sounds/capture.mp3';
 import checkSoundFile from '../../assets/sounds/check.mp3';
 import checkmateSoundFile from '../../assets/sounds/checkmate.mp3';
+import bg from "../../assets/images/bgprofile.jpg";
 
 const debounce = (func, delay) => {
   let timeoutId;
@@ -49,7 +50,7 @@ const Puzzle5 = () => {
   const [currentStatus, setCurrentStatus] = useState(null);
   const [moves, setMoves] = useState([]);
   const gameRef = useRef(new Chess(puzzleFEN));
-  const [isTableCollapsed, setIsTableCollapsed] = useState(true);
+  const [isTableCollapsed, setIsTableCollapsed] = useState(false);
   const [isVideoCollapsed, setIsVideoCollapsed] = useState(false);
   const [promotionPiece, setPromotionPiece] = useState('q');
 
@@ -224,7 +225,9 @@ const Puzzle5 = () => {
   };
 
   return (
-    <div className='w-full flex flex-col items-center h-screen'>
+    <div className='w-full flex flex-col items-center h-screen'
+    style={{ backgroundImage: `url(${bg})`, backgroundSize: "contain" }}
+    >
       <h1 className='text-3xl font-bold mt-4'>Mate in one move (normal)</h1>
       <div className='w-[80%] p-4 text-lg'>
        

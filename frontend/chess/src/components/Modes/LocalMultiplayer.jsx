@@ -7,7 +7,7 @@ import captureSoundFile from "../../assets/sounds/capture.mp3";
 import checkSoundFile from "../../assets/sounds/check.mp3";
 import checkmateSoundFile from "../../assets/sounds/checkmate.mp3";
 import pieceImages from "../pieceImages";
-import boardbg from "../../assets/images/bgboard.jpg";
+import boardbg from "../../assets/images/bgboard.jpeg";
 
 const moveSound = new Howl({ src: [moveSoundFile] });
 const captureSound = new Howl({ src: [captureSoundFile] });

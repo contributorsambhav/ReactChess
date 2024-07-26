@@ -1,12 +1,13 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Chess } from 'chess.js';
-import Chessboard from 'chessboardjs';
-import { Howl } from 'howler';
-import moveSoundFile from '../../assets/sounds/move.mp3';
-import captureSoundFile from '../../assets/sounds/capture.mp3';
-import checkSoundFile from '../../assets/sounds/check.mp3';
-import checkmateSoundFile from '../../assets/sounds/checkmate.mp3';
+import React, { useEffect, useRef, useState } from "react";
+import { Chess } from "chess.js";
+import Chessboard from "chessboardjs";
+import { Howl } from "howler";
+import moveSoundFile from "../../assets/sounds/move.mp3";
+import captureSoundFile from "../../assets/sounds/capture.mp3";
+import checkSoundFile from "../../assets/sounds/check.mp3";
+import checkmateSoundFile from "../../assets/sounds/checkmate.mp3";
 import pieceImages from "../pieceImages";
+import bg from "../../assets/images/bgprofile.jpg";
 
 // Initialize sound effects
 const moveSound = new Howl({ src: [moveSoundFile] });
@@ -31,8 +32,10 @@ const ChessboardComponent = () => {
       }
 
       // Only pick up pieces for the side to move
-      if ((game.turn() === 'w' && piece.search(/^b/) !== -1) ||
-        (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
+      if (
+        (game.turn() === "w" && piece.search(/^b/) !== -1) ||
+        (game.turn() === "b" && piece.search(/^w/) !== -1)
+      ) {
         return false;
       }
     };
@@ -43,7 +46,7 @@ const ChessboardComponent = () => {
       let possibleMoves = game.moves();
 
       // Filter out non-legal moves for black
-      possibleMoves = possibleMoves.filter(move => move.includes('b'));
+      possibleMoves = possibleMoves.filter((move) => move.includes("b"));
 
       // Randomly select a move
       const randomIdx = Math.floor(Math.random() * possibleMoves.length);
@@ -59,7 +62,10 @@ const ChessboardComponent = () => {
         }
 
         // Update moves state with the latest move
-        setMoves(prevMoves => [...prevMoves, { from: move.from, to: move.to }]);
+        setMoves((prevMoves) => [
+          ...prevMoves,
+          { from: move.from, to: move.to },
+        ]);
       } catch (error) {
         setCurrentStatus("Black says: Help me move please, I'm overwhelmed");
       }
@@ -72,7 +78,7 @@ const ChessboardComponent = () => {
         let move = game.move({
           from: source,
           to: target,
-          promotion: 'q' // Automatically promote to a queen for simplicity
+          promotion: "q", // Automatically promote to a queen for simplicity
         });
 
         // Log the move result
@@ -89,7 +95,10 @@ const ChessboardComponent = () => {
         }
 
         // Update moves state with the latest move
-        setMoves(prevMoves => [...prevMoves, { from: move.from, to: move.to }]);
+        setMoves((prevMoves) => [
+          ...prevMoves,
+          { from: move.from, to: move.to },
+        ]);
       } catch (error) {
         console.log(error);
         return "snapback";
@@ -98,7 +107,7 @@ const ChessboardComponent = () => {
       updateStatus(); // Update the game status
 
       // After white's move, make random move for black
-      if (game.turn() === 'b') {
+      if (game.turn() === "b") {
         setTimeout(() => {
           makeRandomMove();
         }, 250); // Delay to ensure that the sound plays before the computer's move
@@ -109,7 +118,7 @@ const ChessboardComponent = () => {
       // Get list of possible moves for this square
       const moves = game.moves({
         square: square,
-        verbose: true
+        verbose: true,
       });
 
       // Exit if there are no moves available for this square
@@ -133,22 +142,22 @@ const ChessboardComponent = () => {
     };
 
     const updateStatus = () => {
-      let status = '';
-      let moveColor = 'White';
+      let status = "";
+      let moveColor = "White";
 
-      if (game.turn() === 'b') {
-        moveColor = 'Black';
+      if (game.turn() === "b") {
+        moveColor = "Black";
       }
 
       // Checkmate?
       if (game.isCheckmate()) {
-        status = 'Game over, ' + moveColor + ' is in checkmate.';
+        status = "Game over, " + moveColor + " is in checkmate.";
         checkmateSound.play();
       } else if (game.inCheck()) {
-        status = moveColor + ' to move, ' + moveColor + ' is in check';
+        status = moveColor + " to move, " + moveColor + " is in check";
         checkSound.play();
       } else {
-        status = moveColor + ' to move';
+        status = moveColor + " to move";
       }
 
       // Update the status
@@ -156,21 +165,21 @@ const ChessboardComponent = () => {
     };
 
     const removeGreySquares = () => {
-      const squares = document.querySelectorAll('.square-55d63');
-      squares.forEach(square => square.style.background = '');
+      const squares = document.querySelectorAll(".square-55d63");
+      squares.forEach((square) => (square.style.background = ""));
     };
 
     const greySquare = (square) => {
       const squareEl = document.querySelector(`.square-${square}`);
       if (squareEl) {
-        const isBlack = squareEl.classList.contains('black-3c85d');
-        squareEl.style.background = isBlack ? '#696969' : '#a9a9a9';
+        const isBlack = squareEl.classList.contains("black-3c85d");
+        squareEl.style.background = isBlack ? "#696969" : "#a9a9a9";
       }
     };
 
     const config = {
       draggable: true,
-      position: 'start',
+      position: "start",
       onDragStart: onDragStart,
       onDrop: onDrop,
       onMouseoverSquare: onMouseoverSquare,
@@ -178,7 +187,7 @@ const ChessboardComponent = () => {
       onSnapEnd: onSnapEnd,
       pieceTheme: (piece) => pieceImages[piece],
       snapbackSpeed: 500,
-      snapSpeed: 100
+      snapSpeed: 100,
     };
 
     // Initialize Chessboard.js
@@ -193,32 +202,53 @@ const ChessboardComponent = () => {
   }, []);
 
   return (
-    <div className='flex flex-col items-center h-screen'>
-      <div className='w-screen flex mx-auto my-auto'>
-        <div className='mx-16 w-1/2'>
-          <div ref={chessRef} style={{ width: window.innerWidth > 1536 ? '40vw' : '70vw' }}></div>
+    <div
+      className="flex flex-col items-center h-screen"
+      style={{ backgroundImage: `url(${bg})`, backgroundSize: "contain" }}
+    >
+      <div className="w-screen flex mx-auto my-auto">
+        <div className="mx-16 w-1/2">
+          <div
+            ref={chessRef}
+            style={{ width: window.innerWidth > 1536 ? "40vw" : "70vw" }}
+          ></div>
         </div>
-        <div className='ml-4 w-1/3'>
-          <div className='rounded-xl text-center p-6 px-16 w-full text-2xl bg-green-700 text-white flex-shrink-0'>
+        <div className="ml-4 w-1/3">
+          <div className="rounded-xl text-center p-6 px-16 w-full text-2xl bg-green-700 text-white flex-shrink-0">
             Current Status: {currentStatus ? currentStatus : "White to move"}
           </div>
-          <div className='mt-4'>
-            <p className='text-weight-500 mx-2 mx-3 text-center text-xl text-green-500'>Always promotes to queen.</p>
+          <div className="mt-4">
+            <p className="text-weight-500 mx-2 mx-3 text-center text-xl text-green-500">
+              Always promotes to queen.
+            </p>
 
-            <table className='w-full border-collapse border border-gray-700 rounded-lg overflow-hidden'>
+            <table className="w-full border-collapse border border-gray-700 rounded-lg overflow-hidden">
               <thead>
-                <tr className='bg-gray-800 text-center text-white'>
-                  <th className='border border-gray-700 px-6 py-3'>Move</th>
-                  <th className='border border-gray-700 px-6 py-3'>From</th>
-                  <th className='border border-gray-700 px-6 py-3'>To</th>
+                <tr className="bg-gray-800 text-center text-white">
+                  <th className="border border-gray-700 px-6 py-3">Move</th>
+                  <th className="border border-gray-700 px-6 py-3">From</th>
+                  <th className="border border-gray-700 px-6 py-3">To</th>
                 </tr>
               </thead>
               <tbody>
                 {moves.map((move, index) => (
-                  <tr key={index} className={index % 2 === 0 ? 'bg-gray-700 text-white text-center' : 'bg-gray-600 text-gray-200 text-center'}>
-                    <td className='border border-gray-700 px-6 py-4'>{index + 1}</td>
-                    <td className='border border-gray-700 px-6 py-4'>{move.from}</td>
-                    <td className='border border-gray-700 px-6 py-4'>{move.to}</td>
+                  <tr
+                    key={index}
+                    className={
+                      index % 2 === 0
+                        ? "bg-gray-700 text-white text-center"
+                        : "bg-gray-600 text-gray-200 text-center"
+                    }
+                  >
+                    <td className="border border-gray-700 px-6 py-4">
+                      {index + 1}
+                    </td>
+                    <td className="border border-gray-700 px-6 py-4">
+                      {move.from}
+                    </td>
+                    <td className="border border-gray-700 px-6 py-4">
+                      {move.to}
+                    </td>
                   </tr>
                 ))}
               </tbody>

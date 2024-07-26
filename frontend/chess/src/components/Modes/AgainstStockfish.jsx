@@ -8,6 +8,8 @@ import moveSoundFile from '../../assets/sounds/move.mp3';
 import captureSoundFile from '../../assets/sounds/capture.mp3';
 import checkSoundFile from '../../assets/sounds/check.mp3';
 import checkmateSoundFile from '../../assets/sounds/checkmate.mp3';
+import bg from "../../assets/images/bgprofile.jpg";
+
 
 const moveSound = new Howl({ src: [moveSoundFile] });
 const captureSound = new Howl({ src: [captureSoundFile] });
@@ -211,7 +213,9 @@ const AgainstStockfish = () => {
   };
 
   return (
-    <div className='w-full flex flex-col items-center h-screen'>
+    <div className='w-full flex flex-col items-center h-screen'
+    style={{ backgroundImage: `url(${bg})`, backgroundSize: "contain" }}
+    >
       <div className='w-screen flex flex-col md:flex-row mx-auto my-auto'>
         <div className='mx-16 w-full md:w-1/2'>
           <div ref={chessRef} style={{ width: window.innerWidth > 1536 ? '40vw' : '70vw' }}></div>
