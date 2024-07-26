@@ -6,8 +6,12 @@ const register = async (req, res) => {
   console.log(req.body);
   const { username, password, email } = req.body;
 
+  // Convert to lowercase
+  const lowerCaseUsername = username.toLowerCase();
+  const lowerCaseEmail = email.toLowerCase();
+
   try {
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: lowerCaseEmail });
     if (existingUser) {
       return res.status(400).json({ error: 'Email already in use' });
     }
@@ -15,9 +19,9 @@ const register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = new User({
-      username,
+      username: lowerCaseUsername,
       password: hashedPassword,
-      email
+      email: lowerCaseEmail
     });
 
     await newUser.save();
@@ -31,8 +35,11 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   const { email, password } = req.body;
 
+  // Convert to lowercase
+  const lowerCaseEmail = email.toLowerCase();
+
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: lowerCaseEmail });
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -58,7 +65,7 @@ const login = async (req, res) => {
     res.cookie('token', token, {
       httpOnly: true,
       maxAge: 3600000,
-      secure : false
+      secure: false
     });
 
     res.status(200).json({

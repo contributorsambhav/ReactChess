@@ -68,13 +68,13 @@ function Profile() {
                 key={match._id}
                 className="hover:bg-gray-600 transition-colors duration-300"
               >
-                <td className="px-6 py-4 text-xl text-gray-100">
+                <td className="px-6  py-4 text-xl text-gray-100">
                   {index + 1}
                 </td>
-                <td className="px-6 py-4 text-xl text-gray-100">
+                <td className="px-6 capitalize py-4 text-xl text-gray-100">
                   {match.opponent}
                 </td>
-                <td className="px-6 py-4 text-xl text-gray-100">
+                <td className="px-6 capitalize py-4 text-xl text-gray-100">
                   {match.status}
                 </td>
                 <td className="px-6 py-4 text-xl text-gray-100">
@@ -124,7 +124,7 @@ function Profile() {
                             <td className="font-semibold text-2xl capitalize py-2">
                               {key}:
                             </td>
-                            <td className="text-2xl py-2">{value}</td>
+                            <td className="capitalize text-2xl py-2">{value}</td>
                           </tr>
                         );
                       }
