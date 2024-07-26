@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import bg from "../../assets/images/bgpuzzle.jpg";
+import bg from "../../assets/images/bgpuzzle.jpeg";
 
 const Puzzles = () => {
   const [animate, setAnimate] = useState(false);
@@ -13,9 +13,9 @@ const Puzzles = () => {
     { path: "/puzzle1", label: "Puzzle 1", delay: "delay-100" },
     { path: "/puzzle2", label: "Puzzle 2", delay: "delay-200" },
     { path: "/puzzle3", label: "Puzzle 3", delay: "delay-300" },
-    { path: "/puzzle4", label: "EASY", delay: "delay-400" },
-    { path: "/puzzle5", label: "NORMAL", delay: "delay-500" },
-    { path: "/puzzle6", label: "HARD", delay: "delay-600" }
+    { path: "/puzzle4", label: "EASY", delay: "delay-100" },
+    { path: "/puzzle5", label: "NORMAL", delay: "delay-200" },
+    { path: "/puzzle6", label: "HARD", delay: "delay-300" }
   ];
 
   return (
@@ -24,7 +24,7 @@ const Puzzles = () => {
         className="w-full h-screen bg-cover bg-center relative overflow-hidden"
         style={{
           backgroundImage: `url(${bg})`,
-          backgroundSize: "100% auto",
+          backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
         }}
@@ -40,8 +40,8 @@ const Puzzles = () => {
             </h3>
             {puzzles.slice(0, 3).map(({ path, label, delay }) => (
               <div key={path} className={`w-full game-mode ${animate ? `animate-slide-in ${delay}` : ''}`}>
-                <div className="bg-gray-800 bg-opacity-40 backdrop-filter backdrop-blur-xl border border-gray-500 p-4 rounded-xl shadow-lg w-full">
-                  <Link to={path} className="text-gray-100 text-2xl text-center block hover:text-white">
+                <div className="transition duration-300 border border-white hover:bg-gray300  transform transition duration-300 hover:scale-105  bg-gray-800 bg-opacity-40 backdrop-filter backdrop-blur-xl border border-gray-500 p-4 rounded-xl shadow-lg w-full">
+                  <Link to={path} className="text-gray-100 text-2xl text-center block hover:text-green-200">
                     {label}
                   </Link>
                 </div>
@@ -52,8 +52,8 @@ const Puzzles = () => {
             </h3>
             {puzzles.slice(3).map(({ path, label, delay }) => (
               <div key={path} className={`w-full game-mode ${animate ? `animate-slide-in ${delay}` : ''}`}>
-                <div className="bg-gray-800 bg-opacity-40 backdrop-filter backdrop-blur-xl border border-gray-500 p-4 rounded-xl shadow-lg w-full">
-                  <Link to={path} className="text-gray-100 text-2xl text-center block hover:text-white">
+                <div className="transition duration-300 border border-white hover:bg-gray300  transform transition duration-300 hover:scale-105 bg-gray-800 bg-opacity-40 backdrop-filter backdrop-blur-xl border border-gray-500 p-4 rounded-xl shadow-lg w-full">
+                  <Link to={path} className="text-gray-100 text-2xl text-center block hover:text-green-200">
                     {label}
                   </Link>
                 </div>

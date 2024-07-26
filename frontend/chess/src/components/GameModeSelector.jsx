@@ -25,8 +25,8 @@ function GameModeSelector() {
         <div className='flex flex-col items-center justify-center h-full w-full'>
           {gameModes.map(({ path, label, delay }) => (
             <div key={path} className={` w-1/3 game-mode ${animate ? `animate-slide-in ${delay}` : ''}`}>
-              <div className="bg-gray-800 bg-opacity-40 backdrop-filter backdrop-blur-xl border border-gray-500 p-2 md:p-4 lg:p-5 my-4 rounded-xl shadow-lg w-full w-[40vw] mx-auto">
-                <Link to={path} className="text-gray-100 text-xl md:text-2xl lg:text-3xl text-border-black text-center block">{label}</Link>
+              <div className="bg-gray-800 transition duration-300 border border-white hover:bg-gray300  transform transition duration-300 hover:scale-105 bg-opacity-40 backdrop-filter backdrop-blur-xl border border-gray-500 p-2 md:p-4 lg:p-5 my-4 rounded-xl shadow-lg w-full w-[40vw] mx-auto ">
+                <Link to={path} className="text-gray-100 text-xl md:text-2xl lg:text-3xl text-border-black text-center block hover:text-green-200">{label}</Link>
               </div>
             </div>
           ))}

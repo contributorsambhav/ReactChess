@@ -8,7 +8,6 @@ import svg from "../assets/images/base.png";
 import bg from "../assets/images/bgprofile.jpg";
 
 function Profile() {
-  const authStatus = useSelector((state) => state.auth.status);
   const userData = useSelector((state) => state.auth.userData);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -30,12 +29,12 @@ function Profile() {
 
   const renderMatchHistory = (matchHistory) => {
     return (
-      <div className="h-full bg-gray-800 bg-opacity-90 p-4 rounded-lg shadow-md">
+      <div className="h-full bg-gray-800 bg-opacity-50 p-4 rounded-lg shadow-md">
         <h2 className="text-3xl font-semibold text-center text-white mb-2">
           Match History
         </h2>
-        <table className="min-w-full bg-gray-800 text-gray-100">
-          <thead className="bg-gray-700">
+        <table className="min-w-full bg-gray-200 bg-opacity-20 text-gray-100 rounded-lg">
+          <thead className="bg-gray-700 bg-opacity-70">
             <tr>
               <th
                 scope="col"
