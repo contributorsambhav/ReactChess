@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import wN from './pieces/wN.png';
 import { login } from '../store/authSlice';
@@ -9,6 +9,7 @@ function Navbar() {
     const dispatch = useDispatch();
     const authStatus = useSelector(state => state.auth.status);
     const userData = useSelector(state => state.auth.userData);
+    const location = useLocation();
 
     React.useEffect(() => {
         axios.get("http://localhost:8123/profile", {
@@ -22,7 +23,11 @@ function Navbar() {
             .catch(error => {
                 console.error('Error fetching profile:', error);
             });
-    }, [dispatch]);    
+    }, [dispatch]);
+
+    // Override authStatus to false if the route is /login or /signup
+    const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
+    const effectiveAuthStatus = isAuthPage ? 'false' : authStatus;
 
     return (
         <nav className="w-full absolute top-0 z-10 bg-purple-900 bg-opacity-40 p-2">
@@ -41,7 +46,7 @@ function Navbar() {
                             Home
                         </Link>
                     </li>
-                    {authStatus ==="true" ? (
+                    {effectiveAuthStatus === "true" ? (
                         <>
                             <li>
                                 <Link
