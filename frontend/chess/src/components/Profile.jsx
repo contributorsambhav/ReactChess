@@ -30,7 +30,7 @@ function Profile() {
   const renderMatchHistory = (matchHistory) => {
     return (
       <div className="h-full bg-gray-800 bg-opacity-50 p-4 rounded-lg shadow-md">
-        <h2 className="text-3xl font-semibold text-center text-white mb-2">
+        <h2 className="text-2xl lg:text-3xl font-semibold text-center text-white mb-2">
           Match History
         </h2>
         <table className="min-w-full bg-gray-200 bg-opacity-20 text-gray-100 rounded-lg">
@@ -38,25 +38,25 @@ function Profile() {
             <tr>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xl font-semibold text-white"
+                className="px-4 lg:px-6 py-2 lg:py-3 text-left text-lg lg:text-xl font-semibold text-white"
               >
                 SR.NO
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xl font-semibold text-white"
+                className="px-4 lg:px-6 py-2 lg:py-3 text-left text-lg lg:text-xl font-semibold text-white"
               >
                 OPPONENT
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xl font-semibold text-white"
+                className="px-4 lg:px-6 py-2 lg:py-3 text-left text-lg lg:text-xl font-semibold text-white"
               >
                 RESULT
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xl font-semibold text-white"
+                className="px-4 lg:px-6 py-2 lg:py-3 text-left text-lg lg:text-xl font-semibold text-white"
               >
                 DATE
               </th>
@@ -68,16 +68,16 @@ function Profile() {
                 key={match._id}
                 className="hover:bg-gray-600 transition-colors duration-300"
               >
-                <td className="px-6  py-4 text-xl text-gray-100">
+                <td className="px-4 lg:px-6 py-2 lg:py-4 text-lg lg:text-xl text-gray-100">
                   {index + 1}
                 </td>
-                <td className="px-6 capitalize py-4 text-xl text-gray-100">
+                <td className="px-4 lg:px-6 py-2 lg:py-4 capitalize text-lg lg:text-xl text-gray-100">
                   {match.opponent}
                 </td>
-                <td className="px-6 capitalize py-4 text-xl text-gray-100">
+                <td className="px-4 lg:px-6 py-2 lg:py-4 capitalize text-lg lg:text-xl text-gray-100">
                   {match.status}
                 </td>
-                <td className="px-6 py-4 text-xl text-gray-100">
+                <td className="px-4 lg:px-6 py-2 lg:py-4 text-lg lg:text-xl text-gray-100">
                   {new Date(match.createdAt).toLocaleDateString()}
                 </td>
               </tr>
@@ -97,15 +97,15 @@ function Profile() {
   return (
     <div
       className="w-screen h-screen flex items-center justify-center bg-gray-900"
-      style={{ backgroundImage: `url(${bg})`, backgroundSize: "contain" }}
+      style={{ backgroundImage: `url(${bg})`, backgroundSize: "cover" }}
     >
-      <div className="w-3/4 h-3/4 flex space-x-4">
-        <div className="w-1/2 max-h-[70vh] p-4 bg-gray-700 bg-opacity-50 rounded-lg shadow-md flex flex-col justify-between">
-          <div className="flex w-full overflow-y-scroll flex-col items-center justify-center flex-grow">
-            <h1 className="text-3xl font-semibold text-center text-white mb-4">
+      <div className="w-11/12 lg:w-3/4 h-5/6 flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-4">
+        <div className="lg:w-1/2 bg-gray-700 bg-opacity-50 rounded-lg shadow-md flex flex-col justify-between p-4">
+          <div className="flex flex-col items-center lg:items-start flex-grow overflow-y-auto">
+            <h1 className="text-2xl lg:text-3xl font-semibold text-center lg:text-left text-white mb-4">
               User Profile
             </h1>
-            <div className="text-gray-100 text-xl mb-4 w-full">
+            <div className="text-gray-100 text-lg lg:text-xl mb-4 w-full">
               <table className="min-w-full text-left">
                 <tbody>
                   {userData &&
@@ -121,10 +121,12 @@ function Profile() {
                             key={key}
                             className="hover:text-gray-400 transition-colors duration-300"
                           >
-                            <td className="font-semibold text-2xl capitalize py-2">
+                            <td className="font-semibold text-xl lg:text-2xl capitalize py-2">
                               {key}:
                             </td>
-                            <td className="capitalize text-2xl py-2">{value}</td>
+                            <td className="capitalize text-xl lg:text-2xl py-2">
+                              {value}
+                            </td>
                           </tr>
                         );
                       }
@@ -134,18 +136,18 @@ function Profile() {
               </table>
             </div>
             <div
-              className="w-full h-64 bg-cover bg-center relative overflow-hidden"
+              className="w-full h-48 lg:h-64 bg-cover bg-center relative overflow-hidden"
               style={{ backgroundImage: `url(${svg})` }}
             ></div>
           </div>
           <button
             onClick={handleLogout}
-            className="bg-white text-gray-900 text-2xl my-4 py-3 font-bold py-2 px-4 rounded hover:bg-red-500 hover:text-white transition-colors duration-300"
+            className="bg-white text-gray-900 text-lg lg:text-2xl my-4 py-2 lg:py-3 font-bold rounded hover:bg-red-500 hover:text-white transition-colors duration-300"
           >
             Logout
           </button>
         </div>
-        <div className="w-1/2 max-h-[70vh] overflow-y-scroll">
+        <div className="lg:w-1/2 bg-gray-700 bg-opacity-50 rounded-lg shadow-md p-4 overflow-y-auto">
           {userData && userData.matchHistory && renderMatchHistory(userData.matchHistory)}
         </div>
       </div>
