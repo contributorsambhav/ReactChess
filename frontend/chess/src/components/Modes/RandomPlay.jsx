@@ -203,14 +203,14 @@ const ChessboardComponent = () => {
 
   return (
     <div
-      className="flex flex-col items-center h-screen"
+      className="flex flex-col items-center min-h-screen"
       style={{ backgroundImage: `url(${bg})`, backgroundSize: "contain" }}
     >
       <div className="w-screen flex mx-auto my-auto">
         <div className="mx-16 w-1/2">
           <div
             ref={chessRef}
-            style={{ width: window.innerWidth > 1536 ? "40vw" : "70vw" }}
+            style={{ width: window.innerWidth > 1028 ? "40vw" : "70vw" }}
           ></div>
         </div>
         <div className="ml-4 w-1/3">

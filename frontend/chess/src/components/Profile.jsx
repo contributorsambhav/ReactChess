@@ -99,7 +99,7 @@ function Profile() {
       className="w-screen h-screen flex items-center justify-center bg-gray-900"
       style={{ backgroundImage: `url(${bg})`, backgroundSize: "cover" }}
     >
-      <div className="w-11/12 lg:w-3/4 h-5/6 flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-4">
+      <div className="w-11/12 lg:w-5/6 h-5/6 flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-4">
         <div className="lg:w-1/2 bg-gray-700 bg-opacity-50 rounded-lg shadow-md flex flex-col justify-between p-4">
           <div className="flex flex-col items-center lg:items-start flex-grow overflow-y-auto">
             <h1 className="text-2xl lg:text-3xl font-semibold text-center lg:text-left text-white mb-4">

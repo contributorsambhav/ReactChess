@@ -64,10 +64,10 @@ function SignUp() {
 
     return (
         <div
-            className="w-screen h-screen bg-cover bg-no-repeat bg-center flex items-center justify-center"
+            className="w-screen min-h-screen bg-cover bg-no-repeat bg-center flex items-center justify-center"
             style={{ backgroundImage: `url(${bgImage})` }}
         >
-            <div className="bg-white bg-opacity-10 backdrop-filter backdrop-blur-xl border border-gray-200 p-8 md:p-12 lg:p-16 rounded-xl shadow-lg w-11/12 max-w-md lg:max-w-lg xl:max-w-xl">
+            <div className="bg-white bg-opacity-10 backdrop-filter backdrop-blur-xl border border-gray-200 p-8 lg:p-12 lg:p-16 rounded-xl shadow-lg w-11/12 max-w-md lg:max-w-lg xl:max-w-xl">
                 <h2 className="text-4xl font-bold text-white text-center mb-8">Sign Up</h2>
                 <form className="space-y-2" onSubmit={postData}>
                     <div>

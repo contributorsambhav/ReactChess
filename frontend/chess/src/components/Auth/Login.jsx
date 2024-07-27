@@ -62,12 +62,12 @@ function Login() {
 
     return (
         <div
-            className="w-screen h-screen bg-cover bg-no-repeat bg-center flex items-center justify-center"
+            className="w-screen min-h-screen bg-cover bg-no-repeat bg-center flex items-center justify-center"
             style={{ backgroundImage: `url(${bgImage})` }}
         >
-            <div className="bg-white bg-opacity-10 backdrop-filter backdrop-blur-xl border border-gray-200 p-8 md:p-12 lg:p-16 rounded-xl shadow-lg w-11/12 max-w-md lg:max-w-lg xl:max-w-xl">
+            <div className="bg-white bg-opacity-10 backdrop-filter backdrop-blur-xl border border-gray-200 p-8 lg:p-12 lg:p-16 rounded-xl shadow-lg w-11/12 max-w-md lg:max-w-lg xl:max-w-xl">
                 <PieceArray />
-                <h2 className="md:text-4xl lg:text-5xl sm:text-3xl font-semibold text-center text-white mb-12">Login</h2>
+                <h2 className="lg:text-4xl lg:text-5xl sm:text-3xl font-semibold text-center text-white mb-12">Login</h2>
                 <form className="space-y-6" onSubmit={handleLogin}>
                     <div>
                         <label htmlFor="email" className="block text-lg my-2 font-medium text-white">Email</label>

@@ -30,7 +30,7 @@ const Puzzles = () => {
         }}
       >
         <div className="flex flex-col items-center justify-center h-full w-full">
-          <h1 className="text-5xl font-bold mb-10 text-center text-white  animate-fade-in"
+          <h1 className="text-5xl font-bold mb-10  lg:mt-2 mt:16 text-center text-white z-10 animate-fade-in"
           >
             Select a Puzzle
           </h1>

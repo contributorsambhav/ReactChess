@@ -260,14 +260,14 @@ const GlobalMultiplayer = () => {
         <WaitQueue />
       ) : (
         <div
-          className="flex  h-screen items-center justify-center w-screen"
+          className="flex  min-h-screen items-center justify-center w-screen"
           style={{
             backgroundImage: `url(${boardbg})`,
             backgroundSize: "cover",
           }}
         >
-          <div className="w-screen mt-16 flex flex-col md:flex-row mx-auto my-auto">
-            <div className="lg:mx-16 w-full md:w-1/2">
+          <div className="w-screen mt-16 flex flex-col lg:flex-row mx-auto my-auto">
+            <div className="lg:mx-16 w-full lg:w-1/2">
               {opponent && (
                 <div className="flex justify-between text-center mr-8 text-xl">
                   <p>Opponent: {opponent.username}</p>
@@ -283,7 +283,7 @@ const GlobalMultiplayer = () => {
               )}
               <div
                 ref={chessRef}
-                style={{ width: window.innerWidth > 1536 ? "40vw" : "100vw" }}
+                style={{ width: window.innerWidth > 1028 ? "40vw" : "100vw" }}
               ></div>
 
               {user && (
@@ -295,7 +295,7 @@ const GlobalMultiplayer = () => {
                 </div>
               )}
             </div>
-            <div className="w-11/12 mx-auto md:w-1/3">
+            <div className="w-11/12 mx-auto lg:w-1/3">
               <div className="flex flex-col justify-between text-center text-xl">
                 <label className="mt-2 text-gray-100 ">Promotion piece</label>
                 <select

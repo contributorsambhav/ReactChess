@@ -225,11 +225,11 @@ const Puzzle2 = () => {
   };
 
   return (
-    <div className='w-full flex flex-col items-center h-screen'
-    style={{ backgroundImage: `url(${bg})`, backgroundSize: "contain" }}
+    <div className='w-full flex flex-col items-center min-min-h-screen '
+    style={{ backgroundImage: `url(${bg})`, backgroundSize: "contain" ,backgroundRepeat: "repeat-y"}}
     >
-      <h1 className='text-3xl font-bold mt-4'>The Mighty Knight</h1>
-      <div className='w-[80%] p-4 text-lg'>
+      <h1 className='text-3xl lg:mt-4 font-bold mt-16 z-10'>The Mighty Knight</h1>
+      <div className=' p-4 text-lg'>
         <p>
           This puzzle was composed by Ottó Bláthy in 1922. This involves a lot of chess thinking in
           terms of strategy, tactics, moves & ideas. White has just one pawn and a king whereas,
@@ -242,11 +242,11 @@ const Puzzle2 = () => {
         <p className='text-weight-500 mx-2 mt-3 text-center text-xl text-red-500'>If board position changes to original after promotion, just attempt an illegal move</p>
 
       </div>
-      <div className='w-screen flex flex-col md:flex-row mx-auto my-auto'>
-        <div className='mx-16 w-full md:w-1/2'>
-          <div ref={chessRef} style={{ width: window.innerWidth > 1536 ? '40vw' : '70vw' }}></div>
+      <div className='w-screen flex lg:flex-row flex-col lg:flex-row mx-auto my-auto'>
+        <div className='lg:mx-16 w-full lg:w-1/2'>
+          <div ref={chessRef} style={{ width: window.innerWidth > 1028 ? '40vw' : '100vw' }}></div>
         </div>
-        <div className='ml-4 w-full md:w-1/3 mt-4 md:mt-0'>
+        <div className='lg:ml-4 w-full lg:w-1/3 mt-4 lg:mt-0'>
           <div className='rounded-xl text-center p-6 px-16 w-full text-2xl bg-green-700 text-white flex-shrink-0'>
             Current Status: {currentStatus ? currentStatus : "White to move"}
           </div>

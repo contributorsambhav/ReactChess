@@ -165,27 +165,27 @@ const LocalMultiplayer = () => {
 
   return (
     <div
-      className="flex h-screen items-center justify-center w-screen"
+      className="flex min-h-screen items-center justify-center w-screen"
       style={{ backgroundImage: `url(${boardbg})`, backgroundSize: "cover" }}
     >
-      <div className="w-screen flex flex-col md:flex-row md:flex-row mx-auto my-auto">
-        <div className="lg:mx-16 w-full mx-auto  md:w-1/2">
+      <div className="w-screen flex flex-col lg:flex-row lg:flex-row mx-auto my-auto">
+        <div className="lg:mx-16 w-full mx-auto  lg:w-1/2">
           <div
             ref={chessRef}
-            style={{ width: window.innerWidth > 1536 ? "40vw" : "100vw" }}
+            style={{ width: window.innerWidth > 1028 ? "40vw" : "100vw" }}
           ></div>
         </div>
-        <div className="lg:mx-4  w-fit mx-2 md:w-1/3 mt-4 md:mt-0">
-          <div className="rounded-xl shadow-lg text-center p-8 px-16 lg:w-full text-xl md:text-2xl lg:text-3xl xl:text-4xl bg-gray-400 bg-opacity-30 text-white border border-gray-200 flex-shrink-0">
+        <div className="lg:mx-4  w-fit mx-2 lg:w-1/3 mt-4 lg:mt-0">
+          <div className="rounded-xl shadow-lg text-center p-8 px-16 lg:w-full text-xl lg:text-2xl lg:text-3xl xl:text-4xl bg-gray-400 bg-opacity-30 text-white border border-gray-200 flex-shrink-0">
             Current Status: {currentStatus ? currentStatus : "White to move"}
           </div>
 
           <div className="mt-4 ">
-            <label className="mr-2 text-white text-lg md:text-xl">Promotion Piece:</label>
+            <label className="mr-2 text-white text-lg lg:text-xl">Promotion Piece:</label>
             <select
               value={promotionPiece}
               onChange={handlePromotionChange}
-              className="bg-gray-400 bg-opacity-30 text-white px-4 py-2 rounded-lg w-full text-base md:text-lg"
+              className="bg-gray-400 bg-opacity-30 text-white px-4 py-2 rounded-lg w-full text-base lg:text-lg"
             >
               <option
                 className="bg-blue-900 bg-opacity-50 bg-transparent text-white"
@@ -213,13 +213,13 @@ const LocalMultiplayer = () => {
               </option>
             </select>
           </div>
-          <div className="mx-2 mt-3 text-center border border-gray-800 text-lg md:text-xl text-white bg-black bg-opacity-20 p-4 rounded-lg">
+          <div className="mx-2 mt-3 text-center border border-gray-800 text-lg lg:text-xl text-white bg-black bg-opacity-20 p-4 rounded-lg">
             If the game goes to start after promotion piece change, just attempt
             an illegal move, it will get OK so relax
           </div>
           <button
             onClick={toggleTable}
-            className="mt-4 bg-gray-400 bg-opacity-30 text-white border border-gray-200 px-6 py-3 rounded-lg w-full text-lg md:text-xl"
+            className="mt-4 bg-gray-400 bg-opacity-30 text-white border border-gray-200 px-6 py-3 rounded-lg w-full text-lg lg:text-xl"
           >
             {isTableCollapsed ? "Show Moves" : "Hide Moves"}
           </button>
@@ -234,13 +234,13 @@ const LocalMultiplayer = () => {
               <table className="w-full border-collapse border border-gray-700 rounded-lg bg-gray-400 bg-opacity-30 text-white">
                 <thead>
                   <tr className="bg-gray-800 bg-opacity-30 text-center text-white">
-                    <th className="border border-gray-400 px-6 py-3 text-lg md:text-xl">
+                    <th className="border border-gray-400 px-6 py-3 text-lg lg:text-xl">
                       Move
                     </th>
-                    <th className="border border-gray-400 px-6 py-3 text-lg md:text-xl">
+                    <th className="border border-gray-400 px-6 py-3 text-lg lg:text-xl">
                       From
                     </th>
-                    <th className="border border-gray-400 px-6 py-3 text-lg md:text-xl">
+                    <th className="border border-gray-400 px-6 py-3 text-lg lg:text-xl">
                       To
                     </th>
                   </tr>
@@ -255,13 +255,13 @@ const LocalMultiplayer = () => {
                           : "bg-gray-600 bg-opacity-30 text-gray-200 text-center"
                       }
                     >
-                      <td className="border border-gray-400 px-6 py-4 text-lg md:text-xl">
+                      <td className="border border-gray-400 px-6 py-4 text-lg lg:text-xl">
                         {index + 1}
                       </td>
-                      <td className="border border-gray-400 px-6 py-4 text-lg md:text-xl">
+                      <td className="border border-gray-400 px-6 py-4 text-lg lg:text-xl">
                         {move.from}
                       </td>
-                      <td className="border border-gray-400 px-6 py-4 text-lg md:text-xl">
+                      <td className="border border-gray-400 px-6 py-4 text-lg lg:text-xl">
                         {move.to}
                       </td>
                     </tr>

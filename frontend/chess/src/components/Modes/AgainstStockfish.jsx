@@ -213,14 +213,14 @@ const AgainstStockfish = () => {
   };
 
   return (
-    <div className='w-full flex md:flex-row flex-col items-center h-screen'
+    <div className='w-full flex lg:flex-row flex-col items-center min-h-screen'
     style={{ backgroundImage: `url(${bg})`, backgroundSize: "contain" }}
     >
-      <div className='w-screen flex flex-col md:flex-row mx-auto my-auto'>
-        <div className='lg:mx-16 w-full md:w-1/2'>
-          <div ref={chessRef} style={{ width: window.innerWidth > 1536 ? '40vw' : '100vw' }}></div>
+      <div className='w-screen flex flex-col lg:flex-row mx-auto my-auto'>
+        <div className='lg:mx-16 w-full lg:w-1/2'>
+          <div ref={chessRef} style={{ width: window.innerWidth > 1028 ? '40vw' : '100vw' }}></div>
         </div>
-        <div className='w-11/12 lg:w-full mx-auto md:w-1/3 mt-4 md:mt-0'>
+        <div className='w-11/12  mx-auto lg:w-1/3 mt-4 lg:mt-0'>
           <div className='rounded-xl text-center p-6 px-16 w-full text-2xl bg-green-700 text-white flex-shrink-0'>
             Current Status: {currentStatus ? currentStatus : "White to move"}
           </div>
