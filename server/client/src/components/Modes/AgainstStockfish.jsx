@@ -29,7 +29,7 @@ const debounce = (func, delay) => {
 const AgainstStockfish = () => {
   const fetchBestMove = async (FEN) => {
     try {
-      const response = await axios.get('http://localhost:8123/stockfish', {
+      const response = await axios.get('https://reactchess.onrender.com/stockfish', {
         params: {
           fen: FEN,
           depth: 10

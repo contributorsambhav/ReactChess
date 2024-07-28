@@ -25,7 +25,7 @@ const GlobalMultiplayer = () => {
     try {
       console.log("Sending data:", { userId, opponentName, status });
       const response = await axios.post(
-        `http://localhost:8123/user/${userId}/match-history`,
+        `https://reactchess.onrender.com/user/${userId}/match-history`,
         {
           opponent: opponentName,
           status,
