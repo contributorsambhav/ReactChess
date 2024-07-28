@@ -38,7 +38,7 @@ function SignUp() {
             return;
         }
     
-        const res = await fetch("http://localhost:8123/user/register", {
+        const res = await fetch("https://reactchess.onrender.com/user/register", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
