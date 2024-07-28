@@ -61,8 +61,8 @@ const io = new Server(httpServer, {
 let pendingUser = null;
 
 io.on('connection', (socket) => {
+  console.log(socket);
   const user = JSON.parse(socket.handshake.query.user);
-  console.log('User connected:', user);
 
   if (pendingUser) {
     const player1 = pendingUser;
