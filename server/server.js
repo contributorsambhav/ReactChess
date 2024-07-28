@@ -7,7 +7,7 @@ const axios = require('axios');
 const userRoutes = require("./routes/userRoutes.js");
 const cookieParser = require("cookie-parser");
 const { restrictToLoginUserOnly } = require("./middlewares/auth.js");
-
+const path = require("path")
 dotenv.config();
 const dbConnector = require('./config/connect.js');
 const profileRoutes = require("./routes/profileRoutes.js");
@@ -25,9 +25,11 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
+console.log(path.join (__dirname,"/client/dist"));
+app.use(express.static(path.join (__dirname,"/client/dist")))
 
-app.get("/", (req, res) => {
-  res.end("HI");
+app.get("*", (req, res) => {
+  res.sendFile(path.join (__dirname,"/client/dist/index.html"))
 });
 
 app.use("/user", userRoutes);
