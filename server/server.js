@@ -18,7 +18,7 @@ const app = express();
 const httpServer = createServer(app);
 
 const corsOptions = {
-  origin: 'https://reactchess.onrender.com',
+  origin: '*:*',
   methods: ['GET', 'POST'],
   credentials: true
 };
@@ -54,7 +54,7 @@ app.get("*", (req, res) => {
 
 const io = new Server(httpServer, {
   cors: {
-    origin: 'https://reactchess.onrender.com',
+    origin: '*:*',
   }
 });
 
