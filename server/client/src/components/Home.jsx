@@ -6,6 +6,7 @@ import bgImage from '../assets/images/bgImage.jpg';
 
 function Home() {
   const authStatus = useSelector(state => state.auth.status);
+  const userData = useSelector(state => state.auth.userData);
 
   return (
     <div
@@ -37,7 +38,7 @@ function Home() {
         </div>
 
         <div className="flex flex-wrap justify-center gap-4">
-          {authStatus === "true" ? (
+          {authStatus === "true" && userData.username? (
             <>
               <Link to="/modeselector" className="block bg-green-400 bg-opacity-40 text-white py-3 px-6 rounded-lg text-lg lg:text-2xl w-full  hover:bg-opacity-50 transition duration-300 border border-white hover:bg-gray300 hover:text-yellow-400 transform transition duration-300 hover:scale-105">
                 Continue 

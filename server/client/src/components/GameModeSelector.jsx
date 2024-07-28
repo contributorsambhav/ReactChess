@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import ModeSelectorImage from '../assets/images/selector2.jpg';
+import { useSelector } from 'react-redux';
 
 function GameModeSelector() {
   const [animate, setAnimate] = useState(false);
-
+  const userData = useSelector(state => state.auth.userData);
   useEffect(() => {
     setAnimate(true);
   }, []);

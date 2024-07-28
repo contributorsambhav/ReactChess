@@ -22,15 +22,11 @@ const corsOptions = {
   methods: ['GET', 'POST'],
   credentials: true
 };
+
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
-console.log(path.join (__dirname,"/client/dist"));
-app.use(express.static(path.join (__dirname,"/client/dist")))
-
-app.get("*", (req, res) => {
-  res.sendFile(path.join (__dirname,"/client/dist/index.html"))
-});
+app.use(express.static(path.join(__dirname, "/client/dist")));
 
 app.use("/user", userRoutes);
 app.use('/profile', restrictToLoginUserOnly, profileRoutes);
@@ -48,6 +44,12 @@ app.get("/stockfish", async (req, res) => {
   } catch (error) {
     res.status(500).send(`Error: ${error.message}`);
   }
+});
+
+// Wildcard route for SPA (Single Page Application)
+// This should be the last route to catch all other routes
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "/client/dist/index.html"));
 });
 
 const io = new Server(httpServer, {

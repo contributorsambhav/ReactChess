@@ -26,7 +26,7 @@ function Navbar() {
     }, [dispatch]);
 
     // Override authStatus to false if the route is /login or /signup
-    const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
+    const isAuthPage =location.pathname === '/login' || location.pathname === '/signup';
     const effectiveAuthStatus = isAuthPage ? 'false' : authStatus;
 
     return (
@@ -46,8 +46,9 @@ function Navbar() {
                             Home
                         </Link>
                     </li>
-                    {effectiveAuthStatus === "true" ? (
+                    {effectiveAuthStatus === "true" && userData.username ? (
                         <>
+                       
                             <li>
                                 <Link
                                     to="/modeselector"
