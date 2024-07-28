@@ -2,7 +2,6 @@ const { getUser } = require("../services/auth");
 
 async function restrictToLoginUserOnly(req, res, next) {
     const userToken = req.cookies?.token; // Assuming token is stored in cookies
-    console.log(req.cookies);
     if (!userToken) {
         console.error("No token found in cookies");
         return res.redirect("/login");

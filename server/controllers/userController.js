@@ -3,8 +3,6 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
 
 const register = async (req, res) => {
-  console.log(req.body);
-  const { username, password, email } = req.body;
 
   // Convert to lowercase
   const lowerCaseUsername = username.toLowerCase();
@@ -61,7 +59,6 @@ const login = async (req, res) => {
       expiresIn: '1h'
     });
 
-    console.log(token);
     res.cookie('token', token, {
       httpOnly: true,
       maxAge: 3600000,

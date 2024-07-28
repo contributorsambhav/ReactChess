@@ -4,12 +4,10 @@ const router = express.Router();
 
 
 router.get('/', (req, res) => {
-  console.log(req.user);
   res.send(JSON.stringify(req.user));
 });
 
 router.get('/settings', (req, res) => {
-  console.log(req);
   res.send('User Profile Settings Page');
 });
 

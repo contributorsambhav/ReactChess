@@ -8,7 +8,6 @@ function getUser(token) {
         return null;
     }
 
-    console.log("Received token:", token);
 
     try {
         return jwt.verify(token, secret);

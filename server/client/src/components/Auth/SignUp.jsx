@@ -55,8 +55,6 @@ function SignUp() {
         if (!data) {
             alert("Invalid data");
         } else {
-            alert(JSON.stringify(data))
-            alert("Registration Successful");
             navigate("/login");
         }
     };
