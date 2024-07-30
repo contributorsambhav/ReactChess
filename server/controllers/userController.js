@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
 
 const register = async (req, res) => {
-
+const {username,password,email} = req.body
   // Convert to lowercase
   const lowerCaseUsername = username.toLowerCase();
   const lowerCaseEmail = email.toLowerCase();
