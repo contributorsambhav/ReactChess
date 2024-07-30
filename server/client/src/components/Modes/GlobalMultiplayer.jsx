@@ -61,7 +61,7 @@ const GlobalMultiplayer = () => {
   useEffect(() => {
     const newGame = new Chess();
     setGame(newGame);
-    const newSocket = socketIOClient("http://localhost:8123", {
+    const newSocket = socketIOClient("https://reactchess.onrender.com", {
       query: { user: JSON.stringify(user) },
     });
     setSocket(newSocket);
