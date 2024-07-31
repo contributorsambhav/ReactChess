@@ -310,52 +310,53 @@ const GlobalMultiplayer = () => {
                   Mobile Mode
                 </label>
               </div>
-
             </div>
-            <div className={`w-11/12 mx-auto lg:w-1/3 ${mobileMode ? "hidden" : "hi" }`}>
-              <div className="flex flex-col justify-between text-center text-xl">
-                <label className="mt-2 text-gray-100 ">Promotion piece</label>
-                <select
-                  className="mt-2 text-gray-800 py-2 w-full text-center text-xl bg-gray-200 border border-gray-400 rounded"
-                  value={promotionPiece}
-                  onChange={handlePromotionChange}
+            {(!mobileMode) && (
+              <div className={`w-11/12 mx-auto lg:w-1/3 `}>
+                <div className="flex flex-col justify-between text-center text-xl">
+                  <label className="mt-2 text-gray-100 ">Promotion piece</label>
+                  <select
+                    className="mt-2 text-gray-800 py-2 w-full text-center text-xl bg-gray-200 border border-gray-400 rounded"
+                    value={promotionPiece}
+                    onChange={handlePromotionChange}
+                  >
+                    <option value="q">Queen</option>
+                    <option value="r">Rook</option>
+                    <option value="b">Bishop</option>
+                    <option value="n">Knight</option>
+                  </select>
+                </div>
+                <div className="text-center text-2xl mb-4 mt-8">
+                  {currentStatus ? currentStatus : "White to move"}
+                </div>
+                <button
+                  onClick={toggleTable}
+                  className="mb-4 w-full bg-gray-200 text-black py-2 px-4 rounded shadow-md hover:bg-gray-200"
                 >
-                  <option value="q">Queen</option>
-                  <option value="r">Rook</option>
-                  <option value="b">Bishop</option>
-                  <option value="n">Knight</option>
-                </select>
-              </div>
-              <div className="text-center text-2xl mb-4 mt-8">
-                {currentStatus ? currentStatus : "White to move"}
-              </div>
-              <button
-                onClick={toggleTable}
-                className="mb-4 w-full bg-gray-200 text-black py-2 px-4 rounded shadow-md hover:bg-gray-200"
-              >
-                {isTableCollapsed ? "Show Moves" : "Hide Moves"}
-              </button>
-              {!isTableCollapsed && (
-                <table className="table-auto text-lg font-semibold w-full">
-                  <thead>
-                    <tr>
-                      <th className="px-4 py-2">Move #</th>
-                      <th className="px-4 py-2">From</th>
-                      <th className="px-4 py-2">To</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {moves.map((move, index) => (
-                      <tr key={index}>
-                        <td className="border px-4 py-2">{index + 1}</td>
-                        <td className="border px-4 py-2">{move.from}</td>
-                        <td className="border px-4 py-2">{move.to}</td>
+                  {isTableCollapsed ? "Show Moves" : "Hide Moves"}
+                </button>
+                {!isTableCollapsed && (
+                  <table className="table-auto text-lg font-semibold w-full">
+                    <thead>
+                      <tr>
+                        <th className="px-4 py-2">Move #</th>
+                        <th className="px-4 py-2">From</th>
+                        <th className="px-4 py-2">To</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
+                    </thead>
+                    <tbody>
+                      {moves.map((move, index) => (
+                        <tr key={index}>
+                          <td className="border px-4 py-2">{index + 1}</td>
+                          <td className="border px-4 py-2">{move.from}</td>
+                          <td className="border px-4 py-2">{move.to}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}
