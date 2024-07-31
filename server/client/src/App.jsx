@@ -25,7 +25,7 @@ function App() {
   return (
     <Provider store={store}>
       <Router>
-        <div className='w-[100vw] h-[100vh] '>
+        <div className='w-[100vw] min-h-[90dvh] '>
           <Navbar />
           <Routes>
             <Route path="/" element={<Home />} />
