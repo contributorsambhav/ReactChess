@@ -3,11 +3,11 @@ import { Chess } from "chess.js";
 import Chessboard from "chessboardjs";
 import socketIOClient from "socket.io-client";
 import { useSelector } from "react-redux";
-import WaitQueue from "../WaitQueue";
 import { useNavigate } from "react-router-dom";
-import pieceImages from "../pieceImages";
 import axios from "axios";
 import { Howl } from "howler";
+import WaitQueue from "../WaitQueue";
+import pieceImages from "../pieceImages";
 import moveSoundFile from "../../assets/sounds/move.mp3";
 import captureSoundFile from "../../assets/sounds/capture.mp3";
 import checkSoundFile from "../../assets/sounds/check.mp3";
@@ -21,25 +21,6 @@ const checkSound = new Howl({ src: [checkSoundFile] });
 const checkmateSound = new Howl({ src: [checkmateSoundFile] });
 
 const GlobalMultiplayer = () => {
-  const addMatchToHistory = async (userId, opponentName, status) => {
-    try {
-      console.log("Sending data:", { userId, opponentName, status });
-      const response = await axios.post(
-        `https://reactchess.onrender.com/user/${userId}/match-history`,
-        {
-          opponent: opponentName,
-          status,
-        }
-      );
-      console.log("Match history added:", response.data);
-    } catch (error) {
-      console.error(
-        "Error adding match to history:",
-        error.response?.data || error.message
-      );
-    }
-  };
-
   const user = useSelector((state) => state.auth.userData);
   const chessRef = useRef(null);
   const boardRef = useRef(null);
@@ -52,42 +33,36 @@ const GlobalMultiplayer = () => {
   const [opponent, setOpponent] = useState(null);
   const [promotionPiece, setPromotionPiece] = useState("q");
   const [isTableCollapsed, setIsTableCollapsed] = useState(false);
+  const [mobileMode, setMobileMode] = useState(true);
   const navigate = useNavigate();
 
-  const toggleTable = () => {
-    setIsTableCollapsed(!isTableCollapsed);
-  };
-
   useEffect(() => {
-    const newGame = new Chess();
-    setGame(newGame);
-    const newSocket = socketIOClient("https://reactchess.onrender.com", {
-      query: { user: JSON.stringify(user) },
-    });
-    setSocket(newSocket);
+    const initializeGame = () => {
+      const newGame = new Chess();
+      setGame(newGame);
+      const newSocket = socketIOClient("https://reactchess.onrender.com", {
+        query: { user: JSON.stringify(user) },
+      });
+      setSocket(newSocket);
 
-    newSocket.on("color", (color) => {
-      setPlayerColor(color);
-      setGameCreated(true);
-    });
+      newSocket.on("color", (color) => {
+        setPlayerColor(color);
+        setGameCreated(true);
+      });
 
-    newSocket.on("opponent", (obtainedOpponent) => {
-      console.log(obtainedOpponent);
-      setOpponent(obtainedOpponent);
-    });
+      newSocket.on("opponent", (obtainedOpponent) => {
+        setOpponent(obtainedOpponent);
+      });
 
-    return () => newSocket.disconnect();
+      return () => newSocket.disconnect();
+    };
+
+    initializeGame();
   }, [user]);
 
   useEffect(() => {
-    if (opponent) {
-      console.log(opponent);
-    }
-  }, [opponent]);
-
-  useEffect(() => {
     if (socket && gameCreated) {
-      socket.on("move", ({ from, to, obtainedPromotion }) => {
+      const handleMove = ({ from, to, obtainedPromotion }) => {
         try {
           const move = game.move({ from, to, promotion: obtainedPromotion });
           if (move) {
@@ -97,31 +72,28 @@ const GlobalMultiplayer = () => {
               ...prevMoves,
               { from: move.from, to: move.to, promotion: obtainedPromotion },
             ]);
-
-            // Play sound based on move type
-            if (move.captured) {
-              captureSound.play();
-            } else {
-              moveSound.play();
-            }
+            playSound(move);
           }
         } catch (error) {
           console.error("Invalid move received:", error);
         }
-      });
+      };
 
-      socket.on("opponentDisconnected", () => {
+      const handleDisconnect = () => {
         alert("Opponent has been disconnected");
         navigate("/modeselector");
-      });
+      };
+
+      socket.on("move", handleMove);
+      socket.on("opponentDisconnected", handleDisconnect);
 
       boardRef.current = Chessboard(chessRef.current, {
         draggable: true,
         position: game.fen() || "start",
-        onDrop: onDrop,
-        onMouseoverSquare: onMouseoverSquare,
-        onMouseoutSquare: onMouseoutSquare,
-        onSnapEnd: onSnapEnd,
+        onDrop,
+        onMouseoverSquare,
+        onMouseoutSquare,
+        onSnapEnd,
         pieceTheme: (piece) => pieceImages[piece],
         snapbackSpeed: 500,
         snapSpeed: 100,
@@ -136,30 +108,16 @@ const GlobalMultiplayer = () => {
       (playerColor === "black" && game.turn() === "b")
     ) {
       try {
-        const move = game.move({
-          from: source,
-          to: target,
-          promotion: promotionPiece,
-        });
+        const move = game.move({ from: source, to: target, promotion: promotionPiece });
         if (move) {
           boardRef.current.position(game.fen());
           updateStatus();
-          socket.emit("move", {
-            from: source,
-            to: target,
-            obtainedPromotion: promotionPiece,
-          });
+          socket.emit("move", { from: source, to: target, obtainedPromotion: promotionPiece });
           setMoves((prevMoves) => [
             ...prevMoves,
             { from: move.from, to: move.to, promotion: promotionPiece },
           ]);
-
-          // Play sound based on move type
-          if (move.captured) {
-            captureSound.play();
-          } else {
-            moveSound.play();
-          }
+          playSound(move);
         } else {
           console.log("Invalid move:", source, target);
         }
@@ -171,7 +129,7 @@ const GlobalMultiplayer = () => {
     }
   };
 
-  const onMouseoverSquare = (square, piece) => {
+  const onMouseoverSquare = (square) => {
     const moves = game.moves({ square, verbose: true });
     if (moves.length > 0) {
       greySquare(square);
@@ -196,29 +154,13 @@ const GlobalMultiplayer = () => {
     }
 
     if (game.isCheckmate()) {
-      if (turn === "White") {
-        status = "Game over, Black wins by checkmate.";
-        checkmateSound.play();
-        if (playerColor === "white") {
-          addMatchToHistory(user.userId, opponent?.username, "lose");
-        } else {
-          addMatchToHistory(user.userId, opponent?.username, "win");
-        }
-      } else {
-        status = "Game over, White wins by checkmate.";
-        checkmateSound.play();
-        if (playerColor === "black") {
-          addMatchToHistory(user.userId, opponent?.username, "lose");
-        } else {
-          addMatchToHistory(user.userId, opponent?.username, "win");
-        }
-      }
+      status = `Game over, ${turn === "White" ? "Black" : "White"} wins by checkmate.`;
+      checkmateSound.play();
+      addMatchToHistory(user.userId, opponent?.username, turn === playerColor ? "lose" : "win");
     } else if (game.isDraw()) {
       status = "Game over, draw.";
       checkSound.play();
-      if (opponent) {
-        addMatchToHistory(user.userId, opponent?.username, "draw");
-      }
+      addMatchToHistory(user.userId, opponent?.username, "draw");
     } else {
       status = `${turn} to move`;
       if (game.inCheck()) {
@@ -227,6 +169,21 @@ const GlobalMultiplayer = () => {
     }
 
     setCurrentStatus(status);
+  };
+
+  const addMatchToHistory = async (userId, opponentName, status) => {
+    try {
+      const response = await axios.post(
+        `https://reactchess.onrender.com/user/${userId}/match-history`,
+        {
+          opponent: opponentName,
+          status,
+        }
+      );
+      console.log("Match history added:", response.data);
+    } catch (error) {
+      console.error("Error adding match to history:", error.response?.data || error.message);
+    }
   };
 
   const removeGreySquares = () => {
@@ -242,6 +199,14 @@ const GlobalMultiplayer = () => {
     }
   };
 
+  const playSound = (move) => {
+    if (move.captured) {
+      captureSound.play();
+    } else {
+      moveSound.play();
+    }
+  };
+
   const calculateRating = (wins, loses, draws) => {
     const totalGames = wins + loses + draws;
     if (totalGames === 0) return 0;
@@ -254,13 +219,17 @@ const GlobalMultiplayer = () => {
     setPromotionPiece(e.target.value);
   };
 
+  const toggleTable = () => {
+    setIsTableCollapsed(!isTableCollapsed);
+  };
+
   return (
     <>
       {!gameCreated ? (
         <WaitQueue />
       ) : (
         <div
-          className="flex  min-h-screen items-center justify-center w-screen"
+          className={`flex ${mobileMode ? "h-screen overflow-hide" : "min-h-screen overflow-scroll"} items-center justify-center w-screen`}
           style={{
             backgroundImage: `url(${boardbg})`,
             backgroundSize: "cover",
@@ -272,12 +241,7 @@ const GlobalMultiplayer = () => {
                 <div className="flex justify-between text-center mr-8 text-xl">
                   <p>Opponent: {opponent.username}</p>
                   <p>
-                    Rating:{" "}
-                    {calculateRating(
-                      opponent.wins,
-                      opponent.loses,
-                      opponent.draws
-                    )}
+                    Rating: {calculateRating(opponent.wins, opponent.loses, opponent.draws)}
                   </p>
                 </div>
               )}
@@ -297,7 +261,7 @@ const GlobalMultiplayer = () => {
             </div>
             <div className="w-11/12 mx-auto lg:w-1/3">
               <div className="flex flex-col justify-between text-center text-xl">
-                <label className="mt-2 text-gray-100 ">Promotion piece</label>
+                <label className="mt-2 text-gray-100">Promotion piece</label>
                 <select
                   className="mt-2 text-gray-800 py-2 w-full text-center text-xl bg-gray-200 border border-gray-400 rounded"
                   value={promotionPiece}
