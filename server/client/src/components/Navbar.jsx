@@ -41,7 +41,7 @@ function Navbar() {
                     <li>
                         <Link
                             to="/"
-                            className="text-white text-lg md:text-xl hover:text-purple-300 transition duration-300 ease-in-out"
+                            className="text-white text-md md:text-xl hover:text-purple-300 transition duration-300 ease-in-out"
                         >
                             Home
                         </Link>
@@ -51,15 +51,15 @@ function Navbar() {
                             <li>
                                 <Link
                                     to="/modeselector"
-                                    className="text-white text-lg md:text-xl hover:text-purple-300 transition duration-300 ease-in-out"
+                                    className="text-white text-md md:text-xl hover:text-purple-300 transition duration-300 ease-in-out"
                                 >
-                                    Game Mode
+                                    Mode
                                 </Link>
                             </li>
                             <li>
                                 <Link
                                     to="/puzzle"
-                                    className="text-white text-lg md:text-xl hover:text-purple-300 transition duration-300 ease-in-out"
+                                    className="text-white text-md md:text-xl hover:text-purple-300 transition duration-300 ease-in-out"
                                 >
                                     Puzzles
                                 </Link>
@@ -67,7 +67,7 @@ function Navbar() {
                             <li>
                                 <Link
                                     to="/profile"
-                                    className="text-white text-lg md:text-xl hover:text-purple-300 transition duration-300 ease-in-out"
+                                    className="text-white text-md md:text-xl hover:text-purple-300 transition duration-300 ease-in-out"
                                 >
                                     {userData ? userData.username : "Profile"}
                                 </Link>
@@ -78,7 +78,7 @@ function Navbar() {
                             <li>
                                 <Link
                                     to="/signup"
-                                    className="text-white text-lg md:text-xl hover:text-purple-300 transition duration-300 ease-in-out"
+                                    className="text-white text-md md:text-xl hover:text-purple-300 transition duration-300 ease-in-out"
                                 >
                                     SignUp
                                 </Link>
@@ -86,7 +86,7 @@ function Navbar() {
                             <li>
                                 <Link
                                     to="/login"
-                                    className="text-white text-lg md:text-xl hover:text-purple-300 transition duration-300 ease-in-out"
+                                    className="text-white text-md md:text-xl hover:text-purple-300 transition duration-300 ease-in-out"
                                 >
                                     Login
                                 </Link>
