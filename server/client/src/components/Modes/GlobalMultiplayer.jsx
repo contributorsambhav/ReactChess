@@ -265,7 +265,7 @@ const GlobalMultiplayer = () => {
         <WaitQueue />
       ) : (
         <div
-          className={`flex  ${mobileMode ? "" : ""} overflow-scroll items-center justify-center w-screen`}
+          className={`flex min-h-screen  overflow-scroll items-center justify-center w-screen`}
           style={{
             backgroundImage: `url(${boardbg})`,
             backgroundSize: "cover",
