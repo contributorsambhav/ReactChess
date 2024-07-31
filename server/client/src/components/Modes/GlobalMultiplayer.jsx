@@ -265,11 +265,7 @@ const GlobalMultiplayer = () => {
         <WaitQueue />
       ) : (
         <div
-          className={`flex ${
-            mobileMode
-              ? "h-screen overflow-hide"
-              : "min-h-screen overflow-scroll"
-          }  items-center justify-center w-screen`}
+          className={`flex min-h-screen overflow-scroll items-center justify-center w-screen`}
           style={{
             backgroundImage: `url(${boardbg})`,
             backgroundSize: "cover",
@@ -303,8 +299,7 @@ const GlobalMultiplayer = () => {
                   </p>
                 </div>
               )}
-            </div>
-            <div className="w-11/12 mx-auto lg:w-1/3">
+
               <div>
                 <label>
                   <input
@@ -315,6 +310,9 @@ const GlobalMultiplayer = () => {
                   Mobile Mode
                 </label>
               </div>
+
+            </div>
+            <div className={`w-11/12 mx-auto lg:w-1/3 ${mobileMode ? "hidden" : "hi" }`}>
               <div className="flex flex-col justify-between text-center text-xl">
                 <label className="mt-2 text-gray-100 ">Promotion piece</label>
                 <select
