@@ -168,7 +168,7 @@ const LocalMultiplayer = () => {
 
   return (
     <div
-      className="lg:mt-4 mt-16 flex min-h-screen items-center justify-center w-screen"
+      className="lg:mt-4 mt-16 flex h-fit items-center justify-center w-screen"
       style={{ backgroundImage: `url(${boardbg})`, backgroundSize: "cover" }}
     >
       <div className="w-screen flex flex-col lg:flex-row lg:flex-row mx-auto my-auto">
