@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import Typing from 'react-typing-effect';
 import bgImage from '../assets/images/bgImage.jpg';
-import "./home.css"
 function Home() {
   const authStatus = useSelector(state => state.auth.status);
   const userData = useSelector(state => state.auth.userData);
