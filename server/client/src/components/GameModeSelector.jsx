@@ -13,7 +13,7 @@ function GameModeSelector() {
   const gameModes = [
     { path: '/global-multiplayer', label: 'Global Multiplayer', delay: 'delay-100' },
     { path: '/local-multiplayer', label: 'Local Multiplayer', delay: 'delay-200' },
-    { path: '/against-stockfish', label: 'Against ELO:3634', delay: 'delay-300' },
+    { path: '/against-stockfish', label: 'Against Stockfish ', delay: 'delay-300' },
     { path: '/puzzle', label: 'Puzzles', delay: 'delay-400' },
     { path: '/random-play', label: 'Random Play (Always win)', delay: 'delay-500' }
   ];

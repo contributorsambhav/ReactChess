@@ -228,7 +228,7 @@ const AgainstStockfish = () => {
       style={{ backgroundImage: `url(${bg})`, backgroundSize: "contain" }}
     >
       <div className="w-screen flex flex-col lg:flex-row mx-auto my-auto">
-        <div className="lg:mx-16 w-full lg:w-1/2">
+        <div className="lg:mx-16 mt-16 w-full lg:w-1/2">
           <div
             ref={chessRef}
             style={{ width: window.innerWidth > 1028 ? "40vw" : "100vw" }}
@@ -244,7 +244,7 @@ const AgainstStockfish = () => {
             Mobile Mode
           </label>
         </div>
-        {!mobileMode && (
+        {(!mobileMode) && (
           <div className="w-11/12  mx-auto lg:w-1/3 mt-4 lg:mt-0">
             <div className="rounded-xl text-center p-6 px-16 w-full text-2xl bg-green-700 text-white flex-shrink-0">
               Current Status: {currentStatus ? currentStatus : "White to move"}
@@ -323,83 +323,7 @@ const AgainstStockfish = () => {
             </div>
           </div>
         )}
-        <div className="w-11/12  mx-auto lg:w-1/3 mt-4 lg:mt-0">
-          <div className="rounded-xl text-center p-6 px-16 w-full text-2xl bg-green-700 text-white flex-shrink-0">
-            Current Status: {currentStatus ? currentStatus : "White to move"}
-          </div>
-          <div className="mt-4">
-            <label className="mr-2 text-white">Promotion Piece:</label>
-            <select
-              value={promotionPiece}
-              onChange={handlePromotionChange}
-              className="bg-green-700 text-white px-4 py-2 rounded-lg w-full"
-            >
-              <option value="q">Queen</option>
-              <option value="r">Rook</option>
-              <option value="b">Bishop</option>
-              <option value="n">Knight</option>
-            </select>
-            <p className="text-weight-500 mx-2 mt-3 text-center text-xl text-red-500">
-              If board position changes to original after promotion, just
-              attempt an illegal move ,
-            </p>
-            <p className="text-weight-500 mx-2 mt-3 text-center text-xl text-green-500">
-              {" "}
-              Though its rare as stockfish won't give you a chance to promote.{" "}
-            </p>
-          </div>
-          <button
-            onClick={toggleTable}
-            className="mt-4 bg-green-700 text-white px-4 py-2 rounded-t-lg w-full"
-          >
-            {isTableCollapsed ? "Show Moves" : "Hide Moves"}
-          </button>
-          <div
-            style={{
-              maxHeight: isTableCollapsed ? "0" : "40vh",
-              transition: "max-height 0.3s ease-in-out",
-              overflow: "scroll",
-            }}
-          >
-            <div style={{ height: "100%", overflowY: "auto" }}>
-              <table className="w-full border-collapse border border-gray-700 rounded-lg">
-                <thead>
-                  <tr className="bg-gray-800 text-center text-white">
-                    <th className="border border-gray-700 px-6 py-3">Move</th>
-                    <th className="border border-gray-700 px-6 py-3">From</th>
-                    <th className="border border-gray-700 px-6 py-3">To</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {moves.map((move, index) => (
-                    <tr
-                      key={index}
-                      className="bg-gray-700 text-center text-white"
-                    >
-                      <td className="border border-gray-700 px-6 py-3">
-                        {index + 1}
-                      </td>
-                      <td className="border border-gray-700 px-6 py-3">
-                        {move.from}
-                      </td>
-                      <td className="border border-gray-700 px-6 py-3">
-                        {move.to}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <div className="mt-4 text-white text-center">
-            <button
-              onClick={() => window.location.reload()}
-              className="bg-green-700 text-white px-4 py-2 rounded-b-lg w-full"
-            >
-              Restart
-            </button>
-          </div>
-        </div>
+        
       </div>
     </div>
   );
