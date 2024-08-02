@@ -267,26 +267,7 @@ const Puzzle1 = () => {
           </div>
         </>
       )}
-      <>
-        <h1 className="text-3xl font-bold mt-16 lg:mt-4 z-10">
-          The Magician's Puzzle
-        </h1>
-        <div className="w-[80%] p-4 text-lg">
-          <p>
-            "Grandmasters and Engines Couldn't Solve This Puzzle. Then Came The
-            Magician". This puzzle was composed by Gijs van Breukelen. It was
-            created in somewhat around 1970 but published in the 1990 This is
-            one of the hardest puzzles ever composed as leave alone
-            Grandmasters, engines could not solve it either! Everyone thinks
-            that Black is winning with passed pawns and a knights. Yet white can
-            force a win soon...
-          </p>
-          <p className="text-weight-500  mt-3 text-center text-xl text-red-500">
-            If board position changes to original after promotion, just attempt
-            an illegal move
-          </p>
-        </div>
-      </>
+      
 
       <div className="w-screen flex lg:flex-row flex-col lg:flex-row mx-auto my-auto">
         <div className="lg:mx-16 w-full lg:w-1/2">
