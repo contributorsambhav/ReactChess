@@ -206,11 +206,11 @@ const ChessboardComponent = () => {
 
   return (
     <div
-      className="flex flex-col items-center min-h-screen"
-      style={{ backgroundImage: `url(${bg})`, backgroundSize: "contain" }}
+    className="lg:mt-4 mt-16 flex h-fit py-32 items-center justify-center w-screen"
+    style={{ backgroundImage: `url(${bg})`, backgroundSize: "contain" }}
     >
-      <div className="w-screen flex mx-auto my-auto">
-        <div className="mx-16 w-1/2">
+      <div className="w-screen flex flex-col lg:flex-row lg:flex-row mx-auto my-auto">
+        <div className="mx-16 w-full lg:w-1/2">
           <div
             ref={chessRef}
             style={{ width: window.innerWidth > 1028 ? "40vw" : "70vw" }}
@@ -228,7 +228,7 @@ const ChessboardComponent = () => {
         </div>
         {!mobileMode && (
           <div className="ml-4 w-1/3">
-            <div className="rounded-xl text-center p-6 px-16 w-full text-2xl bg-green-700 text-white flex-shrink-0">
+            <div className="rounded-xl text-center p-6 px-16 w-full lg:w-1/3 text-2xl bg-green-700 text-white flex-shrink-0">
               Current Status: {currentStatus ? currentStatus : "White to move"}
             </div>
             <div className="mt-4">
