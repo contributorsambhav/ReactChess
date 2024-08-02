@@ -1,0 +1,8 @@
+
+
+@layer utilities {
+    .h-fit-2 {
+      height: calc(fit-content * 2);
+    }
+  }
+  

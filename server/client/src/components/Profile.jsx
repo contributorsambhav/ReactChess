@@ -54,12 +54,14 @@ function Profile() {
               >
                 RESULT
               </th>
-              <th
-                scope="col"
-                className="px-4 lg:px-6 py-2 lg:py-3 text-left text-lg lg:text-xl font-semibold text-white"
-              >
-                DATE
-              </th>
+              {window.innerWidth > 768 && (
+                <th
+                  scope="col"
+                  className="px-4 lg:px-6 py-2 lg:py-3 text-left text-lg lg:text-xl font-semibold text-white"
+                >
+                  DATE
+                </th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -77,9 +79,11 @@ function Profile() {
                 <td className="px-4 lg:px-6 py-2 lg:py-4 capitalize text-lg lg:text-xl text-gray-100">
                   {match.status}
                 </td>
-                <td className="px-4 lg:px-6 py-2 lg:py-4 text-lg lg:text-xl text-gray-100">
-                  {new Date(match.createdAt).toLocaleDateString()}
-                </td>
+                {window.innerWidth > 768 && (
+                  <td className="px-4 lg:px-6 py-2 lg:py-4 text-lg lg:text-xl text-gray-100">
+                    {new Date(match.createdAt).toLocaleDateString()}
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

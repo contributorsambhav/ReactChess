@@ -274,7 +274,7 @@ const GlobalMultiplayer = () => {
           <div className="w-screen mt-16 flex flex-col lg:flex-row mx-auto my-auto">
             <div className="lg:mx-16 w-full lg:w-1/2">
               {opponent && (
-                <div className="flex justify-between text-center mr-8 text-xl">
+                <div className="flex justify-between text-center mr-8 text-lg lg:text-xl xl:text-2xl">
                   <p>Opponent: {opponent.username.split(" ")[0]}</p>
                   <p>
                     Rating:{" "}
@@ -292,7 +292,7 @@ const GlobalMultiplayer = () => {
               ></div>
 
               {user && (
-                <div className="flex justify-between text-center text-xl mr-8 mb-4">
+                <div className="flex text-lg lg:text-xl xl:text-2xl justify-between text-center text-xl mr-8 mb-4">
                   <p>You ({user.username})</p>
                   <p>
                     Rating: {calculateRating(user.wins, user.loses, user.draws)}
