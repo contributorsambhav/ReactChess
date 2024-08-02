@@ -67,7 +67,7 @@ function Navbar() {
                             <li>
                                 <Link
                                     to="/profile"
-                                    className="text-white text-md md:text-xl hover:text-purple-300 transition duration-300 ease-in-out"
+                                    className="text-white text-md md:text-xl hover:text-purple-300 transition duration-300 capitalize ease-in-out"
                                 >
                                     {userData ? userData.username.split(" ")[0] : "Profile"}
 
