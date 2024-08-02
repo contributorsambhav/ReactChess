@@ -135,10 +135,12 @@ function Profile() {
                 </tbody>
               </table>
             </div>
-            <div
-              className="w-full h-48 lg:h-64 bg-cover bg-center relative overflow-hidden"
-              style={{ backgroundImage: `url(${svg})` }}
-            ></div>
+            {window.innerWidth > 768 && (
+              <div
+                className="w-full h-48 lg:h-64 bg-cover bg-center relative overflow-hidden"
+                style={{ backgroundImage: `url(${svg})` }}
+              ></div>
+            )}
           </div>
           <button
             onClick={handleLogout}
@@ -148,7 +150,9 @@ function Profile() {
           </button>
         </div>
         <div className="lg:w-1/2 bg-gray-700 bg-opacity-50 rounded-lg shadow-md p-4 overflow-y-auto">
-          {userData && userData.matchHistory && renderMatchHistory(userData.matchHistory)}
+          {userData &&
+            userData.matchHistory &&
+            renderMatchHistory(userData.matchHistory)}
         </div>
       </div>
     </div>

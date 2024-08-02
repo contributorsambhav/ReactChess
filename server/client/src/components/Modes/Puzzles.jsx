@@ -40,7 +40,7 @@ const Puzzles = () => {
             {puzzles.slice(0, 3).map(({ path, label, delay }) => (
               <div
                 key={path}
-                className={`w-full game-mode ${
+                className={`w-full mx-4 game-mode ${
                   animate ? `animate-slide-in ${delay}` : ""
                 }`}
               >
@@ -60,7 +60,7 @@ const Puzzles = () => {
             {puzzles.slice(3).map(({ path, label, delay }) => (
               <div
                 key={path}
-                className={`w-full game-mode ${
+                className={`w-full mx-4 game-mode ${
                   animate ? `animate-slide-in ${delay}` : ""
                 }`}
               >

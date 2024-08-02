@@ -275,7 +275,7 @@ const GlobalMultiplayer = () => {
             <div className="lg:mx-16 w-full lg:w-1/2">
               {opponent && (
                 <div className="flex justify-between text-center mr-8 text-xl">
-                  <p>Opponent: {opponent.username}</p>
+                  <p>Opponent: {opponent.username.split(" ")[0]}</p>
                   <p>
                     Rating:{" "}
                     {calculateRating(

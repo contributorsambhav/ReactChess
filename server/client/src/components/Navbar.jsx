@@ -69,7 +69,8 @@ function Navbar() {
                                     to="/profile"
                                     className="text-white text-md md:text-xl hover:text-purple-300 transition duration-300 ease-in-out"
                                 >
-                                    {userData ? userData.username : "Profile"}
+                                    {userData ? userData.username.split(" ")[0] : "Profile"}
+
                                 </Link>
                             </li>
                         </>

@@ -19,7 +19,7 @@ function Home() {
       }}
     >
       <div className="font-serif tracking-wide bg-gray-800 flex flex-col bg-opacity-30 backdrop-filter backdrop-blur-xl border border-gray-500 p-8 rounded-xl shadow-lg text-center w-11/12 lg:w-2/3 lg:w-1/2 xl:w-1/2 xl:h-fit">
-        <h1 className="text-3xl lg:text-5xl tracking-normal font-bold font-mono text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600 mb-6">
+        <h1 className="text-3xl lg:text-5xl tracking-normal font-bold font-mono text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600 mb-4">
           <Typing 
             text={['Welcome to Chess Master']} 
             speed={100} 
@@ -29,17 +29,14 @@ function Home() {
           />
         </h1>
 
-        <div className='description text-center align-middle h-2/3 text-lg lg:text-2xl text-gray-100 mb-6'>
-          <Typing
-            text={['Experience the ultimate chess journey with Chess Master. Challenge your friends in local multiplayer, or take on global opponents with our advanced socket integration. Sharpen your skills with intricate puzzles, or test your strategies against Stockfish, the world’s strongest chess engine. For those moments of frustration, switch to "Always Win" mode and enjoy a flawless victory every time.']}
-            speed={50}
-            eraseDelay={1000000000} // effectively prevents erasing
-          />
+        <div className='description text-center align-middle h-2/3 text-md md:text-xl lg:text-2xl text-gray-100 mb-4'>
+        
+            Experience the ultimate chess journey with Chess Master. Challenge your friends in local multiplayer, or take on global opponents with our advanced socket integration. Sharpen your skills with intricate puzzles, or test your strategies against Stockfish, the world’s strongest chess engine. For those moments of frustration, switch to "Always Win" mode and enjoy a flawless victory every time.
         </div>
 
         <div className="flex flex-wrap justify-center gap-4">
           {authStatus === "true" && userData.username? (
-            <>
+            <>'
               <Link to="/modeselector" className="block bg-green-400 bg-opacity-40 text-white py-3 px-6 rounded-lg text-lg lg:text-2xl w-full  hover:bg-opacity-50 transition duration-300 border border-white hover:bg-gray300 hover:text-yellow-400 transform transition duration-300 hover:scale-105">
                 Continue 
               </Link>
