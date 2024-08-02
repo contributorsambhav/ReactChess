@@ -206,8 +206,8 @@ const ChessboardComponent = () => {
 
   return (
     <div
-    className="lg:mt-4 mt-16 flex h-fit py-32 items-center justify-center w-screen"
-    style={{ backgroundImage: `url(${bg})`, backgroundSize: "contain" }}
+      className="lg:mt-4 mt-16 flex h-fit py-32 items-center justify-center w-screen"
+      style={{ backgroundImage: `url(${bg})`, backgroundSize: "contain" }}
     >
       <div className="w-screen flex flex-col lg:flex-row lg:flex-row mx-auto my-auto">
         <div className="mx-16 w-full lg:w-1/2">
@@ -215,20 +215,21 @@ const ChessboardComponent = () => {
             ref={chessRef}
             style={{ width: window.innerWidth > 1028 ? "40vw" : "100vw" }}
           ></div>
+          <div>
+            <label>
+              <input
+                type="checkbox"
+                checked={mobileMode}
+                onChange={handleCheckboxChange}
+              />
+              Mobile Mode
+            </label>
+          </div>
         </div>
-        <div>
-          <label>
-            <input
-              type="checkbox"
-              checked={mobileMode}
-              onChange={handleCheckboxChange}
-            />
-            Mobile Mode
-          </label>
-        </div>
-        {(!mobileMode)&& (
+
+        {!mobileMode && (
           <div className="ml-4 w-1/3 lg:w-full">
-            <div className="rounded-xl text-center p-6 px-16 w-full lg:w-1/3 text-2xl bg-green-700 text-white flex-shrink-0">
+            <div className="rounded-xl text-center p-6 px-16 lg:w-full w-1/3 text-2xl bg-green-700 text-white flex-shrink-0">
               Current Status: {currentStatus ? currentStatus : "White to move"}
             </div>
             <div className="mt-4">
