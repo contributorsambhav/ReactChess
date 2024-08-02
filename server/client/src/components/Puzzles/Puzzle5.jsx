@@ -237,7 +237,7 @@ const Puzzle5 = () => {
 
   return (
     <div
-      className="w-full flex flex-col items-center min-min-h-screen"
+      className="w-full flex py-32 flex-col items-center min-min-h-screen"
       style={{ backgroundImage: `url(${bg})`, backgroundSize: "contain" }}
     >
       {!mobileMode && (

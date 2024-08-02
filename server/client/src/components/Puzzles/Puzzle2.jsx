@@ -237,7 +237,7 @@ const Puzzle2 = () => {
 
   return (
     <div
-      className="w-full flex flex-col items-center min-min-h-screen "
+      className="w-full flex flex-col items-center py-32 min-min-h-screen "
       style={{
         backgroundImage: `url(${bg})`,
         backgroundSize: "contain",
