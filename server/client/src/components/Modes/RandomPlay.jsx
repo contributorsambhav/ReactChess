@@ -20,7 +20,7 @@ const ChessboardComponent = () => {
   const boardRef = useRef(null); // Reference to the Chessboard instance
   const [currentStatus, setCurrentStatus] = useState(null); // State to hold the current game status
   const [moves, setMoves] = useState([]); // State to hold the list of moves
-  const [mobileMode, setMobileMode] = useState(true);
+  const [mobileMode, setMobileMode] = useState(false);
   const handleCheckboxChange = () => {
     setMobileMode(!mobileMode);
   };
@@ -229,7 +229,7 @@ const ChessboardComponent = () => {
 
         {!mobileMode && (
           <div className="lg:ml-4 lg:w-1/3 w-full">
-            <div className="rounded-xl text-center p-6 px-16 lg:w-1/3 w-full text-2xl bg-green-700 text-white flex-shrink-0">
+            <div className="rounded-xl text-center p-6 px-16  w-full text-2xl bg-green-700 text-white flex-shrink-0">
               Current Status: {currentStatus ? currentStatus : "White to move"}
             </div>
             <div className="mt-4">

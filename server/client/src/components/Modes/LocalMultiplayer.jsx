@@ -32,7 +32,7 @@ const LocalMultiplayer = () => {
   const gameRef = useRef(new Chess());
   const [isTableCollapsed, setIsTableCollapsed] = useState(false);
   const [promotionPiece, setPromotionPiece] = useState("q");
-  const [mobileMode, setMobileMode] = useState(true);
+  const [mobileMode, setMobileMode] = useState(false);
   const handleCheckboxChange = () => {
     setMobileMode(!mobileMode);
   };
