@@ -30,7 +30,7 @@ function Home() {
 
         <div className='description text-center align-middle h-2/3 text-md md:text-xl lg:text-2xl text-gray-100 mb-4'>
         
-            Experience the ultimate chess journey with Chess Master. Challenge your friends in local multiplayer, or take on global opponents with our advanced socket integration. Sharpen your skills with intricate puzzles, or test your strategies against Stockfish, the world’s strongest chess engine. For those moments of frustration, switch to "Always Win" mode and enjoy a flawless victory every time.
+            Experience the ultimate chess journey with Chess Master. Challenge your friends in local multiplayer, or take on global opponents with our advanced socket integration. Sharpen your skills with intricate puzzles, or test your strategies against Stockfish, the world’s strongest chess engine. For those moments of frustration, switch to "Always Win" mode and enjoy a flawless victory every time
         </div>
 
         <div className="flex flex-wrap justify-center gap-4">
