@@ -20,7 +20,10 @@ const ChessboardComponent = () => {
   const boardRef = useRef(null); // Reference to the Chessboard instance
   const [currentStatus, setCurrentStatus] = useState(null); // State to hold the current game status
   const [moves, setMoves] = useState([]); // State to hold the list of moves
-
+  const [mobileMode, setMobileMode] = useState(true);
+  const handleCheckboxChange = () => {
+    setMobileMode(!mobileMode);
+  };
   useEffect(() => {
     const game = new Chess(); // Create a new Chess instance
 
@@ -213,48 +216,60 @@ const ChessboardComponent = () => {
             style={{ width: window.innerWidth > 1028 ? "40vw" : "70vw" }}
           ></div>
         </div>
-        <div className="ml-4 w-1/3">
-          <div className="rounded-xl text-center p-6 px-16 w-full text-2xl bg-green-700 text-white flex-shrink-0">
-            Current Status: {currentStatus ? currentStatus : "White to move"}
-          </div>
-          <div className="mt-4">
-            <p className="text-weight-500 mx-2 mx-3 text-center text-xl text-green-500">
-              Always promotes to queen.
-            </p>
-
-            <table className="w-full border-collapse border border-gray-700 rounded-lg overflow-hidden">
-              <thead>
-                <tr className="bg-gray-800 text-center text-white">
-                  <th className="border border-gray-700 px-6 py-3">Move</th>
-                  <th className="border border-gray-700 px-6 py-3">From</th>
-                  <th className="border border-gray-700 px-6 py-3">To</th>
-                </tr>
-              </thead>
-              <tbody>
-                {moves.map((move, index) => (
-                  <tr
-                    key={index}
-                    className={
-                      index % 2 === 0
-                        ? "bg-gray-700 text-white text-center"
-                        : "bg-gray-600 text-gray-200 text-center"
-                    }
-                  >
-                    <td className="border border-gray-700 px-6 py-4">
-                      {index + 1}
-                    </td>
-                    <td className="border border-gray-700 px-6 py-4">
-                      {move.from}
-                    </td>
-                    <td className="border border-gray-700 px-6 py-4">
-                      {move.to}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        <div>
+          <label>
+            <input
+              type="checkbox"
+              checked={mobileMode}
+              onChange={handleCheckboxChange}
+            />
+            Mobile Mode
+          </label>
         </div>
+        {!mobileMode && (
+          <div className="ml-4 w-1/3">
+            <div className="rounded-xl text-center p-6 px-16 w-full text-2xl bg-green-700 text-white flex-shrink-0">
+              Current Status: {currentStatus ? currentStatus : "White to move"}
+            </div>
+            <div className="mt-4">
+              <p className="text-weight-500 mx-2 mx-3 text-center text-xl text-green-500">
+                Always promotes to queen.
+              </p>
+
+              <table className="w-full border-collapse border border-gray-700 rounded-lg overflow-hidden">
+                <thead>
+                  <tr className="bg-gray-800 text-center text-white">
+                    <th className="border border-gray-700 px-6 py-3">Move</th>
+                    <th className="border border-gray-700 px-6 py-3">From</th>
+                    <th className="border border-gray-700 px-6 py-3">To</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {moves.map((move, index) => (
+                    <tr
+                      key={index}
+                      className={
+                        index % 2 === 0
+                          ? "bg-gray-700 text-white text-center"
+                          : "bg-gray-600 text-gray-200 text-center"
+                      }
+                    >
+                      <td className="border border-gray-700 px-6 py-4">
+                        {index + 1}
+                      </td>
+                      <td className="border border-gray-700 px-6 py-4">
+                        {move.from}
+                      </td>
+                      <td className="border border-gray-700 px-6 py-4">
+                        {move.to}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
