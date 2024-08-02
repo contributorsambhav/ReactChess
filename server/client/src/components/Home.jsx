@@ -18,8 +18,8 @@ function Home() {
         backgroundPosition: 'center' 
       }}
     >
-      <div className="font-serif tracking-wide bg-gray-800 flex flex-col bg-opacity-30 backdrop-filter backdrop-blur-xl border border-gray-500 p-8 rounded-xl shadow-lg text-center w-11/12 lg:w-2/3 lg:w-1/2 xl:w-1/2 h-fit ">
-        <h1 className="text-3xl lg:text-5xl tracking-normal font-bold font-mono text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600 mb-4 xl:h-fit-2">
+      <div className="font-serif tracking-wide bg-gray-800 flex flex-col bg-opacity-30 backdrop-filter backdrop-blur-xl border border-gray-500 p-8 rounded-xl shadow-lg text-center w-11/12 lg:w-2/3 lg:w-1/2 xl:w-1/2 h-fit h/2/3 lg:h-fit">
+        <h1 className="text-3xl lg:text-5xl tracking-normal font-bold font-mono text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600 mb-4 ">
           <Typing 
             text={['Welcome to Chess Master']} 
             speed={100} 

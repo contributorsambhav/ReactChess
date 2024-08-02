@@ -29,11 +29,11 @@ function Profile() {
 
   const renderMatchHistory = (matchHistory) => {
     return (
-      <div className="h-full bg-gray-800 bg-opacity-50 p-4 rounded-lg shadow-md">
+      <div className="h-full bg-gray-800 bg-opacity-50 lg:p-4 rounded-lg shadow-md">
         <h2 className="text-2xl lg:text-3xl font-semibold text-center text-white mb-2">
           Match History
         </h2>
-        <table className="min-w-full bg-gray-200 bg-opacity-20 text-gray-100 rounded-lg">
+        <table className="min-w-full mx-auto bg-gray-200 bg-opacity-20 text-gray-100 rounded-lg">
           <thead className="bg-gray-700 bg-opacity-70">
             <tr>
               <th
