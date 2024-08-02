@@ -294,9 +294,19 @@ const Puzzle1 = () => {
             ref={chessRef}
             style={{ width: window.innerWidth > 1028 ? "40vw" : "100vw" }}
           ></div>
+          <div>
+          <label>
+            <input
+              type="checkbox"
+              checked={mobileMode}
+              onChange={handleCheckboxChange}
+            />
+            Mobile Mode
+          </label>
+        </div>
         </div>
 
-        {!mobileMode && (
+        {(!mobileMode )&& (
           <div className="lg:ml-4 w-full lg:w-1/3 mt-4 lg:mt-0">
             <div className="rounded-xl text-center p-6 px-16 w-full text-2xl bg-green-700 text-white flex-shrink-0">
               Current Status: {currentStatus ? currentStatus : "White to move"}

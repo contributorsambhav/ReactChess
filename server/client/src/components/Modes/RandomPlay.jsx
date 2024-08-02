@@ -213,7 +213,7 @@ const ChessboardComponent = () => {
         <div className="mx-16 w-full lg:w-1/2">
           <div
             ref={chessRef}
-            style={{ width: window.innerWidth > 1028 ? "40vw" : "70vw" }}
+            style={{ width: window.innerWidth > 1028 ? "40vw" : "100vw" }}
           ></div>
         </div>
         <div>
@@ -226,8 +226,8 @@ const ChessboardComponent = () => {
             Mobile Mode
           </label>
         </div>
-        {!mobileMode && (
-          <div className="ml-4 w-1/3">
+        {(!mobileMode)&& (
+          <div className="ml-4 w-1/3 lg:w-full">
             <div className="rounded-xl text-center p-6 px-16 w-full lg:w-1/3 text-2xl bg-green-700 text-white flex-shrink-0">
               Current Status: {currentStatus ? currentStatus : "White to move"}
             </div>
