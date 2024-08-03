@@ -70,16 +70,19 @@ Explore the code: [GitHub - contributorsambhav/ReactChess](https://github.com/co
 ## Screenshots
 
 ### Homepage
-![Homepage](https://via.placeholder.com/800x400.png?text=Homepage)
+![Homepage](./images/home.png)
+
+### Mode Selector
+!Mode Selector](./images/modeselector.png)
 
 ### Local Multiplayer
-![Local Multiplayer](https://via.placeholder.com/800x400.png?text=Local+Multiplayer)
+![Local Multiplayer](./images/local.png)
 
 ### Global Multiplayer
-![Global Multiplayer](https://via.placeholder.com/800x400.png?text=Global+Multiplayer)
+![Global Multiplayer](./images/global.png)
 
-### Chess Puzzles
-![Chess Puzzles](https://via.placeholder.com/800x400.png?text=Chess+Puzzles)
+### Chess Puzzle
+![Chess Puzzles](./images/puzzle.png)
 
 ---
 
