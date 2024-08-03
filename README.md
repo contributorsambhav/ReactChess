@@ -73,13 +73,13 @@ Explore the code: [GitHub - contributorsambhav/ReactChess](https://github.com/co
 ![Homepage](./images/home.png)
 
 ### Mode Selector
-!Mode Selector](./images/modeselector.png)
+![Mode Selector](./images/modeselector.png)
 
 ### Local Multiplayer
-![Local Multiplayer](./images/local.png)
+![Local Multiplayer](./images/Local.png)
 
 ### Global Multiplayer
-![Global Multiplayer](./images/global.png)
+![Global Multiplayer](./images/Global.png)
 
 ### Chess Puzzle
 ![Chess Puzzles](./images/puzzle.png)
