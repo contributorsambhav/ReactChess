@@ -99,8 +99,9 @@ Explore the code: [GitHub - contributorsambhav/ReactChess](https://github.com/co
 3. **Set up environment variables**
    - Create a `.env` file in the root directory and add the following:
      ```
-     MONGO_URI=your_mongodb_uri
+     URL="https://stockfish.online/api/s/v2.php";
      JWT_SECRET=your_jwt_secret
+     PORT=your_port
      ```
 
 4. **Run the application**
