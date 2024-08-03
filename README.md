@@ -82,7 +82,7 @@ Explore the code: [GitHub - contributorsambhav/ReactChess](https://github.com/co
 ![Global Multiplayer](./images/Global.png)
 
 ### Chess Puzzle
-![Chess Puzzles](./images/puzzle.png)
+![Chess Puzzles](./images/Puzzles.png)
 
 ---
 
