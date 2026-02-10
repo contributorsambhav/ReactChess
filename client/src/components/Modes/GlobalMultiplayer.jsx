@@ -1,18 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
+
 import { Chess } from "chess.js";
 import Chessboard from "chessboardjs";
-import socketIOClient from "socket.io-client";
-import { useSelector } from "react-redux";
-import WaitQueue from "../WaitQueue";
-import { useNavigate } from "react-router-dom";
-import pieceImages from "../pieceImages";
-import axios from "axios";
 import { Howl } from "howler";
-import moveSoundFile from "../../assets/sounds/move.mp3";
+import WaitQueue from "../WaitQueue";
+import axios from "axios";
+import boardbg from "../../assets/images/bgboard.jpeg";
 import captureSoundFile from "../../assets/sounds/capture.mp3";
 import checkSoundFile from "../../assets/sounds/check.mp3";
 import checkmateSoundFile from "../../assets/sounds/checkmate.mp3";
-import boardbg from "../../assets/images/bgboard.jpeg";
+import moveSoundFile from "../../assets/sounds/move.mp3";
+import pieceImages from "../pieceImages";
+import socketIOClient from "socket.io-client";
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 // Initialize sound effects
 const moveSound = new Howl({ src: [moveSoundFile] });
@@ -25,7 +26,7 @@ const GlobalMultiplayer = () => {
     try {
       console.log("Sending data:", { userId, opponentName, status });
       const response = await axios.post(
-        `https://reactchess.onrender.com/user/${userId}/match-history`,
+        `${import.meta.env.VITE_BACKEND_URL}/user/${userId}/match-history`,
         {
           opponent: opponentName,
           status,
@@ -66,7 +67,7 @@ const GlobalMultiplayer = () => {
   useEffect(() => {
     const newGame = new Chess();
     setGame(newGame);
-    const newSocket = socketIOClient("https://reactchess.onrender.com", {
+    const newSocket = socketIOClient(import.meta.env.VITE_BACKEND_URL, {
       query: { user: JSON.stringify(user) },
     });
     setSocket(newSocket);

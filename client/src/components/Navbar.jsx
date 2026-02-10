@@ -1,9 +1,10 @@
-import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import wN from './pieces/wN.png';
-import { login } from '../store/authSlice';
+import { useDispatch, useSelector } from 'react-redux';
+
+import React from 'react';
 import axios from 'axios';
+import { login } from '../store/authSlice';
+import wN from './pieces/wN.png';
 
 function Navbar() {
     const dispatch = useDispatch();
@@ -12,7 +13,9 @@ function Navbar() {
     const location = useLocation();
 
     React.useEffect(() => {
-        axios.get("https://reactchess.onrender.com/profile", {
+        console.log("BACKEND_URL =", import.meta.env.VITE_BACKEND_URL);
+
+        axios.get(import.meta.env.VITE_BACKEND_URL, {
             withCredentials: true
         })
             .then(res => {

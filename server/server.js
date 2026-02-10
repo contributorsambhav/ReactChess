@@ -18,10 +18,13 @@ const app = express();
 const httpServer = createServer(app);
 
 const corsOptions = {
-  origin: '*:*',
-  methods: ['GET', 'POST'],
-  credentials: true
+  origin: function (origin, callback) {
+    callback(null, true); 
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
 };
+
 
 app.use(cors(corsOptions));
 app.use(express.json());
@@ -46,17 +49,21 @@ app.get("/stockfish", async (req, res) => {
   }
 });
 
-// Wildcard route for SPA (Single Page Application)
-// This should be the last route to catch all other routes
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "/client/dist/index.html"));
+app.get("/", (req, res) => {
+  res.send("Server is running");
 });
+
 
 const io = new Server(httpServer, {
   cors: {
-    origin: '*:*',
+    origin: (origin, callback) => {
+      callback(null, true); 
+    },
+    credentials: true,
+    methods: ["GET", "POST"]
   }
 });
+
 
 let pendingUser = null;
 
@@ -102,5 +109,5 @@ io.on('connection', (socket) => {
 });
 
 httpServer.listen(port, () => {
-  console.log(`Server started at succesfully`);
+  console.log(`Server started at succesfully on port ${port} `);
 });

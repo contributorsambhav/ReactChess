@@ -1,11 +1,12 @@
+import { login, logout } from "../store/authSlice";
+import { useDispatch, useSelector } from "react-redux";
+
+import Cookies from "js-cookie";
 import React from "react";
 import axios from "axios";
-import { useSelector, useDispatch } from "react-redux";
-import { login, logout } from "../store/authSlice";
-import Cookies from "js-cookie";
-import { useNavigate } from "react-router-dom";
-import svg from "../assets/images/base.png";
 import bg from "../assets/images/bgprofile.jpg";
+import svg from "../assets/images/base.png";
+import { useNavigate } from "react-router-dom";
 
 function Profile() {
   const userData = useSelector((state) => state.auth.userData);
@@ -14,7 +15,7 @@ function Profile() {
 
   React.useEffect(() => {
     axios
-      .get("https://reactchess.onrender.com/profile", {
+      .get(`${import.meta.env.VITE_BACKEND_URL}/profile`, {
         withCredentials: true,
       })
       .then((res) => {

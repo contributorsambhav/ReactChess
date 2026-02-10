@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import bgImage from '../../assets/images/bgImage.jpg';
+import React, { useState } from 'react';
+
 import PieceArray from '../PieceArray';
 import axios from "axios"
+import bgImage from '../../assets/images/bgImage.jpg';
 import { login } from '../../store/authSlice';
+import { useDispatch } from 'react-redux';
+
 function Login() {
     const dispatch = useDispatch();
     
@@ -14,7 +16,7 @@ function Login() {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     React.useEffect(() => {
-        axios.get("https://reactchess.onrender.com/profile", {
+        axios.get(import.meta.env.VITE_BACKEND_URL, {
             withCredentials: true
         })
             .then(res => {
@@ -30,7 +32,7 @@ function Login() {
     const handleLogin = async (e) => {
     e.preventDefault();
     try {
-        const response = await fetch('https://reactchess.onrender.com/user/login', {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
