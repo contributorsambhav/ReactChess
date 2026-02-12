@@ -1,8 +1,12 @@
 const mongoose = require('mongoose')
+const dotenv = require("dotenv")
+dotenv.config()
 
+const MONGO_URI = process.env.MONGO_URI
+console.log(MONGO_URI)
 const dbConnector = async () => {
 
-    await mongoose.connect('mongodb+srv://sam:Password@atlascluster.ycaagz6.mongodb.net/Chess?retryWrites=true&w=majority&appName=AtlasCluster', {
+    await mongoose.connect(MONGO_URI, {
     }
     ).then(() => console.log('MongoDB connected')).catch((err) => {
         console.log(err);
