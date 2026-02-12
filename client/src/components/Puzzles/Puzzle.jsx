@@ -1,14 +1,17 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+
 import { Chess } from "chess.js";
 import Chessboard from "chessboardjs";
-import axios from "axios";
-import pieceImages from "../pieceImages";
 import { Howl } from "howler";
-import moveSoundFile from "../../assets/sounds/move.mp3";
+import PuzzleService from "../../services/puzzleService";
+import axios from "axios";
+import bg from "../../assets/images/bgprofile.jpg";
 import captureSoundFile from "../../assets/sounds/capture.mp3";
 import checkSoundFile from "../../assets/sounds/check.mp3";
 import checkmateSoundFile from "../../assets/sounds/checkmate.mp3";
-import bg from "../../assets/images/bgprofile.jpg";
+import moveSoundFile from "../../assets/sounds/move.mp3";
+import pieceImages from "../pieceImages";
 
 const debounce = (func, delay) => {
   let timeoutId;
@@ -26,8 +29,50 @@ const captureSound = new Howl({ src: [captureSoundFile] });
 const checkSound = new Howl({ src: [checkSoundFile] });
 const checkmateSound = new Howl({ src: [checkmateSoundFile] });
 
-const Puzzle4 = () => {
-  const puzzleFEN = "r5r1/2pn4/1p1p2n1/3Pp2R/1pP1BkP1/2N2P2/P2K4/8 w - - 0 35";
+const Puzzle = () => {
+  const { puzzleId } = useParams();
+  const navigate = useNavigate();
+  
+  const [puzzle, setPuzzle] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  const chessRef = useRef(null);
+  const boardRef = useRef(null);
+  const [currentStatus, setCurrentStatus] = useState(null);
+  const [moves, setMoves] = useState([]);
+  const gameRef = useRef(null);
+  const [isTableCollapsed, setIsTableCollapsed] = useState(false);
+  const [isSolutionCollapsed, setIsSolutionCollapsed] = useState(false);
+  const [promotionPiece, setPromotionPiece] = useState("q");
+  const [mobileMode, setMobileMode] = useState(false);
+  const [puzzleCompleted, setPuzzleCompleted] = useState(false);
+
+  // Fetch puzzle data from API
+  useEffect(() => {
+    const fetchPuzzle = async () => {
+      try {
+        setLoading(true);
+        const response = await PuzzleService.getPuzzleById(puzzleId);
+        
+        if (response.success) {
+          setPuzzle(response.puzzle);
+          gameRef.current = new Chess(response.puzzle.fen);
+        } else {
+          setError('Puzzle not found');
+          setTimeout(() => navigate("/puzzle"), 2000);
+        }
+      } catch (err) {
+        console.error('Error fetching puzzle:', err);
+        setError('Failed to load puzzle');
+        setTimeout(() => navigate("/puzzle"), 2000);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPuzzle();
+  }, [puzzleId, navigate]);
 
   const fetchBestMove = async (FEN) => {
     try {
@@ -48,19 +93,24 @@ const Puzzle4 = () => {
     }
   };
 
-  const chessRef = useRef(null);
-  const boardRef = useRef(null);
-  const [currentStatus, setCurrentStatus] = useState(null);
-  const [moves, setMoves] = useState([]);
-  const gameRef = useRef(new Chess(puzzleFEN));
-  const [isTableCollapsed, setIsTableCollapsed] = useState(false);
-  const [isVideoCollapsed, setIsVideoCollapsed] = useState(false);
-  const [promotionPiece, setPromotionPiece] = useState("q");
-  const [mobileMode, setMobileMode] = useState(false);
   const handleCheckboxChange = () => {
     setMobileMode(!mobileMode);
   };
+
+  const recordPuzzleAttempt = async (success) => {
+    if (puzzleCompleted) return; // Only record once
+    
+    try {
+      await PuzzleService.recordAttempt(puzzleId, success);
+      setPuzzleCompleted(true);
+    } catch (error) {
+      console.error('Error recording puzzle attempt:', error);
+    }
+  };
+
   useEffect(() => {
+    if (!puzzle || !puzzle.fen) return;
+
     const game = gameRef.current;
 
     const onDragStart = (source, piece, position, orientation) => {
@@ -103,6 +153,14 @@ const Puzzle4 = () => {
         moveSound.play();
       }
 
+      // Check if puzzle is solved (game over and white wins or checkmate)
+      if (game.isGameOver()) {
+        if (game.isCheckmate() && game.turn() === 'b') {
+          // White delivered checkmate - puzzle solved!
+          recordPuzzleAttempt(true);
+        }
+      }
+
       if (game.turn() === "b") {
         try {
           const fen = game.fen();
@@ -117,7 +175,7 @@ const Puzzle4 = () => {
             move = game.move({
               from: bestMove.slice(0, 2),
               to: bestMove.slice(2, 4),
-              promotion: promotionPiece, // Use the selected promotion piece
+              promotion: promotionPiece,
             });
 
             if (move !== null) {
@@ -203,7 +261,7 @@ const Puzzle4 = () => {
 
     const config = {
       draggable: true,
-      position: puzzleFEN,
+      position: puzzle.fen,
       onDragStart: onDragStart,
       onDrop: onDrop,
       onMouseoverSquare: onMouseoverSquare,
@@ -221,53 +279,99 @@ const Puzzle4 = () => {
         boardRef.current.destroy();
       }
     };
-  }, [puzzleFEN, promotionPiece]);
+  }, [puzzle, promotionPiece]);
 
   const toggleTable = () => {
     setIsTableCollapsed(!isTableCollapsed);
   };
 
-  const toggleVideo = () => {
-    setIsVideoCollapsed(!isVideoCollapsed);
+  const toggleSolution = () => {
+    setIsSolutionCollapsed(!isSolutionCollapsed);
   };
 
   const handlePromotionChange = (e) => {
     setPromotionPiece(e.target.value);
   };
 
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-white text-2xl">Loading puzzle...</div>
+      </div>
+    );
+  }
+
+  if (error || !puzzle) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-red-500 text-2xl">{error || 'Puzzle not found'}</div>
+      </div>
+    );
+  }
+
   return (
     <div
-      className="w-full flex py-32 flex-col items-center min-min-h-screen "
-      style={{ backgroundImage: `url(${bg})`, backgroundSize: "contain" }}
+      className="w-full flex flex-col items-center min-h-screen"
+      style={{
+        backgroundImage: `url(${bg})`,
+        backgroundSize: "contain",
+        backgroundRepeat: "repeat-y",
+      }}
     >
       {!mobileMode && (
-        <h1 className="text-3xl font-bold mt-16 lg:mt-4 z-10">
-          Mate in one move (easy)
-        </h1>
+        <>
+          <h1 className="text-3xl font-bold mt-16 lg:mt-4 z-10">
+            {puzzle.name}
+          </h1>
+          <div className="w-[80%] p-4 text-lg">
+            <p>{puzzle.description}</p>
+            {puzzle.composer && (
+              <p className="mt-2 text-gray-300">
+                <span className="font-semibold">Composer:</span> {puzzle.composer}
+                {puzzle.year && ` (${puzzle.year})`}
+              </p>
+            )}
+            {puzzle.attempts > 0 && (
+              <p className="mt-2 text-gray-400 text-sm">
+                Attempted {puzzle.attempts} times • {puzzle.successRate.toFixed(1)}% success rate
+              </p>
+            )}
+            <p className="text-weight-500 mt-3 text-center text-xl text-red-500">
+              If board position changes to original after promotion, just
+              attempt an illegal move
+            </p>
+          </div>
+        </>
       )}
 
-      <div className="w-screen flex lg:flex-row flex-col lg:flex-row mx-auto my-auto">
-        <div className=" w-full mx-auto lg:w-1/2">
+      <div className="w-screen flex lg:flex-row flex-col mx-auto my-auto">
+        <div className="lg:mx-16 w-full lg:w-1/2">
           <div
             ref={chessRef}
             style={{ width: window.innerWidth > 1028 ? "40vw" : "100vw" }}
           ></div>
+          <div>
+            <label>
+              <input
+                type="checkbox"
+                checked={mobileMode}
+                onChange={handleCheckboxChange}
+              />
+              Mobile Mode
+            </label>
+          </div>
         </div>
-        <div>
-          <label>
-            <input
-              type="checkbox"
-              checked={mobileMode}
-              onChange={handleCheckboxChange}
-            />
-            Mobile Mode
-          </label>
-        </div>
+
         {!mobileMode && (
           <div className="lg:ml-4 w-full lg:w-1/3 mt-4 lg:mt-0">
             <div className="rounded-xl text-center p-6 px-16 w-full text-2xl bg-green-700 text-white flex-shrink-0">
               Current Status: {currentStatus ? currentStatus : "White to move"}
             </div>
+            {puzzleCompleted && (
+              <div className="mt-4 p-4 bg-green-600 text-white rounded-lg text-center">
+                🎉 Puzzle Solved! Great job!
+              </div>
+            )}
             <div className="mt-4">
               <label className="mr-2 text-white">Promotion Piece:</label>
               <select
@@ -329,13 +433,31 @@ const Puzzle4 = () => {
               </div>
             </div>
             <button
-              onClick={toggleVideo}
+              onClick={toggleSolution}
               className="mt-4 bg-green-700 text-white px-4 py-2 rounded-t-lg w-full"
             >
-              {isVideoCollapsed ? "Hide  Solution" : "Show  Solution"}
+              {isSolutionCollapsed ? "Hide Solution" : "Show Solution"}
             </button>
-            {isVideoCollapsed && (
-              <div className="text-2xl mt-2 text-center">Knight to e2</div>
+            {isSolutionCollapsed && (
+              <>
+                {puzzle.solutionType === "video" && puzzle.videoUrl ? (
+                  <iframe
+                    width="640"
+                    height="360"
+                    src={puzzle.videoUrl}
+                    title={puzzle.videoTitle || "Puzzle Solution"}
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    allowFullScreen
+                    className="mt-4 mx-auto"
+                  ></iframe>
+                ) : puzzle.solutionType === "text" && puzzle.solution ? (
+                  <div className="text-2xl mt-2 text-center text-white">
+                    {puzzle.solution}
+                  </div>
+                ) : null}
+              </>
             )}
           </div>
         )}
@@ -344,4 +466,4 @@ const Puzzle4 = () => {
   );
 };
 
-export default Puzzle4;
+export default Puzzle;
