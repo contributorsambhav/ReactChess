@@ -59,12 +59,11 @@ const login = async (req, res) => {
       expiresIn: '4h'
     });
 
- res.cookie('token', token, {
+res.cookie('token', token, {
   httpOnly: true,
   maxAge: 3600000,
-  secure: process.env.NODE_ENV === 'production',   
-  sameSite: 'none',                                 
-  domain: '.onrender.com'                           
+  secure: false,
+  samesite : 'none'
 });
     res.status(200).json({
       token,
