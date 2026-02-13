@@ -56,12 +56,10 @@ const login = async (req, res) => {
       loses: user.loses,
       draws: user.draws
     }, process.env.JWT_SECRET, {
-      expiresIn: '4h'
     });
 
 res.cookie('token', token, {
   httpOnly: true,
-  maxAge: 3600000,
   secure: true,
   sameSite : 'none'
 });

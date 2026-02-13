@@ -47,6 +47,7 @@ const Puzzle = () => {
   const [promotionPiece, setPromotionPiece] = useState("q");
   const [mobileMode, setMobileMode] = useState(false);
   const [puzzleCompleted, setPuzzleCompleted] = useState(false);
+  const [playerColor, setPlayerColor] = useState("w"); // Track which color the player controls
 
   // Fetch puzzle data from API
   useEffect(() => {
@@ -57,7 +58,11 @@ const Puzzle = () => {
         
         if (response.success) {
           setPuzzle(response.puzzle);
-          gameRef.current = new Chess(response.puzzle.fen);
+          const game = new Chess(response.puzzle.fen);
+          gameRef.current = game;
+          
+          // Set player color based on whose turn it is in the FEN
+          setPlayerColor(game.turn());
         } else {
           setError('Puzzle not found');
           setTimeout(() => navigate("/puzzle"), 2000);
@@ -121,11 +126,7 @@ const Puzzle = () => {
         return false;
       }
 
-      if (game.turn() === "b") {
-        console.log("It's not White's turn");
-        return false;
-      }
-
+      // Only allow the player to move pieces of their color (based on the turn from FEN)
       if (
         (game.turn() === "w" && piece.search(/^b/) !== -1) ||
         (game.turn() === "b" && piece.search(/^w/) !== -1)
@@ -155,15 +156,23 @@ const Puzzle = () => {
         moveSound.play();
       }
 
-      // Check if puzzle is solved (game over and white wins or checkmate)
+      // Check if puzzle is solved
       if (game.isGameOver()) {
-        if (game.isCheckmate() && game.turn() === 'b') {
-          // White delivered checkmate - puzzle solved!
-          recordPuzzleAttempt(true);
+        if (game.isCheckmate()) {
+          // Check if the player's color delivered checkmate
+          // If player is white and black is in checkmate, or player is black and white is in checkmate
+          const playerWon = (playerColor === 'w' && game.turn() === 'b') || 
+                           (playerColor === 'b' && game.turn() === 'w');
+          
+          if (playerWon) {
+            recordPuzzleAttempt(true);
+          }
         }
       }
 
-      if (game.turn() === "b") {
+      // Get opponent's response (only if it's now the opponent's turn)
+      const opponentColor = playerColor === 'w' ? 'b' : 'w';
+      if (game.turn() === opponentColor) {
         try {
           const fen = game.fen();
           console.log(fen);
@@ -239,7 +248,7 @@ const Puzzle = () => {
       } else {
         status = moveColor + " to move";
 
-        if (game.isCheckmate()) {
+        if (game.isCheck()) {
           status += ", " + moveColor + " is in check";
           checkSound.play();
         }
@@ -272,6 +281,8 @@ const Puzzle = () => {
       pieceTheme: (piece) => pieceImages[piece],
       snapbackSpeed: 500,
       snapSpeed: 100,
+      // Set board orientation based on player color
+      orientation: playerColor === 'w' ? 'white' : 'black'
     };
 
     boardRef.current = Chessboard(chessRef.current, config);
@@ -281,7 +292,7 @@ const Puzzle = () => {
         boardRef.current.destroy();
       }
     };
-  }, [puzzle, promotionPiece]);
+  }, [puzzle, promotionPiece, playerColor]);
 
   const toggleTable = () => {
     setIsTableCollapsed(!isTableCollapsed);
@@ -338,6 +349,9 @@ const Puzzle = () => {
                 Attempted {puzzle.attempts} times • {puzzle.successRate.toFixed(1)}% success rate
               </p>
             )}
+            {/* <p className="mt-2 text-yellow-300 text-sm drop-shadow-md font-semibold">
+              You are playing as: {playerColor === 'w' ? 'White' : 'Black'}
+            </p> */}
           </div>
         </>
       )}
@@ -363,7 +377,7 @@ const Puzzle = () => {
         {!mobileMode && (
           <div className="lg:mx-4 w-fit mx-2 lg:w-1/3 mt-4 lg:mt-0">
             <div className="rounded-xl shadow-lg text-center p-6 px-12 lg:w-full text-xl lg:text-2xl bg-gray-400 bg-opacity-30 text-white border border-gray-200 flex-shrink-0">
-              Current Status: {currentStatus ? currentStatus : "White to move"}
+              Current Status: {currentStatus ? currentStatus : (playerColor === 'w' ? "White to move" : "Black to move")}
             </div>
             
             {puzzleCompleted && (
