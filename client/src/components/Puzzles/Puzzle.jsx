@@ -6,7 +6,7 @@ import Chessboard from "chessboardjs";
 import { Howl } from "howler";
 import PuzzleService from "../../services/puzzleService";
 import axios from "axios";
-import bg from "../../assets/images/bgprofile.jpg";
+import boardbg from "../../assets/images/bgboard.jpeg";
 import captureSoundFile from "../../assets/sounds/capture.mp3";
 import checkSoundFile from "../../assets/sounds/check.mp3";
 import checkmateSoundFile from "../../assets/sounds/checkmate.mp3";
@@ -74,17 +74,19 @@ const Puzzle = () => {
     fetchPuzzle();
   }, [puzzleId, navigate]);
 
+
+  
   const fetchBestMove = async (FEN) => {
     try {
       const response = await axios.get(
-        "https://reactchess.onrender.com/stockfish",
-        {
-          params: {
-            fen: FEN,
-            depth: 10,
-          },
-        }
-      );
+          `${import.meta.env.VITE_BACKEND_URL}/stockfish`,
+          {
+            params: {
+              fen: FEN,
+              depth: 10,
+            },
+          }
+        );
       console.log("Response from server:", response.data);
       return response.data.bestMove;
     } catch (error) {
@@ -313,33 +315,29 @@ const Puzzle = () => {
     <div
       className="w-full flex flex-col items-center min-h-screen"
       style={{
-        backgroundImage: `url(${bg})`,
-        backgroundSize: "contain",
-        backgroundRepeat: "repeat-y",
+        backgroundImage: `url(${boardbg})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center"
       }}
     >
       {!mobileMode && (
         <>
-          <h1 className="text-3xl font-bold mt-16 lg:mt-4 z-10">
+          <h1 className="text-3xl font-bold mt-16 lg:mt-4 z-10 text-white drop-shadow-lg">
             {puzzle.name}
           </h1>
-          <div className="w-[80%] p-4 text-lg">
-            <p>{puzzle.description}</p>
+          <div className="w-[80%] p-4 text-lg text-white">
+            <p className="drop-shadow-md">{puzzle.description}</p>
             {puzzle.composer && (
-              <p className="mt-2 text-gray-300">
+              <p className="mt-2 text-gray-200 drop-shadow-md">
                 <span className="font-semibold">Composer:</span> {puzzle.composer}
                 {puzzle.year && ` (${puzzle.year})`}
               </p>
             )}
             {puzzle.attempts > 0 && (
-              <p className="mt-2 text-gray-400 text-sm">
+              <p className="mt-2 text-gray-300 text-sm drop-shadow-md">
                 Attempted {puzzle.attempts} times • {puzzle.successRate.toFixed(1)}% success rate
               </p>
             )}
-            <p className="text-weight-500 mt-3 text-center text-xl text-red-500">
-              If board position changes to original after promotion, just
-              attempt an illegal move
-            </p>
           </div>
         </>
       )}
@@ -363,31 +361,61 @@ const Puzzle = () => {
         </div>
 
         {!mobileMode && (
-          <div className="lg:ml-4 w-full lg:w-1/3 mt-4 lg:mt-0">
-            <div className="rounded-xl text-center p-6 px-16 w-full text-2xl bg-green-700 text-white flex-shrink-0">
+          <div className="lg:mx-4 w-fit mx-2 lg:w-1/3 mt-4 lg:mt-0">
+            <div className="rounded-xl shadow-lg text-center p-6 px-12 lg:w-full text-xl lg:text-2xl bg-gray-400 bg-opacity-30 text-white border border-gray-200 flex-shrink-0">
               Current Status: {currentStatus ? currentStatus : "White to move"}
             </div>
+            
             {puzzleCompleted && (
-              <div className="mt-4 p-4 bg-green-600 text-white rounded-lg text-center">
+              <div className="mt-4 p-4 bg-green-600 bg-opacity-80 text-white rounded-lg text-center border border-green-400 shadow-lg">
                 🎉 Puzzle Solved! Great job!
               </div>
             )}
+
             <div className="mt-4">
-              <label className="mr-2 text-white">Promotion Piece:</label>
+              <label className="mr-2 text-white text-lg lg:text-xl">
+                Promotion Piece:
+              </label>
               <select
                 value={promotionPiece}
                 onChange={handlePromotionChange}
-                className="bg-green-700 text-white px-4 py-2 rounded-lg w-full"
+                className="bg-gray-400 bg-opacity-30 text-white px-4 py-2 rounded-lg w-full text-base lg:text-lg border border-gray-200"
               >
-                <option value="q">Queen</option>
-                <option value="r">Rook</option>
-                <option value="b">Bishop</option>
-                <option value="n">Knight</option>
+                <option
+                  className="bg-blue-900 bg-opacity-50 bg-transparent text-white"
+                  value="q"
+                >
+                  Queen
+                </option>
+                <option
+                  className="bg-blue-900 bg-opacity-50 bg-transparent text-white"
+                  value="r"
+                >
+                  Rook
+                </option>
+                <option
+                  className="bg-blue-900 bg-opacity-50 bg-transparent text-white"
+                  value="b"
+                >
+                  Bishop
+                </option>
+                <option
+                  className="bg-blue-900 bg-opacity-50 bg-transparent text-white"
+                  value="n"
+                >
+                  Knight
+                </option>
               </select>
             </div>
+
+            <div className="mx-2 mt-3 text-center border border-gray-800 text-base lg:text-lg text-white bg-black bg-opacity-20 p-4 rounded-lg">
+              If board position changes to original after promotion, just
+              attempt an illegal move
+            </div>
+
             <button
               onClick={toggleTable}
-              className="mt-4 bg-green-700 text-white px-4 py-2 rounded-t-lg w-full"
+              className="mt-4 bg-gray-400 bg-opacity-30 text-white border border-gray-200 px-4 py-2 rounded-lg w-full text-base lg:text-lg"
             >
               {isTableCollapsed ? "Show Moves" : "Hide Moves"}
             </button>
@@ -399,12 +427,18 @@ const Puzzle = () => {
               }}
             >
               <div style={{ height: "100%", overflowY: "auto" }}>
-                <table className="w-full border-collapse border border-gray-700 rounded-lg">
+                <table className="w-full border-collapse border border-gray-700 rounded-lg bg-gray-400 bg-opacity-30 text-white">
                   <thead>
-                    <tr className="bg-gray-800 text-center text-white">
-                      <th className="border border-gray-700 px-6 py-3">Move</th>
-                      <th className="border border-gray-700 px-6 py-3">From</th>
-                      <th className="border border-gray-700 px-6 py-3">To</th>
+                    <tr className="bg-gray-800 bg-opacity-30 text-center text-white">
+                      <th className="border border-gray-400 px-6 py-3 text-base lg:text-lg">
+                        Move
+                      </th>
+                      <th className="border border-gray-400 px-6 py-3 text-base lg:text-lg">
+                        From
+                      </th>
+                      <th className="border border-gray-400 px-6 py-3 text-base lg:text-lg">
+                        To
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -413,17 +447,17 @@ const Puzzle = () => {
                         key={index}
                         className={
                           index % 2 === 0
-                            ? "bg-gray-700 text-white text-center"
-                            : "bg-gray-600 text-gray-200 text-center"
+                            ? "bg-gray-700 bg-opacity-30 text-white text-center"
+                            : "bg-gray-600 bg-opacity-30 text-gray-200 text-center"
                         }
                       >
-                        <td className="border border-gray-700 px-6 py-4">
+                        <td className="border border-gray-400 px-6 py-4 text-base lg:text-lg">
                           {index + 1}
                         </td>
-                        <td className="border border-gray-700 px-6 py-4">
+                        <td className="border border-gray-400 px-6 py-4 text-base lg:text-lg">
                           {move.from}
                         </td>
-                        <td className="border border-gray-700 px-6 py-4">
+                        <td className="border border-gray-400 px-6 py-4 text-base lg:text-lg">
                           {move.to}
                         </td>
                       </tr>
@@ -432,9 +466,10 @@ const Puzzle = () => {
                 </table>
               </div>
             </div>
+            
             <button
               onClick={toggleSolution}
-              className="mt-4 bg-green-700 text-white px-4 py-2 rounded-t-lg w-full"
+              className="mt-4 bg-gray-400 bg-opacity-30 text-white border border-gray-200 px-4 py-2 rounded-lg w-full text-base lg:text-lg"
             >
               {isSolutionCollapsed ? "Hide Solution" : "Show Solution"}
             </button>
@@ -442,7 +477,7 @@ const Puzzle = () => {
               <>
                 {puzzle.solutionType === "video" && puzzle.videoUrl ? (
                   <iframe
-                    width="640"
+                    width="100%"
                     height="360"
                     src={puzzle.videoUrl}
                     title={puzzle.videoTitle || "Puzzle Solution"}
@@ -450,10 +485,10 @@ const Puzzle = () => {
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     referrerPolicy="strict-origin-when-cross-origin"
                     allowFullScreen
-                    className="mt-4 mx-auto"
+                    className="mt-4 mx-auto rounded-lg border border-gray-200"
                   ></iframe>
                 ) : puzzle.solutionType === "text" && puzzle.solution ? (
-                  <div className="text-2xl mt-2 text-center text-white">
+                  <div className="text-base lg:text-lg mt-4 text-center text-white bg-gray-400 bg-opacity-30 p-4 rounded-lg border border-gray-200">
                     {puzzle.solution}
                   </div>
                 ) : null}

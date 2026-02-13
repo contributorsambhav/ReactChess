@@ -25,6 +25,11 @@ const puzzleSchema = new mongoose.Schema({
     required: [true, 'FEN notation is required'],
     trim: true
   },
+  turn: {
+    type: Boolean,
+    required: [true, 'Turn is required (true for white, false for black)'],
+    default: true
+  },
   description: {
     type: String,
     trim: true
