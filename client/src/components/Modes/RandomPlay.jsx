@@ -23,7 +23,7 @@ const ChessboardComponent = () => {
   const gameRef = useRef(null); // Reference to the Chess game instance
   const [currentStatus, setCurrentStatus] = useState(null); // State to hold the current game status
   const [moves, setMoves] = useState([]); // State to hold the list of moves
-  const [mobileMode, setMobileMode] = useState(false);
+  const [mobileMode, setMobileMode] = useState(window.innerWidth <= 1028);
   const [isTableCollapsed, setIsTableCollapsed] = useState(false);
   const [selectedSquare, setSelectedSquare] = useState(null); // Track selected square in touch mode
   

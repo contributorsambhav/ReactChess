@@ -54,7 +54,7 @@ const AgainstStockfish = () => {
   const gameRef = useRef(new Chess());
   const [isTableCollapsed, setIsTableCollapsed] = useState(true);
   const [promotionPiece, setPromotionPiece] = useState("q");
-  const [mobileMode, setMobileMode] = useState(false);
+  const [mobileMode, setMobileMode] = useState(window.innerWidth <= 1028);
   const [selectedSquare, setSelectedSquare] = useState(null);
   const [isThinking, setIsThinking] = useState(false);
 

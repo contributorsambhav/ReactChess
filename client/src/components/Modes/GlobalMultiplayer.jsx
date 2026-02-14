@@ -54,7 +54,7 @@ const GlobalMultiplayer = () => {
   const [opponent, setOpponent] = useState(null);
   const [promotionPiece, setPromotionPiece] = useState("q");
   const [isTableCollapsed, setIsTableCollapsed] = useState(false);
-  const [mobileMode, setMobileMode] = useState(false);
+  const [mobileMode, setMobileMode] = useState(window.innerWidth <= 1028);
   const [selectedSquare, setSelectedSquare] = useState(null);
   const navigate = useNavigate();
 

@@ -46,7 +46,7 @@ const Puzzle = () => {
   const [isTableCollapsed, setIsTableCollapsed] = useState(false);
   const [isSolutionCollapsed, setIsSolutionCollapsed] = useState(false);
   const [promotionPiece, setPromotionPiece] = useState("q");
-  const [mobileMode, setMobileMode] = useState(false);
+  const [mobileMode, setMobileMode] = useState(window.innerWidth <= 1028);
   const [puzzleCompleted, setPuzzleCompleted] = useState(false);
   const [playerColor, setPlayerColor] = useState("w");
   const [selectedSquare, setSelectedSquare] = useState(null);
