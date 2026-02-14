@@ -1,13 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
+
 import { Chess } from "chess.js";
 import Chessboard from "chessboardjs";
 import { Howl } from "howler";
-import moveSoundFile from "../../assets/sounds/move.mp3";
+import MobileToggle from "../MobileToggle";
+import bg from "../../assets/images/bgprofile.jpg";
 import captureSoundFile from "../../assets/sounds/capture.mp3";
 import checkSoundFile from "../../assets/sounds/check.mp3";
 import checkmateSoundFile from "../../assets/sounds/checkmate.mp3";
+import moveSoundFile from "../../assets/sounds/move.mp3";
 import pieceImages from "../pieceImages";
-import bg from "../../assets/images/bgprofile.jpg";
 
 // Initialize sound effects
 const moveSound = new Howl({ src: [moveSoundFile] });
@@ -21,9 +23,16 @@ const ChessboardComponent = () => {
   const [currentStatus, setCurrentStatus] = useState(null); // State to hold the current game status
   const [moves, setMoves] = useState([]); // State to hold the list of moves
   const [mobileMode, setMobileMode] = useState(false);
+  const [isTableCollapsed, setIsTableCollapsed] = useState(false);
+  
   const handleCheckboxChange = () => {
     setMobileMode(!mobileMode);
   };
+
+  const toggleTable = () => {
+    setIsTableCollapsed(!isTableCollapsed);
+  };
+  
   useEffect(() => {
     const game = new Chess(); // Create a new Chess instance
 
@@ -206,71 +215,94 @@ const ChessboardComponent = () => {
 
   return (
     <div
-      className="lg:mt-4 mt-16 flex h-fit py-32 items-center justify-center w-screen"
-      style={{ backgroundImage: `url(${bg})`, backgroundSize: "contain" }}
+      className="w-full flex flex-col items-center min-h-screen"
+      style={{
+        backgroundImage: `url(${bg})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center"
+      }}
     >
-      <div className="w-screen flex flex-col lg:flex-row lg:flex-row mx-auto my-auto">
+      <div className="w-screen mt-32 flex lg:flex-row flex-col mx-auto my-auto">
         <div className="lg:mx-16 w-full lg:w-1/2">
           <div
             ref={chessRef}
             style={{ width: window.innerWidth > 1028 ? "40vw" : "100vw" }}
           ></div>
-          <div>
-            <label>
-              <input
-                type="checkbox"
-                checked={mobileMode}
-                onChange={handleCheckboxChange}
-              />
-              Mobile Mode
-            </label>
-          </div>
         </div>
 
-        {!mobileMode && (
-          <div className="lg:ml-4 lg:w-1/3 w-full">
-            <div className="rounded-xl text-center p-6 px-16  w-full text-2xl bg-green-700 text-white flex-shrink-0">
-              Current Status: {currentStatus ? currentStatus : "White to move"}
-            </div>
-            <div className="mt-4">
-              <p className="text-weight-500 mx-2 mx-3 text-center text-xl text-green-500">
-                Always promotes to queen.
-              </p>
+        <div className="lg:mx-4 w-fit mx-2 lg:w-1/3 mt-4 lg:mt-0">
+          <MobileToggle 
+            mobileMode={mobileMode} 
+            onChange={handleCheckboxChange}
+            className="mb-4"
+          />
+          
+          {!mobileMode && (
+            <>
+              <div className="rounded-xl shadow-lg text-center p-6 px-12 lg:w-full text-xl lg:text-2xl bg-gray-400 bg-opacity-30 text-white border border-gray-200 flex-shrink-0">
+                Current Status: {currentStatus ? currentStatus : "White to move"}
+              </div>
 
-              <table className="w-full border-collapse border border-gray-700 rounded-lg overflow-hidden">
-                <thead>
-                  <tr className="bg-gray-800 text-center text-white">
-                    <th className="border border-gray-700 px-6 py-3">Move</th>
-                    <th className="border border-gray-700 px-6 py-3">From</th>
-                    <th className="border border-gray-700 px-6 py-3">To</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {moves.map((move, index) => (
-                    <tr
-                      key={index}
-                      className={
-                        index % 2 === 0
-                          ? "bg-gray-700 text-white text-center"
-                          : "bg-gray-600 text-gray-200 text-center"
-                      }
-                    >
-                      <td className="border border-gray-700 px-6 py-4">
-                        {index + 1}
-                      </td>
-                      <td className="border border-gray-700 px-6 py-4">
-                        {move.from}
-                      </td>
-                      <td className="border border-gray-700 px-6 py-4">
-                        {move.to}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
+              <div className="mx-2 mt-3 text-center border border-gray-800 text-base lg:text-lg text-white bg-black bg-opacity-20 p-4 rounded-lg">
+                Always promotes to queen
+              </div>
+
+              <button
+                onClick={toggleTable}
+                className="mt-4 bg-gray-400 bg-opacity-30 text-white border border-gray-200 px-4 py-2 rounded-lg w-full text-base lg:text-lg"
+              >
+                {isTableCollapsed ? "Show Moves" : "Hide Moves"}
+              </button>
+              <div
+                style={{
+                  maxHeight: isTableCollapsed ? "0" : "40vh",
+                  transition: "max-height 0.3s ease-in-out",
+                  overflow: "scroll",
+                }}
+              >
+                <div style={{ height: "100%", overflowY: "auto" }}>
+                  <table className="w-full border-collapse border border-gray-700 rounded-lg bg-gray-400 bg-opacity-30 text-white">
+                    <thead>
+                      <tr className="bg-gray-800 bg-opacity-30 text-center text-white">
+                        <th className="border border-gray-400 px-6 py-3 text-base lg:text-lg">
+                          Move
+                        </th>
+                        <th className="border border-gray-400 px-6 py-3 text-base lg:text-lg">
+                          From
+                        </th>
+                        <th className="border border-gray-400 px-6 py-3 text-base lg:text-lg">
+                          To
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {moves.map((move, index) => (
+                        <tr
+                          key={index}
+                          className={
+                            index % 2 === 0
+                              ? "bg-gray-700 bg-opacity-30 text-white text-center"
+                              : "bg-gray-600 bg-opacity-30 text-gray-200 text-center"
+                          }
+                        >
+                          <td className="border border-gray-400 px-6 py-4 text-base lg:text-lg">
+                            {index + 1}
+                          </td>
+                          <td className="border border-gray-400 px-6 py-4 text-base lg:text-lg">
+                            {move.from}
+                          </td>
+                          <td className="border border-gray-400 px-6 py-4 text-base lg:text-lg">
+                            {move.to}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

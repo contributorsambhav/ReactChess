@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Chess } from "chess.js";
 import Chessboard from "chessboardjs";
 import { Howl } from "howler";
+import MobileToggle from "../MobileToggle";
 import axios from "axios";
 import bg from "../../assets/images/bgprofile.jpg";
 import captureSoundFile from "../../assets/sounds/capture.mp3";
@@ -55,7 +56,7 @@ const AgainstStockfish = () => {
   const [promotionPiece, setPromotionPiece] = useState("q");
   const [mobileMode, setMobileMode] = useState(false);
   
-  // NEW: State for touch/click mode
+  // State for touch/click mode
   const [selectedSquare, setSelectedSquare] = useState(null);
   const [isThinking, setIsThinking] = useState(false);
 
@@ -63,7 +64,7 @@ const AgainstStockfish = () => {
     setMobileMode(!mobileMode);
   };
 
-  // NEW: Function to handle square clicks in mobile mode
+  // Function to handle square clicks in mobile mode
   const handleSquareClick = async (square) => {
     if (!mobileMode) return;
     
@@ -378,7 +379,7 @@ const AgainstStockfish = () => {
       boardRef.current = Chessboard(chessRef.current, config);
     }
 
-    // NEW: Add click listeners for mobile mode
+    // Add click listeners for mobile mode
     const addMobileListeners = () => {
       const squares = document.querySelectorAll(".square-55d63");
       squares.forEach((square) => {
@@ -430,124 +431,158 @@ const AgainstStockfish = () => {
 
   return (
     <div
-      className="w-full flex lg:flex-row flex-col items-center min-h-screen"
-      style={{ backgroundImage: `url(${bg})`, backgroundSize: "contain" }}
+      className="w-full flex flex-col items-center min-h-screen"
+      style={{
+        backgroundImage: `url(${bg})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center"
+      }}
     >
-      <div className="w-screen flex flex-col lg:flex-row mx-auto my-auto">
-        <div className="lg:mx-16 mt-16 w-full lg:w-1/2">
+      <div className="w-screen mt-32 flex lg:flex-row flex-col mx-auto my-auto">
+        <div className="lg:mx-16 w-full lg:w-1/2">
           <div
             ref={chessRef}
             style={{ width: window.innerWidth > 1028 ? "40vw" : "100vw" }}
           ></div>
         </div>
-        <div className="w-11/12 mx-auto lg:w-1/3 mt-4 lg:mt-0">
-          {/* IMPROVED: Better styled checkbox */}
-          <div className="mb-4 flex items-center justify-center lg:justify-start">
-            <label className="flex items-center gap-3 cursor-pointer bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg">
-              <input
-                type="checkbox"
-                checked={mobileMode}
-                onChange={handleCheckboxChange}
-                className="w-5 h-5 cursor-pointer"
-              />
-              <span className="text-white font-medium">
-                {mobileMode ? "Touch Mode (Click to Move)" : "Drag Mode"}
-              </span>
-            </label>
-          </div>
 
-          <div className="rounded-xl text-center p-6 px-16 w-full text-2xl bg-green-700 text-white flex-shrink-0">
-            Current Status: {currentStatus ? currentStatus : "White to move"}
-            {/* NEW: Show thinking indicator */}
-            {isThinking && (
-              <div className="mt-2 text-sm animate-pulse">
-                Stockfish is thinking...
+        <div className="lg:mx-4 w-fit mx-2 lg:w-1/3 mt-4 lg:mt-0">
+          <MobileToggle 
+            mobileMode={mobileMode} 
+            onChange={handleCheckboxChange}
+            className="mb-4"
+          />
+          
+          {!mobileMode && (
+            <>
+              <div className="rounded-xl shadow-lg text-center p-6 px-12 lg:w-full text-xl lg:text-2xl bg-gray-400 bg-opacity-30 text-white border border-gray-200 flex-shrink-0">
+                Current Status: {currentStatus ? currentStatus : "White to move"}
+                {/* Show thinking indicator */}
+                {isThinking && (
+                  <div className="mt-2 text-sm animate-pulse">
+                    Stockfish is thinking...
+                  </div>
+                )}
+                {/* Show selected square in mobile mode */}
+                {mobileMode && selectedSquare && (
+                  <div className="mt-2 text-sm bg-green-600 rounded px-3 py-1 inline-block">
+                    Selected: {selectedSquare.toUpperCase()}
+                  </div>
+                )}
               </div>
-            )}
-            {/* NEW: Show selected square in mobile mode */}
-            {mobileMode && selectedSquare && (
-              <div className="mt-2 text-sm bg-green-600 rounded px-3 py-1 inline-block">
-                Selected: {selectedSquare.toUpperCase()}
+
+              <div className="mt-4">
+                <label className="mr-2 text-white text-lg lg:text-xl">
+                  Promotion Piece:
+                </label>
+                <select
+                  value={promotionPiece}
+                  onChange={handlePromotionChange}
+                  className="bg-gray-400 bg-opacity-30 text-white px-4 py-2 rounded-lg w-full text-base lg:text-lg border border-gray-200"
+                >
+                  <option
+                    className="bg-blue-900 bg-opacity-50 bg-transparent text-white"
+                    value="q"
+                  >
+                    Queen
+                  </option>
+                  <option
+                    className="bg-blue-900 bg-opacity-50 bg-transparent text-white"
+                    value="r"
+                  >
+                    Rook
+                  </option>
+                  <option
+                    className="bg-blue-900 bg-opacity-50 bg-transparent text-white"
+                    value="b"
+                  >
+                    Bishop
+                  </option>
+                  <option
+                    className="bg-blue-900 bg-opacity-50 bg-transparent text-white"
+                    value="n"
+                  >
+                    Knight
+                  </option>
+                </select>
               </div>
-            )}
-          </div>
-          <div className="mt-4">
-            <label className="mr-2 text-white">Promotion Piece:</label>
-            <select
-              value={promotionPiece}
-              onChange={handlePromotionChange}
-              className="bg-green-700 text-white px-4 py-2 rounded-lg w-full"
-            >
-              <option value="q">Queen</option>
-              <option value="r">Rook</option>
-              <option value="b">Bishop</option>
-              <option value="n">Knight</option>
-            </select>
-            {/* IMPROVED: Better warning message */}
-            <p className="text-weight-500 mx-2 mt-3 text-center text-sm text-red-400">
-              If board position resets after promotion, attempt an illegal move to refresh.
-            </p>
-            <p className="text-weight-500 mx-2 mt-2 text-center text-sm text-green-400">
-              Note: Stockfish rarely allows pawn promotion!
-            </p>
-            {/* NEW: Mobile mode instructions */}
-            {mobileMode && (
-              <p className="text-weight-500 mx-2 mt-3 text-center text-sm text-blue-300 bg-blue-900/30 rounded p-2">
-                Tap a piece to select it, then tap the destination square to move.
-              </p>
-            )}
-          </div>
-          <button
-            onClick={toggleTable}
-            className="mt-4 bg-green-700 text-white px-4 py-2 rounded-t-lg w-full"
-          >
-            {isTableCollapsed ? "Show Moves" : "Hide Moves"}
-          </button>
-          <div
-            style={{
-              maxHeight: isTableCollapsed ? "0" : "40vh",
-              transition: "max-height 0.3s ease-in-out",
-              overflow: "scroll",
-            }}
-          >
-            <div style={{ height: "100%", overflowY: "auto" }}>
-              <table className="w-full border-collapse border border-gray-700 rounded-lg">
-                <thead>
-                  <tr className="bg-gray-800 text-center text-white">
-                    <th className="border border-gray-700 px-6 py-3">Move</th>
-                    <th className="border border-gray-700 px-6 py-3">From</th>
-                    <th className="border border-gray-700 px-6 py-3">To</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {moves.map((move, index) => (
-                    <tr
-                      key={index}
-                      className="bg-gray-700 text-center text-white"
-                    >
-                      <td className="border border-gray-700 px-6 py-3">
-                        {index + 1}
-                      </td>
-                      <td className="border border-gray-700 px-6 py-3">
-                        {move.from}
-                      </td>
-                      <td className="border border-gray-700 px-6 py-3">
-                        {move.to}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <div className="mt-4 text-white text-center">
-            <button
-              onClick={() => window.location.reload()}
-              className="bg-green-700 text-white px-4 py-2 rounded-b-lg w-full"
-            >
-              Restart
-            </button>
-          </div>
+
+              <div className="mx-2 mt-3 text-center border border-gray-800 text-base lg:text-lg text-white bg-black bg-opacity-20 p-4 rounded-lg">
+                If board position changes to original after promotion, just
+                attempt an illegal move
+              </div>
+
+              {/* Mobile mode instructions */}
+              {mobileMode && (
+                <div className="mx-2 mt-3 text-center text-sm text-blue-300 bg-blue-900 bg-opacity-30 border border-blue-700 p-3 rounded-lg">
+                  Tap a piece to select it, then tap the destination square to move.
+                </div>
+              )}
+
+              <button
+                onClick={toggleTable}
+                className="mt-4 bg-gray-400 bg-opacity-30 text-white border border-gray-200 px-4 py-2 rounded-lg w-full text-base lg:text-lg"
+              >
+                {isTableCollapsed ? "Show Moves" : "Hide Moves"}
+              </button>
+              <div
+                style={{
+                  maxHeight: isTableCollapsed ? "0" : "40vh",
+                  transition: "max-height 0.3s ease-in-out",
+                  overflow: "scroll",
+                }}
+              >
+                <div style={{ height: "100%", overflowY: "auto" }}>
+                  <table className="w-full border-collapse border border-gray-700 rounded-lg bg-gray-400 bg-opacity-30 text-white">
+                    <thead>
+                      <tr className="bg-gray-800 bg-opacity-30 text-center text-white">
+                        <th className="border border-gray-400 px-6 py-3 text-base lg:text-lg">
+                          Move
+                        </th>
+                        <th className="border border-gray-400 px-6 py-3 text-base lg:text-lg">
+                          From
+                        </th>
+                        <th className="border border-gray-400 px-6 py-3 text-base lg:text-lg">
+                          To
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {moves.map((move, index) => (
+                        <tr
+                          key={index}
+                          className={
+                            index % 2 === 0
+                              ? "bg-gray-700 bg-opacity-30 text-white text-center"
+                              : "bg-gray-600 bg-opacity-30 text-gray-200 text-center"
+                          }
+                        >
+                          <td className="border border-gray-400 px-6 py-4 text-base lg:text-lg">
+                            {index + 1}
+                          </td>
+                          <td className="border border-gray-400 px-6 py-4 text-base lg:text-lg">
+                            {move.from}
+                          </td>
+                          <td className="border border-gray-400 px-6 py-4 text-base lg:text-lg">
+                            {move.to}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div className="mt-4 text-white text-center">
+                <button
+                  onClick={() => window.location.reload()}
+                  className="bg-gray-400 bg-opacity-30 text-white border border-gray-200 px-4 py-2 rounded-lg w-full text-base lg:text-lg hover:bg-opacity-40 transition-all"
+                >
+                  Restart Game
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

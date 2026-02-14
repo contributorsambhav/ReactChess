@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Chess } from "chess.js";
 import Chessboard from "chessboardjs";
 import { Howl } from "howler";
+import MobileToggle from "../MobileToggle";
 import WaitQueue from "../WaitQueue";
 import axios from "axios";
 import boardbg from "../../assets/images/bgboard.jpeg";
@@ -266,16 +267,17 @@ const GlobalMultiplayer = () => {
         <WaitQueue />
       ) : (
         <div
-          className={`flex min-h-screen  overflow-scroll items-center justify-center w-screen`}
+          className="w-full flex flex-col items-center min-h-screen"
           style={{
             backgroundImage: `url(${boardbg})`,
             backgroundSize: "cover",
+            backgroundPosition: "center"
           }}
         >
-          <div className="w-screen mt-16 flex flex-col lg:flex-row mx-auto my-auto">
+          <div className="w-screen flex lg:flex-row flex-col mx-auto my-auto">
             <div className="lg:mx-16 w-full lg:w-1/2">
               {opponent && (
-                <div className="flex justify-between text-center mr-8 text-lg lg:text-xl xl:text-2xl">
+                <div className="flex justify-between text-center mr-8 text-white text-base lg:text-lg mb-2">
                   <p>Opponent: {opponent.username.split(" ")[0]}</p>
                   <p>
                     Rating:{" "}
@@ -293,71 +295,125 @@ const GlobalMultiplayer = () => {
               ></div>
 
               {user && (
-                <div className="flex text-lg lg:text-xl xl:text-2xl justify-between text-center text-xl mr-8 mb-4">
+                <div className="flex text-white text-base lg:text-lg justify-between text-center mr-8 mt-2 mb-4">
                   <p>You ({user.username})</p>
                   <p>
                     Rating: {calculateRating(user.wins, user.loses, user.draws)}
                   </p>
                 </div>
               )}
-
-              <div>
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={mobileMode}
-                    onChange={handleCheckboxChange}
-                  />
-                  Mobile Mode
-                </label>
-              </div>
             </div>
-            {(!mobileMode) && (
-              <div className={`w-11/12 mx-auto lg:w-1/3 `}>
-                <div className="flex flex-col justify-between text-center text-xl">
-                  <label className="mt-2 text-gray-100 ">Promotion piece</label>
-                  <select
-                    className="mt-2 text-gray-800 py-2 w-full text-center text-xl bg-gray-200 border border-gray-400 rounded"
-                    value={promotionPiece}
-                    onChange={handlePromotionChange}
+            
+            <div className="lg:mx-4 w-fit mx-2 lg:w-1/3 mt-4 lg:mt-0">
+              <MobileToggle 
+                mobileMode={mobileMode} 
+                onChange={handleCheckboxChange}
+                className="mb-4"
+              />
+              
+              {(!mobileMode) && (
+                <>
+                  <div className="rounded-xl shadow-lg text-center p-6 px-12 lg:w-full text-xl lg:text-2xl bg-gray-400 bg-opacity-30 text-white border border-gray-200 flex-shrink-0">
+                    Current Status: {currentStatus ? currentStatus : "White to move"}
+                  </div>
+
+                  <div className="mt-4">
+                    <label className="mr-2 text-white text-lg lg:text-xl">
+                      Promotion Piece:
+                    </label>
+                    <select
+                      value={promotionPiece}
+                      onChange={handlePromotionChange}
+                      className="bg-gray-400 bg-opacity-30 text-white px-4 py-2 rounded-lg w-full text-base lg:text-lg border border-gray-200"
+                    >
+                      <option
+                        className="bg-blue-900 bg-opacity-50 bg-transparent text-white"
+                        value="q"
+                      >
+                        Queen
+                      </option>
+                      <option
+                        className="bg-blue-900 bg-opacity-50 bg-transparent text-white"
+                        value="r"
+                      >
+                        Rook
+                      </option>
+                      <option
+                        className="bg-blue-900 bg-opacity-50 bg-transparent text-white"
+                        value="b"
+                      >
+                        Bishop
+                      </option>
+                      <option
+                        className="bg-blue-900 bg-opacity-50 bg-transparent text-white"
+                        value="n"
+                      >
+                        Knight
+                      </option>
+                    </select>
+                  </div>
+
+                  <div className="mx-2 mt-3 text-center border border-gray-800 text-base lg:text-lg text-white bg-black bg-opacity-20 p-4 rounded-lg">
+                    If board position changes to original after promotion, just
+                    attempt an illegal move
+                  </div>
+
+                  <button
+                    onClick={toggleTable}
+                    className="mt-4 bg-gray-400 bg-opacity-30 text-white border border-gray-200 px-4 py-2 rounded-lg w-full text-base lg:text-lg"
                   >
-                    <option value="q">Queen</option>
-                    <option value="r">Rook</option>
-                    <option value="b">Bishop</option>
-                    <option value="n">Knight</option>
-                  </select>
-                </div>
-                <div className="text-center text-2xl mb-4 mt-8">
-                  {currentStatus ? currentStatus : "White to move"}
-                </div>
-                <button
-                  onClick={toggleTable}
-                  className="mb-4 w-full bg-gray-200 text-black py-2 px-4 rounded shadow-md hover:bg-gray-200"
-                >
-                  {isTableCollapsed ? "Show Moves" : "Hide Moves"}
-                </button>
-                {!isTableCollapsed && (
-                  <table className="table-auto text-lg font-semibold w-full">
-                    <thead>
-                      <tr>
-                        <th className="px-4 py-2">Move #</th>
-                        <th className="px-4 py-2">From</th>
-                        <th className="px-4 py-2">To</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {moves.map((move, index) => (
-                        <tr key={index}>
-                          <td className="border px-4 py-2">{index + 1}</td>
-                          <td className="border px-4 py-2">{move.from}</td>
-                          <td className="border px-4 py-2">{move.to}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-              </div>
-            )}
+                    {isTableCollapsed ? "Show Moves" : "Hide Moves"}
+                  </button>
+                  <div
+                    style={{
+                      maxHeight: isTableCollapsed ? "0" : "40vh",
+                      transition: "max-height 0.3s ease-in-out",
+                      overflow: "scroll",
+                    }}
+                  >
+                    <div style={{ height: "100%", overflowY: "auto" }}>
+                      <table className="w-full border-collapse border border-gray-700 rounded-lg bg-gray-400 bg-opacity-30 text-white">
+                        <thead>
+                          <tr className="bg-gray-800 bg-opacity-30 text-center text-white">
+                            <th className="border border-gray-400 px-6 py-3 text-base lg:text-lg">
+                              Move
+                            </th>
+                            <th className="border border-gray-400 px-6 py-3 text-base lg:text-lg">
+                              From
+                            </th>
+                            <th className="border border-gray-400 px-6 py-3 text-base lg:text-lg">
+                              To
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {moves.map((move, index) => (
+                            <tr
+                              key={index}
+                              className={
+                                index % 2 === 0
+                                  ? "bg-gray-700 bg-opacity-30 text-white text-center"
+                                  : "bg-gray-600 bg-opacity-30 text-gray-200 text-center"
+                              }
+                            >
+                              <td className="border border-gray-400 px-6 py-4 text-base lg:text-lg">
+                                {index + 1}
+                              </td>
+                              <td className="border border-gray-400 px-6 py-4 text-base lg:text-lg">
+                                {move.from}
+                              </td>
+                              <td className="border border-gray-400 px-6 py-4 text-base lg:text-lg">
+                                {move.to}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}

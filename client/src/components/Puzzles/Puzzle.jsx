@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Chess } from "chess.js";
 import Chessboard from "chessboardjs";
 import { Howl } from "howler";
+import MobileToggle from "../MobileToggle";
 import PuzzleService from "../../services/puzzleService";
 import axios from "axios";
 import boardbg from "../../assets/images/bgboard.jpeg";
@@ -349,9 +350,6 @@ const Puzzle = () => {
                 Attempted {puzzle.attempts} times • {puzzle.successRate.toFixed(1)}% success rate
               </p>
             )}
-            {/* <p className="mt-2 text-yellow-300 text-sm drop-shadow-md font-semibold">
-              You are playing as: {playerColor === 'w' ? 'White' : 'Black'}
-            </p> */}
           </div>
         </>
       )}
@@ -362,16 +360,11 @@ const Puzzle = () => {
             ref={chessRef}
             style={{ width: window.innerWidth > 1028 ? "40vw" : "100vw" }}
           ></div>
-          <div>
-            <label>
-              <input
-                type="checkbox"
-                checked={mobileMode}
-                onChange={handleCheckboxChange}
-              />
-              Mobile Mode
-            </label>
-          </div>
+          <MobileToggle 
+            mobileMode={mobileMode} 
+            onChange={handleCheckboxChange}
+            className="mt-4 mb-4"
+          />
         </div>
 
         {!mobileMode && (
