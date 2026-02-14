@@ -7,10 +7,11 @@ const axios = require('axios');
 const userRoutes = require("./routes/userRoutes.js");
 const cookieParser = require("cookie-parser");
 const { restrictToLoginUserOnly } = require("./middlewares/auth.js");
-const path = require("path")
+const path = require("path");
 dotenv.config();
 const dbConnector = require('./config/connect.js');
 const profileRoutes = require("./routes/profileRoutes.js");
+const puzzleRoutes = require("./routes/puzzleRoutes.js");
 dbConnector();
 
 const port = process.env.PORT || 3000;
@@ -18,9 +19,11 @@ const app = express();
 const httpServer = createServer(app);
 
 const corsOptions = {
-  origin: '*:*',
-  methods: ['GET', 'POST'],
-  credentials: true
+  origin: function (origin, callback) {
+    callback(null, true); 
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
 };
 
 app.use(cors(corsOptions));
@@ -28,8 +31,10 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "/client/dist")));
 
+// Routes
 app.use("/user", userRoutes);
 app.use('/profile', restrictToLoginUserOnly, profileRoutes);
+app.use('/api/puzzles', puzzleRoutes);
 
 app.get("/stockfish", async (req, res) => {
   try {
@@ -46,15 +51,17 @@ app.get("/stockfish", async (req, res) => {
   }
 });
 
-// Wildcard route for SPA (Single Page Application)
-// This should be the last route to catch all other routes
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "/client/dist/index.html"));
+app.get("/", (req, res) => {
+  res.send("Server is running");
 });
 
 const io = new Server(httpServer, {
   cors: {
-    origin: '*:*',
+    origin: (origin, callback) => {
+      callback(null, true); 
+    },
+    credentials: true,
+    methods: ["GET", "POST"]
   }
 });
 
@@ -76,11 +83,11 @@ io.on('connection', (socket) => {
 
     pendingUser = null;
 
-    player1.on('move', ({ from, to ,obtainedPromotion}) => {
-      player2.emit('move', { from, to ,obtainedPromotion});
+    player1.on('move', ({ from, to, obtainedPromotion }) => {
+      player2.emit('move', { from, to, obtainedPromotion });
     });
 
-    player2.on('move', ({ from, to , obtainedPromotion}) => {
+    player2.on('move', ({ from, to, obtainedPromotion }) => {
       player1.emit('move', { from, to, obtainedPromotion });
     });
 
@@ -102,5 +109,5 @@ io.on('connection', (socket) => {
 });
 
 httpServer.listen(port, () => {
-  console.log(`Server started at succesfully`);
+  console.log(`Server started successfully on port ${port}`);
 });

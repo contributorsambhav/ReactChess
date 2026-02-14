@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+
 import bgImage from '../../assets/images/bgImage.jpg';
 
 function SignUp() {
@@ -38,7 +39,7 @@ function SignUp() {
             return;
         }
     
-        const res = await fetch("https://reactchess.onrender.com/user/register", {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/register`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

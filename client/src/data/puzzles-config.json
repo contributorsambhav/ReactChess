@@ -1,0 +1,79 @@
+{
+  "puzzles": [
+    {
+      "id": "puzzle1",
+      "name": "The Magician's Puzzle",
+      "difficulty": "legendary",
+      "category": "The Big Three",
+      "fen": "8/3P3k/n2K3p/2p3n1/1b4N1/2p1p1P1/8/3B4 w - - 0 1",
+      "description": "\"Grandmasters and Engines Couldn't Solve This Puzzle. Then Came The Magician\". This puzzle was composed by Gijs van Breukelen. It was created in somewhat around 1970 but published in the 1990 This is one of the hardest puzzles ever composed as leave alone Grandmasters, engines could not solve it either! Everyone thinks that Black is winning with passed pawns and a knights. Yet white can force a win soon...",
+      "composer": "Gijs van Breukelen",
+      "year": "1970 (published 1990)",
+      "videoUrl": "https://www.youtube.com/embed/8wCJalNkTEI?si=G7f0-adhIoT3IJFz",
+      "videoTitle": "The Magician's Puzzle Solution",
+      "solutionType": "video"
+    },
+    {
+      "id": "puzzle2",
+      "name": "The Mighty Knight",
+      "difficulty": "legendary",
+      "category": "The Big Three",
+      "fen": "8/8/8/2p5/1pp5/brpp4/qpprpK1P/1nkbn3 w - - 0 1",
+      "description": "This puzzle was composed by Ottó Bláthy in 1922. This involves a lot of chess thinking in terms of strategy, tactics, moves & ideas. White has just one pawn and a king whereas, black has all his pieces. But still White can win this game. White needs to find the best moves & ideas in which white can trap black in the corner and checkmate the black king. This is a really interesting & unique puzzle and we can learn some important chess concepts out of this brilliant endgame composition. This will help us in move calculation & emphasize on the idea of restriction in chess.",
+      "composer": "Ottó Bláthy",
+      "year": "1922",
+      "videoUrl": "https://www.youtube.com/embed/WqenJgw7ZIc?si=nrbDwkdaHz8EnfDE",
+      "videoTitle": "The Mighty Knight Solution",
+      "solutionType": "video"
+    },
+    {
+      "id": "puzzle3",
+      "name": "The Enigmatic Puzzle",
+      "difficulty": "legendary",
+      "category": "The Big Three",
+      "fen": "k1b5/Pp1p4/1P1Pp3/4Pp2/5Pp1/6P1/P6P/6K1 w - - 0 1",
+      "description": "This puzzle was composed by Unknown. It is known for its complexity and strategic depth. White faces a challenging position against Black's resilient defense. Can you find the winning sequence? This one is dubbed as the \"Stairway to Heaven\". White may have some positional advantage, yet if he is not careful, it's going to be a stalemate.",
+      "composer": "Unknown",
+      "year": "Unknown",
+      "videoUrl": "https://www.youtube.com/embed/4lRdztT2Qn4?si=Ioq9IUIvkHyBfv3F",
+      "videoTitle": "The Enigmatic Puzzle Solution",
+      "solutionType": "video"
+    },
+    {
+      "id": "puzzle4",
+      "name": "Mate in One Move (Easy)",
+      "difficulty": "easy",
+      "category": "Mate in One",
+      "fen": "r5r1/2pn4/1p1p2n1/3Pp2R/1pP1BkP1/2N2P2/P2K4/8 w - - 0 35",
+      "description": "Find the checkmate in one move. This is a straightforward tactical puzzle perfect for beginners.",
+      "composer": "Training Puzzle",
+      "year": "Modern",
+      "solution": "Knight to e2",
+      "solutionType": "text"
+    },
+    {
+      "id": "puzzle5",
+      "name": "Mate in One Move (Normal)",
+      "difficulty": "normal",
+      "category": "Mate in One",
+      "fen": "r2q4/pb1r1k2/1p4RQ/2n1pN1B/2p1P3/2P5/PP6/1K3R2 w - - 6 33",
+      "description": "A moderate difficulty mate in one puzzle. Multiple pieces are attacking, but only one move delivers checkmate.",
+      "composer": "Training Puzzle",
+      "year": "Modern",
+      "solution": "Rook anywhere between g1 to g5",
+      "solutionType": "text"
+    },
+    {
+      "id": "puzzle6",
+      "name": "Mate in One Move (Hard)",
+      "difficulty": "hard",
+      "category": "Mate in One",
+      "fen": "r6r/ppp4Q/3qb3/3p4/3P2kP/5R2/P3B1P1/5RK1 w - - 7 29",
+      "description": "A challenging mate in one position. The solution requires careful calculation and visualization.",
+      "composer": "Training Puzzle",
+      "year": "Modern",
+      "solution": "Rook to b3",
+      "solutionType": "text"
+    }
+  ]
+}
