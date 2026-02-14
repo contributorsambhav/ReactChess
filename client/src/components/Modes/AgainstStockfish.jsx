@@ -55,155 +55,16 @@ const AgainstStockfish = () => {
   const [isTableCollapsed, setIsTableCollapsed] = useState(true);
   const [promotionPiece, setPromotionPiece] = useState("q");
   const [mobileMode, setMobileMode] = useState(false);
-  
-  // State for touch/click mode
   const [selectedSquare, setSelectedSquare] = useState(null);
   const [isThinking, setIsThinking] = useState(false);
 
   const handleCheckboxChange = () => {
     setMobileMode(!mobileMode);
+    setSelectedSquare(null);
+    removeGreySquares();
   };
 
-  // Function to handle square clicks in mobile mode
-  const handleSquareClick = async (square) => {
-    if (!mobileMode) return;
-    
-    const game = gameRef.current;
-    
-    if (game.isGameOver() || isThinking) {
-      console.log("Game over or computer is thinking");
-      return;
-    }
-    
-    if (game.turn() === "b") {
-      console.log("It's not White's turn");
-      return;
-    }
-
-    if (!selectedSquare) {
-      // First click - select piece
-      const piece = game.get(square);
-      if (piece && piece.color === 'w') {
-        setSelectedSquare(square);
-        // Highlight square
-        const squareEl = document.querySelector(`.square-${square}`);
-        if (squareEl) {
-          squareEl.style.boxShadow = "inset 0 0 0 4px #22c55e";
-        }
-        
-        // Highlight possible moves
-        const moves = game.moves({ square: square, verbose: true });
-        moves.forEach(move => {
-          const targetEl = document.querySelector(`.square-${move.to}`);
-          if (targetEl) {
-            const isBlack = targetEl.classList.contains("black-3c85d");
-            targetEl.style.background = isBlack ? "#696969" : "#a9a9a9";
-          }
-        });
-      }
-    } else {
-      // Second click - check if clicking same square to deselect
-      if (square === selectedSquare) {
-        removeGreySquares();
-        setSelectedSquare(null);
-        return;
-      }
-
-      // Try to make the move
-      let move = game.move({
-        from: selectedSquare,
-        to: square,
-        promotion: promotionPiece,
-      });
-
-      if (move === null) {
-        // Invalid move - check if clicking another white piece to select it
-        const piece = game.get(square);
-        if (piece && piece.color === 'w') {
-          // Clear previous highlights
-          removeGreySquares();
-          
-          // Select new piece
-          setSelectedSquare(square);
-          const squareEl = document.querySelector(`.square-${square}`);
-          if (squareEl) {
-            squareEl.style.boxShadow = "inset 0 0 0 4px #22c55e";
-          }
-          
-          // Highlight new piece's possible moves
-          const moves = game.moves({ square: square, verbose: true });
-          moves.forEach(m => {
-            const targetEl = document.querySelector(`.square-${m.to}`);
-            if (targetEl) {
-              const isBlack = targetEl.classList.contains("black-3c85d");
-              targetEl.style.background = isBlack ? "#696969" : "#a9a9a9";
-            }
-          });
-        } else {
-          // Clicked empty square or black piece - just deselect
-          removeGreySquares();
-          setSelectedSquare(null);
-        }
-        return;
-      }
-
-      // Valid move made - clear highlights and update game
-      removeGreySquares();
-      setSelectedSquare(null);
-      setMoves((prevMoves) => [...prevMoves, { from: move.from, to: move.to }]);
-      boardRef.current.position(game.fen());
-      updateStatus();
-
-      // Play sound based on move type
-      if (move.captured) {
-        captureSound.play();
-      } else {
-        moveSound.play();
-      }
-
-      // Stockfish's turn
-      if (game.turn() === "b" && !game.isGameOver()) {
-        setIsThinking(true);
-        try {
-          const fen = game.fen();
-          console.log(fen);
-
-          const bestMoveResponse = await fetchBestMove(fen);
-
-          if (bestMoveResponse) {
-            console.log(bestMoveResponse);
-            const bestMove = bestMoveResponse.split(" ")[1].trim();
-
-            move = game.move({
-              from: bestMove.slice(0, 2),
-              to: bestMove.slice(2, 4),
-              promotion: bestMove[4] || promotionPiece,
-            });
-
-            if (move !== null) {
-              setMoves((prevMoves) => [
-                ...prevMoves,
-                { from: move.from, to: move.to },
-              ]);
-              boardRef.current.position(game.fen());
-              updateStatus();
-              
-              if (move.captured) {
-                captureSound.play();
-              } else {
-                moveSound.play();
-              }
-            }
-          }
-        } catch (error) {
-          console.error("Error fetching move from stockfish:", error);
-        } finally {
-          setIsThinking(false);
-        }
-      }
-    }
-  };
-
+  // Helper functions defined outside useEffect
   const removeGreySquares = () => {
     const squares = document.querySelectorAll(".square-55d63");
     squares.forEach((square) => {
@@ -217,6 +78,13 @@ const AgainstStockfish = () => {
     if (squareEl) {
       const isBlack = squareEl.classList.contains("black-3c85d");
       squareEl.style.background = isBlack ? "#696969" : "#a9a9a9";
+    }
+  };
+
+  const highlightSquare = (square) => {
+    const squareEl = document.querySelector(`.square-${square}`);
+    if (squareEl) {
+      squareEl.style.background = "#ffff00"; // Yellow for selected piece
     }
   };
 
@@ -295,7 +163,7 @@ const AgainstStockfish = () => {
         moveSound.play();
       }
 
-      if (game.turn() === "b") {
+      if (game.turn() === "b" && !game.isGameOver()) {
         setIsThinking(true);
         try {
           const fen = game.fen();
@@ -320,6 +188,12 @@ const AgainstStockfish = () => {
               ]);
               boardRef.current.position(game.fen());
               updateStatus();
+
+              if (move.captured) {
+                captureSound.play();
+              } else {
+                moveSound.play();
+              }
             }
           }
         } catch (error) {
@@ -370,56 +244,298 @@ const AgainstStockfish = () => {
       snapSpeed: 100,
     };
 
-    // Only create board if it doesn't exist
-    if (!boardRef.current) {
-      boardRef.current = Chessboard(chessRef.current, config);
-    } else {
-      // Update config without recreating board
-      boardRef.current.destroy();
-      boardRef.current = Chessboard(chessRef.current, config);
-    }
-
-    // Add click listeners for mobile mode
-    const addMobileListeners = () => {
-      const squares = document.querySelectorAll(".square-55d63");
-      squares.forEach((square) => {
-        const squareId = square.getAttribute("data-square");
-        if (squareId) {
-          const clickHandler = () => {
-            console.log("Clicked:", squareId);
-            handleSquareClick(squareId);
-          };
-          const touchHandler = (e) => {
-            e.preventDefault();
-            console.log("Touched:", squareId);
-            handleSquareClick(squareId);
-          };
-          
-          square.addEventListener("click", clickHandler, true);
-          square.addEventListener("touchend", touchHandler, { passive: false });
-          
-          // Store handlers for cleanup
-          square._clickHandler = clickHandler;
-          square._touchHandler = touchHandler;
-        }
-      });
-    };
-
-    if (mobileMode) {
-      setTimeout(addMobileListeners, 100);
-    }
+    boardRef.current = Chessboard(chessRef.current, config);
 
     return () => {
-      // Cleanup event listeners
-      const squares = document.querySelectorAll(".square-55d63");
-      squares.forEach((square) => {
-        if (square._clickHandler) {
-          square.removeEventListener("click", square._clickHandler, true);
-          square.removeEventListener("touchend", square._touchHandler);
-        }
-      });
+      if (boardRef.current) {
+        boardRef.current.destroy();
+      }
     };
-  }, [promotionPiece, mobileMode]);
+  }, [mobileMode, promotionPiece]);
+
+  // Handle touch/click on squares for mobile mode
+  useEffect(() => {
+    console.log("Touch handler effect running. Mobile mode:", mobileMode, "Board ref exists:", !!boardRef.current);
+    
+    if (!mobileMode || !chessRef.current) return;
+
+    // Wait a bit to ensure the board is fully rendered
+    const timer = setTimeout(() => {
+      if (!boardRef.current) {
+        console.log("Board still not ready");
+        return;
+      }
+
+      const handleSquareClick = async (e) => {
+        console.log("=== CLICK DETECTED ===");
+        console.log("Event target:", e.target);
+        console.log("Mobile mode:", mobileMode);
+        
+        const game = gameRef.current;
+        if (!game) {
+          console.log("Game not initialized");
+          return;
+        }
+        
+        if (game.isGameOver() || isThinking) {
+          console.log("Game is over or thinking");
+          return;
+        }
+
+        // Find the clicked square element
+        let squareEl = e.target;
+        console.log("Starting element:", squareEl);
+        
+        // Traverse up to find the square div
+        let attempts = 0;
+        while (squareEl && !squareEl.classList.contains("square-55d63")) {
+          squareEl = squareEl.parentElement;
+          attempts++;
+          if (attempts > 10 || squareEl === chessRef.current || !squareEl) {
+            console.log("Could not find square element after", attempts, "attempts");
+            return;
+          }
+        }
+
+        console.log("Found square element:", squareEl);
+
+        if (!squareEl) {
+          console.log("Square element is null");
+          return;
+        }
+
+        // Extract square name from class (e.g., "square-g2" -> "g2")
+        const classList = Array.from(squareEl.classList);
+        console.log("Square classes:", classList);
+        
+        // Find the class that matches the pattern "square-[a-h][1-8]"
+        const squareClass = classList.find((cls) => {
+          const match = cls.match(/^square-([a-h][1-8])$/);
+          return match !== null;
+        });
+        
+        if (!squareClass) {
+          console.log("Could not find square class");
+          return;
+        }
+
+        const clickedSquare = squareClass.replace("square-", "");
+        console.log("Clicked square:", clickedSquare);
+
+        // Get the piece on the clicked square
+        const position = boardRef.current.position();
+        const piece = position[clickedSquare];
+        console.log("Piece on square:", piece);
+        console.log("Currently selected square:", selectedSquare);
+
+        if (!selectedSquare) {
+          // No piece selected yet - try to select this square
+          console.log("No piece currently selected");
+          
+          if (!piece) {
+            console.log("No piece on clicked square");
+            return;
+          }
+
+          // Check if it's the correct color's turn (white only for this mode)
+          if (game.turn() === "b" || piece.search(/^b/) !== -1) {
+            console.log("Wrong color piece or not white's turn");
+            return;
+          }
+
+          // Get legal moves for this piece
+          const legalMoves = game.moves({
+            square: clickedSquare,
+            verbose: true,
+          });
+
+          console.log("Legal moves for this piece:", legalMoves);
+
+          if (legalMoves.length === 0) {
+            console.log("No legal moves for this piece");
+            return;
+          }
+
+          // Select this square
+          console.log("SELECTING SQUARE:", clickedSquare);
+          setSelectedSquare(clickedSquare);
+          removeGreySquares();
+          highlightSquare(clickedSquare);
+
+          // Highlight legal move destinations
+          legalMoves.forEach((move) => {
+            console.log("Highlighting destination:", move.to);
+            greySquare(move.to);
+          });
+        } else {
+          // A piece is already selected
+          console.log("Piece already selected:", selectedSquare);
+          
+          if (clickedSquare === selectedSquare) {
+            // Clicked the same square - deselect
+            console.log("DESELECTING - clicked same square");
+            setSelectedSquare(null);
+            removeGreySquares();
+            return;
+          }
+
+          // Check if clicking on another white piece (reselect)
+          if (piece) {
+            const selectedPiece = position[selectedSquare];
+            if (selectedPiece[0] === "w" && piece[0] === "w") {
+              // Reselect the new piece
+              console.log("RESELECTING - clicked another white piece");
+              const legalMoves = game.moves({
+                square: clickedSquare,
+                verbose: true,
+              });
+
+              if (legalMoves.length > 0) {
+                setSelectedSquare(clickedSquare);
+                removeGreySquares();
+                highlightSquare(clickedSquare);
+                legalMoves.forEach((move) => {
+                  greySquare(move.to);
+                });
+              }
+              return;
+            }
+          }
+
+          // Try to make the move
+          console.log("ATTEMPTING MOVE from", selectedSquare, "to", clickedSquare);
+          try {
+            const move = game.move({
+              from: selectedSquare,
+              to: clickedSquare,
+              promotion: promotionPiece,
+            });
+
+            if (move) {
+              console.log("MOVE SUCCESSFUL:", move);
+              // Move successful
+              boardRef.current.position(game.fen());
+
+              // Play sound based on move type
+              if (move.captured) {
+                captureSound.play();
+              } else {
+                moveSound.play();
+              }
+
+              // Update moves state
+              setMoves((prevMoves) => [
+                ...prevMoves,
+                { from: move.from, to: move.to },
+              ]);
+
+              // Clear selection and highlights
+              setSelectedSquare(null);
+              removeGreySquares();
+
+              // Update status
+              let status = "";
+              let moveColor = game.turn() === "w" ? "White" : "Black";
+
+              if (game.isCheckmate()) {
+                status = "Game over, " + moveColor + " is in checkmate.";
+                checkmateSound.play();
+              } else if (game.inCheck()) {
+                status = moveColor + " to move, " + moveColor + " is in check";
+                checkSound.play();
+              } else {
+                status = moveColor + " to move";
+              }
+              setCurrentStatus(status);
+
+              // Stockfish's turn
+              if (game.turn() === "b" && !game.isGameOver()) {
+                setIsThinking(true);
+                try {
+                  const fen = game.fen();
+                  console.log(fen);
+
+                  const bestMoveResponse = await fetchBestMove(fen);
+
+                  if (bestMoveResponse) {
+                    console.log(bestMoveResponse);
+                    const bestMove = bestMoveResponse.split(" ")[1].trim();
+
+                    const blackMove = game.move({
+                      from: bestMove.slice(0, 2),
+                      to: bestMove.slice(2, 4),
+                      promotion: bestMove[4] || promotionPiece,
+                    });
+
+                    if (blackMove !== null) {
+                      setMoves((prevMoves) => [
+                        ...prevMoves,
+                        { from: blackMove.from, to: blackMove.to },
+                      ]);
+                      boardRef.current.position(game.fen());
+
+                      if (blackMove.captured) {
+                        captureSound.play();
+                      } else {
+                        moveSound.play();
+                      }
+
+                      // Update status after black's move
+                      let newStatus = "";
+                      let newMoveColor = game.turn() === "w" ? "White" : "Black";
+
+                      if (game.isCheckmate()) {
+                        newStatus =
+                          "Game over, " + newMoveColor + " is in checkmate.";
+                        checkmateSound.play();
+                      } else if (game.inCheck()) {
+                        newStatus =
+                          newMoveColor +
+                          " to move, " +
+                          newMoveColor +
+                          " is in check";
+                        checkSound.play();
+                      } else {
+                        newStatus = newMoveColor + " to move";
+                      }
+                      setCurrentStatus(newStatus);
+                    }
+                  }
+                } catch (error) {
+                  console.error("Error fetching move from stockfish:", error);
+                } finally {
+                  setIsThinking(false);
+                }
+              }
+            } else {
+              console.log("Move was illegal - clearing selection");
+              // Illegal move - clear selection
+              setSelectedSquare(null);
+              removeGreySquares();
+            }
+          } catch (error) {
+            console.log("Move error:", error);
+            // Move failed - clear selection
+            setSelectedSquare(null);
+            removeGreySquares();
+          }
+        }
+      };
+
+      const boardElement = chessRef.current;
+      console.log("Adding click listener to board element:", boardElement);
+      boardElement.addEventListener("click", handleSquareClick, true); // Use capture phase
+
+      return () => {
+        console.log("Removing click listener");
+        boardElement.removeEventListener("click", handleSquareClick, true);
+      };
+    }, 100); // Small delay to ensure board is rendered
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [mobileMode, selectedSquare, promotionPiece, isThinking]);
 
   const toggleTable = () => {
     setIsTableCollapsed(!isTableCollapsed);
@@ -438,7 +554,7 @@ const AgainstStockfish = () => {
         backgroundPosition: "center"
       }}
     >
-      <div className="w-screen mt-32 flex lg:flex-row flex-col mx-auto my-auto">
+      <div className="w-screen mt-20 flex lg:flex-row flex-col mx-auto my-auto">
         <div className="lg:mx-16 w-full lg:w-1/2">
           <div
             ref={chessRef}
@@ -452,21 +568,13 @@ const AgainstStockfish = () => {
             onChange={handleCheckboxChange}
             className="mb-4"
           />
-          
           {!mobileMode && (
             <>
               <div className="rounded-xl shadow-lg text-center p-6 px-12 lg:w-full text-xl lg:text-2xl bg-gray-400 bg-opacity-30 text-white border border-gray-200 flex-shrink-0">
                 Current Status: {currentStatus ? currentStatus : "White to move"}
-                {/* Show thinking indicator */}
                 {isThinking && (
                   <div className="mt-2 text-sm animate-pulse">
                     Stockfish is thinking...
-                  </div>
-                )}
-                {/* Show selected square in mobile mode */}
-                {mobileMode && selectedSquare && (
-                  <div className="mt-2 text-sm bg-green-600 rounded px-3 py-1 inline-block">
-                    Selected: {selectedSquare.toUpperCase()}
                   </div>
                 )}
               </div>
@@ -511,13 +619,6 @@ const AgainstStockfish = () => {
                 If board position changes to original after promotion, just
                 attempt an illegal move
               </div>
-
-              {/* Mobile mode instructions */}
-              {mobileMode && (
-                <div className="mx-2 mt-3 text-center text-sm text-blue-300 bg-blue-900 bg-opacity-30 border border-blue-700 p-3 rounded-lg">
-                  Tap a piece to select it, then tap the destination square to move.
-                </div>
-              )}
 
               <button
                 onClick={toggleTable}

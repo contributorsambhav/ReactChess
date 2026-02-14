@@ -55,6 +55,7 @@ const GlobalMultiplayer = () => {
   const [promotionPiece, setPromotionPiece] = useState("q");
   const [isTableCollapsed, setIsTableCollapsed] = useState(false);
   const [mobileMode, setMobileMode] = useState(false);
+  const [selectedSquare, setSelectedSquare] = useState(null);
   const navigate = useNavigate();
 
   const toggleTable = () => {
@@ -63,6 +64,29 @@ const GlobalMultiplayer = () => {
 
   const handleCheckboxChange = () => {
     setMobileMode(!mobileMode);
+    setSelectedSquare(null);
+    removeGreySquares();
+  };
+
+  // Helper functions
+  const removeGreySquares = () => {
+    const squares = document.querySelectorAll(".square-55d63");
+    squares.forEach((square) => (square.style.background = ""));
+  };
+
+  const greySquare = (square) => {
+    const squareEl = document.querySelector(`.square-${square}`);
+    if (squareEl) {
+      const isBlack = squareEl.classList.contains("black-3c85d");
+      squareEl.style.background = isBlack ? "#696969" : "#a9a9a9";
+    }
+  };
+
+  const highlightSquare = (square) => {
+    const squareEl = document.querySelector(`.square-${square}`);
+    if (squareEl) {
+      squareEl.style.background = "#ffff00";
+    }
   };
 
   useEffect(() => {
@@ -123,11 +147,11 @@ const GlobalMultiplayer = () => {
       });
 
       boardRef.current = Chessboard(chessRef.current, {
-        draggable: true,
+        draggable: !mobileMode,
         position: game.fen() || "start",
         onDrop: onDrop,
-        onMouseoverSquare: onMouseoverSquare,
-        onMouseoutSquare: onMouseoutSquare,
+        onMouseoverSquare: mobileMode ? undefined : onMouseoverSquare,
+        onMouseoutSquare: mobileMode ? undefined : onMouseoutSquare,
         onSnapEnd: onSnapEnd,
         pieceTheme: (piece) => pieceImages[piece],
         snapbackSpeed: 500,
@@ -135,9 +159,141 @@ const GlobalMultiplayer = () => {
         orientation: playerColor,
       });
     }
-  }, [socket, gameCreated, game, playerColor, promotionPiece]);
+  }, [socket, gameCreated, game, playerColor, promotionPiece, mobileMode]);
+
+  // Handle touch/click on squares for mobile mode
+  useEffect(() => {
+    if (!mobileMode || !chessRef.current || !gameCreated) return;
+
+    const timer = setTimeout(() => {
+      if (!boardRef.current) return;
+
+      const handleSquareClick = (e) => {
+        if (!game) return;
+        if (game.isGameOver()) return;
+
+        // Find the clicked square element
+        let squareEl = e.target;
+        let attempts = 0;
+        while (squareEl && !squareEl.classList.contains("square-55d63")) {
+          squareEl = squareEl.parentElement;
+          attempts++;
+          if (attempts > 10 || squareEl === chessRef.current || !squareEl) return;
+        }
+
+        if (!squareEl) return;
+
+        const classList = Array.from(squareEl.classList);
+        const squareClass = classList.find((cls) => cls.match(/^square-([a-h][1-8])$/));
+        if (!squareClass) return;
+
+        const clickedSquare = squareClass.replace("square-", "");
+        const position = boardRef.current.position();
+        const piece = position[clickedSquare];
+
+        // Check if it's player's turn
+        const isPlayerTurn = (playerColor === "white" && game.turn() === "w") || 
+                             (playerColor === "black" && game.turn() === "b");
+        
+        if (!isPlayerTurn && !selectedSquare) return;
+
+        if (!selectedSquare) {
+          if (!piece) return;
+
+          // Check if it's the correct color
+          if (
+            (game.turn() === "w" && piece.search(/^b/) !== -1) ||
+            (game.turn() === "b" && piece.search(/^w/) !== -1)
+          ) {
+            return;
+          }
+
+          const legalMoves = game.moves({ square: clickedSquare, verbose: true });
+          if (legalMoves.length === 0) return;
+
+          setSelectedSquare(clickedSquare);
+          removeGreySquares();
+          highlightSquare(clickedSquare);
+          legalMoves.forEach((move) => greySquare(move.to));
+        } else {
+          if (clickedSquare === selectedSquare) {
+            setSelectedSquare(null);
+            removeGreySquares();
+            return;
+          }
+
+          // Check if clicking another piece of same color (reselect)
+          if (piece) {
+            const selectedPiece = position[selectedSquare];
+            if (
+              (selectedPiece[0] === "w" && piece[0] === "w") ||
+              (selectedPiece[0] === "b" && piece[0] === "b")
+            ) {
+              const legalMoves = game.moves({ square: clickedSquare, verbose: true });
+              if (legalMoves.length > 0) {
+                setSelectedSquare(clickedSquare);
+                removeGreySquares();
+                highlightSquare(clickedSquare);
+                legalMoves.forEach((move) => greySquare(move.to));
+              }
+              return;
+            }
+          }
+
+          // Try to make the move
+          try {
+            const move = game.move({
+              from: selectedSquare,
+              to: clickedSquare,
+              promotion: promotionPiece,
+            });
+
+            if (move) {
+              boardRef.current.position(game.fen());
+              updateStatus();
+              socket.emit("move", {
+                from: selectedSquare,
+                to: clickedSquare,
+                obtainedPromotion: promotionPiece,
+              });
+              setMoves((prevMoves) => [
+                ...prevMoves,
+                { from: move.from, to: move.to, promotion: promotionPiece },
+              ]);
+
+              if (move.captured) {
+                captureSound.play();
+              } else {
+                moveSound.play();
+              }
+
+              setSelectedSquare(null);
+              removeGreySquares();
+            } else {
+              setSelectedSquare(null);
+              removeGreySquares();
+            }
+          } catch (error) {
+            setSelectedSquare(null);
+            removeGreySquares();
+          }
+        }
+      };
+
+      const boardElement = chessRef.current;
+      boardElement.addEventListener("click", handleSquareClick, true);
+
+      return () => {
+        boardElement.removeEventListener("click", handleSquareClick, true);
+      };
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [mobileMode, selectedSquare, promotionPiece, gameCreated, game, playerColor, socket]);
 
   const onDrop = (source, target) => {
+    if (mobileMode) return "snapback";
+
     if (
       (playerColor === "white" && game.turn() === "w") ||
       (playerColor === "black" && game.turn() === "b")
@@ -179,6 +335,7 @@ const GlobalMultiplayer = () => {
   };
 
   const onMouseoverSquare = (square, piece) => {
+    if (mobileMode) return;
     const moves = game.moves({ square, verbose: true });
     if (moves.length > 0) {
       greySquare(square);
@@ -187,6 +344,7 @@ const GlobalMultiplayer = () => {
   };
 
   const onMouseoutSquare = () => {
+    if (mobileMode) return;
     removeGreySquares();
   };
 
@@ -236,19 +394,6 @@ const GlobalMultiplayer = () => {
     setCurrentStatus(status);
   };
 
-  const removeGreySquares = () => {
-    const squares = document.querySelectorAll(".square-55d63");
-    squares.forEach((square) => (square.style.background = ""));
-  };
-
-  const greySquare = (square) => {
-    const squareEl = document.querySelector(`.square-${square}`);
-    if (squareEl) {
-      const isBlack = squareEl.classList.contains("black-3c85d");
-      squareEl.style.background = isBlack ? "#696969" : "#a9a9a9";
-    }
-  };
-
   const calculateRating = (wins, loses, draws) => {
     const totalGames = wins + loses + draws;
     if (totalGames === 0) return 0;
@@ -274,7 +419,7 @@ const GlobalMultiplayer = () => {
             backgroundPosition: "center"
           }}
         >
-          <div className="w-screen flex lg:flex-row flex-col mx-auto my-auto">
+          <div className="w-screen flex mt-16 lg:flex-row flex-col mx-auto my-auto">
             <div className="lg:mx-16 w-full lg:w-1/2">
               {opponent && (
                 <div className="flex justify-between text-center mr-8 text-white text-base lg:text-lg mb-2">

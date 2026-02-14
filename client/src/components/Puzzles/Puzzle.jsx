@@ -48,7 +48,8 @@ const Puzzle = () => {
   const [promotionPiece, setPromotionPiece] = useState("q");
   const [mobileMode, setMobileMode] = useState(false);
   const [puzzleCompleted, setPuzzleCompleted] = useState(false);
-  const [playerColor, setPlayerColor] = useState("w"); // Track which color the player controls
+  const [playerColor, setPlayerColor] = useState("w");
+  const [selectedSquare, setSelectedSquare] = useState(null);
 
   // Fetch puzzle data from API
   useEffect(() => {
@@ -80,8 +81,6 @@ const Puzzle = () => {
     fetchPuzzle();
   }, [puzzleId, navigate]);
 
-
-  
   const fetchBestMove = async (FEN) => {
     try {
       const response = await axios.get(
@@ -103,10 +102,12 @@ const Puzzle = () => {
 
   const handleCheckboxChange = () => {
     setMobileMode(!mobileMode);
+    setSelectedSquare(null);
+    removeGreySquares();
   };
 
   const recordPuzzleAttempt = async (success) => {
-    if (puzzleCompleted) return; // Only record once
+    if (puzzleCompleted) return;
     
     try {
       await PuzzleService.recordAttempt(puzzleId, success);
@@ -116,18 +117,64 @@ const Puzzle = () => {
     }
   };
 
+  // Helper functions
+  const removeGreySquares = () => {
+    const squares = document.querySelectorAll(".square-55d63");
+    squares.forEach((square) => (square.style.background = ""));
+  };
+
+  const greySquare = (square) => {
+    const squareEl = document.querySelector(`.square-${square}`);
+    if (squareEl) {
+      const isBlack = squareEl.classList.contains("black-3c85d");
+      squareEl.style.background = isBlack ? "#696969" : "#a9a9a9";
+    }
+  };
+
+  const highlightSquare = (square) => {
+    const squareEl = document.querySelector(`.square-${square}`);
+    if (squareEl) {
+      squareEl.style.background = "#ffff00";
+    }
+  };
+
+  const updateStatus = debounce(() => {
+    const game = gameRef.current;
+    let status = "";
+    let moveColor = "White";
+
+    if (game.turn() === "b") {
+      moveColor = "Black";
+    }
+
+    if (game.isGameOver()) {
+      status = "Game over";
+      checkmateSound.play();
+    } else {
+      status = moveColor + " to move";
+
+      if (game.isCheck()) {
+        status += ", " + moveColor + " is in check";
+        checkSound.play();
+      }
+    }
+
+    setCurrentStatus(status);
+  }, 100);
+
   useEffect(() => {
     if (!puzzle || !puzzle.fen) return;
 
     const game = gameRef.current;
 
     const onDragStart = (source, piece, position, orientation) => {
+      if (mobileMode) return false;
+
       if (game.isGameOver()) {
         console.log("Start a new game from the menu");
         return false;
       }
 
-      // Only allow the player to move pieces of their color (based on the turn from FEN)
       if (
         (game.turn() === "w" && piece.search(/^b/) !== -1) ||
         (game.turn() === "b" && piece.search(/^w/) !== -1)
@@ -137,6 +184,8 @@ const Puzzle = () => {
     };
 
     const onDrop = async (source, target) => {
+      if (mobileMode) return "snapback";
+      
       removeGreySquares();
 
       let move = game.move({
@@ -150,18 +199,14 @@ const Puzzle = () => {
       setMoves((prevMoves) => [...prevMoves, { from: move.from, to: move.to }]);
       updateStatus();
 
-      // Play sound based on move type
       if (move.captured) {
         captureSound.play();
       } else {
         moveSound.play();
       }
 
-      // Check if puzzle is solved
       if (game.isGameOver()) {
         if (game.isCheckmate()) {
-          // Check if the player's color delivered checkmate
-          // If player is white and black is in checkmate, or player is black and white is in checkmate
           const playerWon = (playerColor === 'w' && game.turn() === 'b') || 
                            (playerColor === 'b' && game.turn() === 'w');
           
@@ -171,17 +216,13 @@ const Puzzle = () => {
         }
       }
 
-      // Get opponent's response (only if it's now the opponent's turn)
       const opponentColor = playerColor === 'w' ? 'b' : 'w';
       if (game.turn() === opponentColor) {
         try {
           const fen = game.fen();
-          console.log(fen);
-
           const bestMoveResponse = await fetchBestMove(fen);
 
           if (bestMoveResponse) {
-            console.log(bestMoveResponse);
             const bestMove = bestMoveResponse.split(" ")[1].trim();
 
             move = game.move({
@@ -198,7 +239,6 @@ const Puzzle = () => {
               boardRef.current.position(game.fen());
               updateStatus();
 
-              // Play sound based on move type
               if (move.captured) {
                 captureSound.play();
               } else {
@@ -213,6 +253,8 @@ const Puzzle = () => {
     };
 
     const onMouseoverSquare = (square, piece) => {
+      if (mobileMode) return;
+
       const moves = game.moves({
         square: square,
         verbose: true,
@@ -228,6 +270,7 @@ const Puzzle = () => {
     };
 
     const onMouseoutSquare = (square, piece) => {
+      if (mobileMode) return;
       removeGreySquares();
     };
 
@@ -235,44 +278,8 @@ const Puzzle = () => {
       boardRef.current.position(game.fen());
     };
 
-    const updateStatus = debounce(() => {
-      let status = "";
-      let moveColor = "White";
-
-      if (game.turn() === "b") {
-        moveColor = "Black";
-      }
-
-      if (game.isGameOver()) {
-        status = "Game over";
-        checkmateSound.play();
-      } else {
-        status = moveColor + " to move";
-
-        if (game.isCheck()) {
-          status += ", " + moveColor + " is in check";
-          checkSound.play();
-        }
-      }
-
-      setCurrentStatus(status);
-    }, 100);
-
-    const removeGreySquares = () => {
-      const squares = document.querySelectorAll(".square-55d63");
-      squares.forEach((square) => (square.style.background = ""));
-    };
-
-    const greySquare = (square) => {
-      const squareEl = document.querySelector(`.square-${square}`);
-      if (squareEl) {
-        const isBlack = squareEl.classList.contains("black-3c85d");
-        squareEl.style.background = isBlack ? "#696969" : "#a9a9a9";
-      }
-    };
-
     const config = {
-      draggable: true,
+      draggable: !mobileMode,
       position: puzzle.fen,
       onDragStart: onDragStart,
       onDrop: onDrop,
@@ -282,7 +289,6 @@ const Puzzle = () => {
       pieceTheme: (piece) => pieceImages[piece],
       snapbackSpeed: 500,
       snapSpeed: 100,
-      // Set board orientation based on player color
       orientation: playerColor === 'w' ? 'white' : 'black'
     };
 
@@ -293,7 +299,183 @@ const Puzzle = () => {
         boardRef.current.destroy();
       }
     };
-  }, [puzzle, promotionPiece, playerColor]);
+  }, [puzzle, promotionPiece, playerColor, mobileMode]);
+
+  // Touch functionality for mobile mode
+  useEffect(() => {
+    if (!mobileMode || !chessRef.current || !puzzle) return;
+
+    const timer = setTimeout(() => {
+      if (!boardRef.current) return;
+
+      const handleSquareClick = async (e) => {
+        const game = gameRef.current;
+        if (!game || game.isGameOver()) return;
+
+        let squareEl = e.target;
+        let attempts = 0;
+        while (squareEl && !squareEl.classList.contains("square-55d63")) {
+          squareEl = squareEl.parentElement;
+          attempts++;
+          if (attempts > 10 || squareEl === chessRef.current || !squareEl) return;
+        }
+
+        if (!squareEl) return;
+
+        const classList = Array.from(squareEl.classList);
+        const squareClass = classList.find((cls) => cls.match(/^square-([a-h][1-8])$/));
+        if (!squareClass) return;
+
+        const clickedSquare = squareClass.replace("square-", "");
+        const position = boardRef.current.position();
+        const piece = position[clickedSquare];
+
+        if (!selectedSquare) {
+          if (!piece) return;
+
+          if (
+            (game.turn() === "w" && piece.search(/^b/) !== -1) ||
+            (game.turn() === "b" && piece.search(/^w/) !== -1)
+          ) {
+            return;
+          }
+
+          const legalMoves = game.moves({ square: clickedSquare, verbose: true });
+          if (legalMoves.length === 0) return;
+
+          setSelectedSquare(clickedSquare);
+          removeGreySquares();
+          highlightSquare(clickedSquare);
+          legalMoves.forEach((move) => greySquare(move.to));
+        } else {
+          if (clickedSquare === selectedSquare) {
+            setSelectedSquare(null);
+            removeGreySquares();
+            return;
+          }
+
+          if (piece) {
+            const selectedPiece = position[selectedSquare];
+            if (
+              (selectedPiece[0] === "w" && piece[0] === "w") ||
+              (selectedPiece[0] === "b" && piece[0] === "b")
+            ) {
+              const legalMoves = game.moves({ square: clickedSquare, verbose: true });
+              if (legalMoves.length > 0) {
+                setSelectedSquare(clickedSquare);
+                removeGreySquares();
+                highlightSquare(clickedSquare);
+                legalMoves.forEach((move) => greySquare(move.to));
+              }
+              return;
+            }
+          }
+
+          try {
+            let move = game.move({
+              from: selectedSquare,
+              to: clickedSquare,
+              promotion: promotionPiece,
+            });
+
+            if (move) {
+              boardRef.current.position(game.fen());
+
+              if (move.captured) {
+                captureSound.play();
+              } else {
+                moveSound.play();
+              }
+
+              setMoves((prevMoves) => [...prevMoves, { from: move.from, to: move.to }]);
+              setSelectedSquare(null);
+              removeGreySquares();
+
+              let status = "";
+              let moveColor = game.turn() === "w" ? "White" : "Black";
+
+              if (game.isCheckmate()) {
+                status = "Game over, " + moveColor + " is in checkmate.";
+                checkmateSound.play();
+                
+                const playerWon = (playerColor === 'w' && game.turn() === 'b') || 
+                                 (playerColor === 'b' && game.turn() === 'w');
+                if (playerWon) {
+                  recordPuzzleAttempt(true);
+                }
+              } else if (game.inCheck()) {
+                status = moveColor + " to move, " + moveColor + " is in check";
+                checkSound.play();
+              } else {
+                status = moveColor + " to move";
+              }
+              setCurrentStatus(status);
+
+              const opponentColor = playerColor === 'w' ? 'b' : 'w';
+              if (game.turn() === opponentColor) {
+                try {
+                  const fen = game.fen();
+                  const bestMoveResponse = await fetchBestMove(fen);
+
+                  if (bestMoveResponse) {
+                    const bestMove = bestMoveResponse.split(" ")[1].trim();
+
+                    move = game.move({
+                      from: bestMove.slice(0, 2),
+                      to: bestMove.slice(2, 4),
+                      promotion: promotionPiece,
+                    });
+
+                    if (move !== null) {
+                      setMoves((prevMoves) => [...prevMoves, { from: move.from, to: move.to }]);
+                      boardRef.current.position(game.fen());
+
+                      if (move.captured) {
+                        captureSound.play();
+                      } else {
+                        moveSound.play();
+                      }
+
+                      let newStatus = "";
+                      let newMoveColor = game.turn() === "w" ? "White" : "Black";
+
+                      if (game.isCheckmate()) {
+                        newStatus = "Game over, " + newMoveColor + " is in checkmate.";
+                        checkmateSound.play();
+                      } else if (game.inCheck()) {
+                        newStatus = newMoveColor + " to move, " + newMoveColor + " is in check";
+                        checkSound.play();
+                      } else {
+                        newStatus = newMoveColor + " to move";
+                      }
+                      setCurrentStatus(newStatus);
+                    }
+                  }
+                } catch (error) {
+                  console.error("Error fetching move from stockfish:", error);
+                }
+              }
+            } else {
+              setSelectedSquare(null);
+              removeGreySquares();
+            }
+          } catch (error) {
+            setSelectedSquare(null);
+            removeGreySquares();
+          }
+        }
+      };
+
+      const boardElement = chessRef.current;
+      boardElement.addEventListener("click", handleSquareClick, true);
+
+      return () => {
+        boardElement.removeEventListener("click", handleSquareClick, true);
+      };
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [mobileMode, selectedSquare, promotionPiece, puzzle, playerColor]);
 
   const toggleTable = () => {
     setIsTableCollapsed(!isTableCollapsed);
@@ -360,18 +542,20 @@ const Puzzle = () => {
             ref={chessRef}
             style={{ width: window.innerWidth > 1028 ? "40vw" : "100vw" }}
           ></div>
+        </div>
+
+        <div className="lg:mx-4 w-fit mx-2 lg:w-1/3 mt-4 lg:mt-0">
           <MobileToggle 
             mobileMode={mobileMode} 
             onChange={handleCheckboxChange}
-            className="mt-4 mb-4"
+            className="mb-4"
           />
-        </div>
-
-        {!mobileMode && (
-          <div className="lg:mx-4 w-fit mx-2 lg:w-1/3 mt-4 lg:mt-0">
-            <div className="rounded-xl shadow-lg text-center p-6 px-12 lg:w-full text-xl lg:text-2xl bg-gray-400 bg-opacity-30 text-white border border-gray-200 flex-shrink-0">
-              Current Status: {currentStatus ? currentStatus : (playerColor === 'w' ? "White to move" : "Black to move")}
-            </div>
+          
+          {!mobileMode && (
+            <>
+              <div className="rounded-xl shadow-lg text-center p-6 px-12 lg:w-full text-xl lg:text-2xl bg-gray-400 bg-opacity-30 text-white border border-gray-200 flex-shrink-0">
+                Current Status: {currentStatus ? currentStatus : (playerColor === 'w' ? "White to move" : "Black to move")}
+              </div>
             
             {puzzleCompleted && (
               <div className="mt-4 p-4 bg-green-600 bg-opacity-80 text-white rounded-lg text-center border border-green-400 shadow-lg">
@@ -501,8 +685,9 @@ const Puzzle = () => {
                 ) : null}
               </>
             )}
-          </div>
-        )}
+          </>
+          )}
+        </div>
       </div>
     </div>
   );
