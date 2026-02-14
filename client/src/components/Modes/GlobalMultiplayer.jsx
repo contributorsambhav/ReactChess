@@ -54,7 +54,7 @@ const GlobalMultiplayer = () => {
   const [opponent, setOpponent] = useState(null);
   const [promotionPiece, setPromotionPiece] = useState("q");
   const [isTableCollapsed, setIsTableCollapsed] = useState(false);
-  const [mobileMode, setMobileMode] = useState(false);
+  const [mobileMode, setMobileMode] = useState(window.innerWidth <= 1028);
   const [selectedSquare, setSelectedSquare] = useState(null);
   const navigate = useNavigate();
 
@@ -456,108 +456,104 @@ const GlobalMultiplayer = () => {
                 className="mb-4"
               />
               
-              {(!mobileMode) && (
-                <>
-                  <div className="rounded-xl shadow-lg text-center p-6 px-12 lg:w-full text-xl lg:text-2xl bg-gray-400 bg-opacity-30 text-white border border-gray-200 flex-shrink-0">
-                    Current Status: {currentStatus ? currentStatus : "White to move"}
-                  </div>
+              <div className="rounded-xl shadow-lg text-center p-6 px-12 lg:w-full text-xl lg:text-2xl bg-gray-400 bg-opacity-30 text-white border border-gray-200 flex-shrink-0">
+                Current Status: {currentStatus ? currentStatus : "White to move"}
+              </div>
 
-                  <div className="mt-4">
-                    <label className="mr-2 text-white text-lg lg:text-xl">
-                      Promotion Piece:
-                    </label>
-                    <select
-                      value={promotionPiece}
-                      onChange={handlePromotionChange}
-                      className="bg-gray-400 bg-opacity-30 text-white px-4 py-2 rounded-lg w-full text-base lg:text-lg border border-gray-200"
-                    >
-                      <option
-                        className="bg-blue-900 bg-opacity-50 bg-transparent text-white"
-                        value="q"
-                      >
-                        Queen
-                      </option>
-                      <option
-                        className="bg-blue-900 bg-opacity-50 bg-transparent text-white"
-                        value="r"
-                      >
-                        Rook
-                      </option>
-                      <option
-                        className="bg-blue-900 bg-opacity-50 bg-transparent text-white"
-                        value="b"
-                      >
-                        Bishop
-                      </option>
-                      <option
-                        className="bg-blue-900 bg-opacity-50 bg-transparent text-white"
-                        value="n"
-                      >
-                        Knight
-                      </option>
-                    </select>
-                  </div>
-
-                  <div className="mx-2 mt-3 text-center border border-gray-800 text-base lg:text-lg text-white bg-black bg-opacity-20 p-4 rounded-lg">
-                    If board position changes to original after promotion, just
-                    attempt an illegal move
-                  </div>
-
-                  <button
-                    onClick={toggleTable}
-                    className="mt-4 bg-gray-400 bg-opacity-30 text-white border border-gray-200 px-4 py-2 rounded-lg w-full text-base lg:text-lg"
+              <div className="mt-4">
+                <label className="mr-2 text-white text-lg lg:text-xl">
+                  Promotion Piece:
+                </label>
+                <select
+                  value={promotionPiece}
+                  onChange={handlePromotionChange}
+                  className="bg-gray-400 bg-opacity-30 text-white px-4 py-2 rounded-lg w-full text-base lg:text-lg border border-gray-200"
+                >
+                  <option
+                    className="bg-blue-900 bg-opacity-50 bg-transparent text-white"
+                    value="q"
                   >
-                    {isTableCollapsed ? "Show Moves" : "Hide Moves"}
-                  </button>
-                  <div
-                    style={{
-                      maxHeight: isTableCollapsed ? "0" : "40vh",
-                      transition: "max-height 0.3s ease-in-out",
-                      overflow: "scroll",
-                    }}
+                    Queen
+                  </option>
+                  <option
+                    className="bg-blue-900 bg-opacity-50 bg-transparent text-white"
+                    value="r"
                   >
-                    <div style={{ height: "100%", overflowY: "auto" }}>
-                      <table className="w-full border-collapse border border-gray-700 rounded-lg bg-gray-400 bg-opacity-30 text-white">
-                        <thead>
-                          <tr className="bg-gray-800 bg-opacity-30 text-center text-white">
-                            <th className="border border-gray-400 px-6 py-3 text-base lg:text-lg">
-                              Move
-                            </th>
-                            <th className="border border-gray-400 px-6 py-3 text-base lg:text-lg">
-                              From
-                            </th>
-                            <th className="border border-gray-400 px-6 py-3 text-base lg:text-lg">
-                              To
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {moves.map((move, index) => (
-                            <tr
-                              key={index}
-                              className={
-                                index % 2 === 0
-                                  ? "bg-gray-700 bg-opacity-30 text-white text-center"
-                                  : "bg-gray-600 bg-opacity-30 text-gray-200 text-center"
-                              }
-                            >
-                              <td className="border border-gray-400 px-6 py-4 text-base lg:text-lg">
-                                {index + 1}
-                              </td>
-                              <td className="border border-gray-400 px-6 py-4 text-base lg:text-lg">
-                                {move.from}
-                              </td>
-                              <td className="border border-gray-400 px-6 py-4 text-base lg:text-lg">
-                                {move.to}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </>
-              )}
+                    Rook
+                  </option>
+                  <option
+                    className="bg-blue-900 bg-opacity-50 bg-transparent text-white"
+                    value="b"
+                  >
+                    Bishop
+                  </option>
+                  <option
+                    className="bg-blue-900 bg-opacity-50 bg-transparent text-white"
+                    value="n"
+                  >
+                    Knight
+                  </option>
+                </select>
+              </div>
+
+              <div className="mx-2 mt-3 text-center border border-gray-800 text-base lg:text-lg text-white bg-black bg-opacity-20 p-4 rounded-lg">
+                If board position changes to original after promotion, just
+                attempt an illegal move
+              </div>
+
+              <button
+                onClick={toggleTable}
+                className="mt-4 bg-gray-400 bg-opacity-30 text-white border border-gray-200 px-4 py-2 rounded-lg w-full text-base lg:text-lg"
+              >
+                {isTableCollapsed ? "Show Moves" : "Hide Moves"}
+              </button>
+              <div
+                style={{
+                  maxHeight: isTableCollapsed ? "0" : "40vh",
+                  transition: "max-height 0.3s ease-in-out",
+                  overflow: "scroll",
+                }}
+              >
+                <div style={{ height: "100%", overflowY: "auto" }}>
+                  <table className="w-full border-collapse border border-gray-700 rounded-lg bg-gray-400 bg-opacity-30 text-white">
+                    <thead>
+                      <tr className="bg-gray-800 bg-opacity-30 text-center text-white">
+                        <th className="border border-gray-400 px-6 py-3 text-base lg:text-lg">
+                          Move
+                        </th>
+                        <th className="border border-gray-400 px-6 py-3 text-base lg:text-lg">
+                          From
+                        </th>
+                        <th className="border border-gray-400 px-6 py-3 text-base lg:text-lg">
+                          To
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {moves.map((move, index) => (
+                        <tr
+                          key={index}
+                          className={
+                            index % 2 === 0
+                              ? "bg-gray-700 bg-opacity-30 text-white text-center"
+                              : "bg-gray-600 bg-opacity-30 text-gray-200 text-center"
+                          }
+                        >
+                          <td className="border border-gray-400 px-6 py-4 text-base lg:text-lg">
+                            {index + 1}
+                          </td>
+                          <td className="border border-gray-400 px-6 py-4 text-base lg:text-lg">
+                            {move.from}
+                          </td>
+                          <td className="border border-gray-400 px-6 py-4 text-base lg:text-lg">
+                            {move.to}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           </div>
         </div>

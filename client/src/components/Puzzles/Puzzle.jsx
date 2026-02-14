@@ -46,7 +46,7 @@ const Puzzle = () => {
   const [isTableCollapsed, setIsTableCollapsed] = useState(false);
   const [isSolutionCollapsed, setIsSolutionCollapsed] = useState(false);
   const [promotionPiece, setPromotionPiece] = useState("q");
-  const [mobileMode, setMobileMode] = useState(false);
+  const [mobileMode, setMobileMode] = useState(window.innerWidth <= 1028);
   const [puzzleCompleted, setPuzzleCompleted] = useState(false);
   const [playerColor, setPlayerColor] = useState("w");
   const [selectedSquare, setSelectedSquare] = useState(null);
@@ -514,27 +514,23 @@ const Puzzle = () => {
         backgroundPosition: "center"
       }}
     >
-      {!mobileMode && (
-        <>
-          <h1 className="text-3xl font-bold mt-16 lg:mt-4 z-10 text-white drop-shadow-lg">
-            {puzzle.name}
-          </h1>
-          <div className="w-[80%] p-4 text-lg text-white">
-            <p className="drop-shadow-md">{puzzle.description}</p>
-            {puzzle.composer && (
-              <p className="mt-2 text-gray-200 drop-shadow-md">
-                <span className="font-semibold">Composer:</span> {puzzle.composer}
-                {puzzle.year && ` (${puzzle.year})`}
-              </p>
-            )}
-            {puzzle.attempts > 0 && (
-              <p className="mt-2 text-gray-300 text-sm drop-shadow-md">
-                Attempted {puzzle.attempts} times • {puzzle.successRate.toFixed(1)}% success rate
-              </p>
-            )}
-          </div>
-        </>
-      )}
+      <h1 className="text-3xl font-bold mt-16 lg:mt-4 z-10 text-white drop-shadow-lg">
+        {puzzle.name}
+      </h1>
+      <div className="w-[80%] p-4 text-lg text-white">
+        <p className="drop-shadow-md">{puzzle.description}</p>
+        {puzzle.composer && (
+          <p className="mt-2 text-gray-200 drop-shadow-md">
+            <span className="font-semibold">Composer:</span> {puzzle.composer}
+            {puzzle.year && ` (${puzzle.year})`}
+          </p>
+        )}
+        {puzzle.attempts > 0 && (
+          <p className="mt-2 text-gray-300 text-sm drop-shadow-md">
+            Attempted {puzzle.attempts} times • {puzzle.successRate.toFixed(1)}% success rate
+          </p>
+        )}
+      </div>
 
       <div className="w-screen flex lg:flex-row flex-col mx-auto my-auto">
         <div className="lg:mx-16 w-full lg:w-1/2">
@@ -551,141 +547,137 @@ const Puzzle = () => {
             className="mb-4"
           />
           
-          {!mobileMode && (
-            <>
-              <div className="rounded-xl shadow-lg text-center p-6 px-12 lg:w-full text-xl lg:text-2xl bg-gray-400 bg-opacity-30 text-white border border-gray-200 flex-shrink-0">
-                Current Status: {currentStatus ? currentStatus : (playerColor === 'w' ? "White to move" : "Black to move")}
-              </div>
-            
-            {puzzleCompleted && (
-              <div className="mt-4 p-4 bg-green-600 bg-opacity-80 text-white rounded-lg text-center border border-green-400 shadow-lg">
-                🎉 Puzzle Solved! Great job!
-              </div>
-            )}
+          <div className="rounded-xl shadow-lg text-center p-6 px-12 lg:w-full text-xl lg:text-2xl bg-gray-400 bg-opacity-30 text-white border border-gray-200 flex-shrink-0">
+            Current Status: {currentStatus ? currentStatus : (playerColor === 'w' ? "White to move" : "Black to move")}
+          </div>
+        
+          {puzzleCompleted && (
+            <div className="mt-4 p-4 bg-green-600 bg-opacity-80 text-white rounded-lg text-center border border-green-400 shadow-lg">
+              🎉 Puzzle Solved! Great job!
+            </div>
+          )}
 
-            <div className="mt-4">
-              <label className="mr-2 text-white text-lg lg:text-xl">
-                Promotion Piece:
-              </label>
-              <select
-                value={promotionPiece}
-                onChange={handlePromotionChange}
-                className="bg-gray-400 bg-opacity-30 text-white px-4 py-2 rounded-lg w-full text-base lg:text-lg border border-gray-200"
+          <div className="mt-4">
+            <label className="mr-2 text-white text-lg lg:text-xl">
+              Promotion Piece:
+            </label>
+            <select
+              value={promotionPiece}
+              onChange={handlePromotionChange}
+              className="bg-gray-400 bg-opacity-30 text-white px-4 py-2 rounded-lg w-full text-base lg:text-lg border border-gray-200"
+            >
+              <option
+                className="bg-blue-900 bg-opacity-50 bg-transparent text-white"
+                value="q"
               >
-                <option
-                  className="bg-blue-900 bg-opacity-50 bg-transparent text-white"
-                  value="q"
-                >
-                  Queen
-                </option>
-                <option
-                  className="bg-blue-900 bg-opacity-50 bg-transparent text-white"
-                  value="r"
-                >
-                  Rook
-                </option>
-                <option
-                  className="bg-blue-900 bg-opacity-50 bg-transparent text-white"
-                  value="b"
-                >
-                  Bishop
-                </option>
-                <option
-                  className="bg-blue-900 bg-opacity-50 bg-transparent text-white"
-                  value="n"
-                >
-                  Knight
-                </option>
-              </select>
-            </div>
+                Queen
+              </option>
+              <option
+                className="bg-blue-900 bg-opacity-50 bg-transparent text-white"
+                value="r"
+              >
+                Rook
+              </option>
+              <option
+                className="bg-blue-900 bg-opacity-50 bg-transparent text-white"
+                value="b"
+              >
+                Bishop
+              </option>
+              <option
+                className="bg-blue-900 bg-opacity-50 bg-transparent text-white"
+                value="n"
+              >
+                Knight
+              </option>
+            </select>
+          </div>
 
-            <div className="mx-2 mt-3 text-center border border-gray-800 text-base lg:text-lg text-white bg-black bg-opacity-20 p-4 rounded-lg">
-              If board position changes to original after promotion, just
-              attempt an illegal move
-            </div>
+          <div className="mx-2 mt-3 text-center border border-gray-800 text-base lg:text-lg text-white bg-black bg-opacity-20 p-4 rounded-lg">
+            If board position changes to original after promotion, just
+            attempt an illegal move
+          </div>
 
-            <button
-              onClick={toggleTable}
-              className="mt-4 bg-gray-400 bg-opacity-30 text-white border border-gray-200 px-4 py-2 rounded-lg w-full text-base lg:text-lg"
-            >
-              {isTableCollapsed ? "Show Moves" : "Hide Moves"}
-            </button>
-            <div
-              style={{
-                maxHeight: isTableCollapsed ? "0" : "40vh",
-                transition: "max-height 0.3s ease-in-out",
-                overflow: "scroll",
-              }}
-            >
-              <div style={{ height: "100%", overflowY: "auto" }}>
-                <table className="w-full border-collapse border border-gray-700 rounded-lg bg-gray-400 bg-opacity-30 text-white">
-                  <thead>
-                    <tr className="bg-gray-800 bg-opacity-30 text-center text-white">
-                      <th className="border border-gray-400 px-6 py-3 text-base lg:text-lg">
-                        Move
-                      </th>
-                      <th className="border border-gray-400 px-6 py-3 text-base lg:text-lg">
-                        From
-                      </th>
-                      <th className="border border-gray-400 px-6 py-3 text-base lg:text-lg">
-                        To
-                      </th>
+          <button
+            onClick={toggleTable}
+            className="mt-4 bg-gray-400 bg-opacity-30 text-white border border-gray-200 px-4 py-2 rounded-lg w-full text-base lg:text-lg"
+          >
+            {isTableCollapsed ? "Show Moves" : "Hide Moves"}
+          </button>
+          <div
+            style={{
+              maxHeight: isTableCollapsed ? "0" : "40vh",
+              transition: "max-height 0.3s ease-in-out",
+              overflow: "scroll",
+            }}
+          >
+            <div style={{ height: "100%", overflowY: "auto" }}>
+              <table className="w-full border-collapse border border-gray-700 rounded-lg bg-gray-400 bg-opacity-30 text-white">
+                <thead>
+                  <tr className="bg-gray-800 bg-opacity-30 text-center text-white">
+                    <th className="border border-gray-400 px-6 py-3 text-base lg:text-lg">
+                      Move
+                    </th>
+                    <th className="border border-gray-400 px-6 py-3 text-base lg:text-lg">
+                      From
+                    </th>
+                    <th className="border border-gray-400 px-6 py-3 text-base lg:text-lg">
+                      To
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {moves.map((move, index) => (
+                    <tr
+                      key={index}
+                      className={
+                        index % 2 === 0
+                          ? "bg-gray-700 bg-opacity-30 text-white text-center"
+                          : "bg-gray-600 bg-opacity-30 text-gray-200 text-center"
+                      }
+                    >
+                      <td className="border border-gray-400 px-6 py-4 text-base lg:text-lg">
+                        {index + 1}
+                      </td>
+                      <td className="border border-gray-400 px-6 py-4 text-base lg:text-lg">
+                        {move.from}
+                      </td>
+                      <td className="border border-gray-400 px-6 py-4 text-base lg:text-lg">
+                        {move.to}
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {moves.map((move, index) => (
-                      <tr
-                        key={index}
-                        className={
-                          index % 2 === 0
-                            ? "bg-gray-700 bg-opacity-30 text-white text-center"
-                            : "bg-gray-600 bg-opacity-30 text-gray-200 text-center"
-                        }
-                      >
-                        <td className="border border-gray-400 px-6 py-4 text-base lg:text-lg">
-                          {index + 1}
-                        </td>
-                        <td className="border border-gray-400 px-6 py-4 text-base lg:text-lg">
-                          {move.from}
-                        </td>
-                        <td className="border border-gray-400 px-6 py-4 text-base lg:text-lg">
-                          {move.to}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                  ))}
+                </tbody>
+              </table>
             </div>
-            
-            <button
-              onClick={toggleSolution}
-              className="mt-4 bg-gray-400 bg-opacity-30 text-white border border-gray-200 px-4 py-2 rounded-lg w-full text-base lg:text-lg"
-            >
-              {isSolutionCollapsed ? "Hide Solution" : "Show Solution"}
-            </button>
-            {isSolutionCollapsed && (
-              <>
-                {puzzle.solutionType === "video" && puzzle.videoUrl ? (
-                  <iframe
-                    width="100%"
-                    height="360"
-                    src={puzzle.videoUrl}
-                    title={puzzle.videoTitle || "Puzzle Solution"}
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    referrerPolicy="strict-origin-when-cross-origin"
-                    allowFullScreen
-                    className="mt-4 mx-auto rounded-lg border border-gray-200"
-                  ></iframe>
-                ) : puzzle.solutionType === "text" && puzzle.solution ? (
-                  <div className="text-base lg:text-lg mt-4 text-center text-white bg-gray-400 bg-opacity-30 p-4 rounded-lg border border-gray-200">
-                    {puzzle.solution}
-                  </div>
-                ) : null}
-              </>
-            )}
-          </>
+          </div>
+          
+          <button
+            onClick={toggleSolution}
+            className="mt-4 bg-gray-400 bg-opacity-30 text-white border border-gray-200 px-4 py-2 rounded-lg w-full text-base lg:text-lg"
+          >
+            {isSolutionCollapsed ? "Hide Solution" : "Show Solution"}
+          </button>
+          {isSolutionCollapsed && (
+            <>
+              {puzzle.solutionType === "video" && puzzle.videoUrl ? (
+                <iframe
+                  width="100%"
+                  height="360"
+                  src={puzzle.videoUrl}
+                  title={puzzle.videoTitle || "Puzzle Solution"}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allowFullScreen
+                  className="mt-4 mx-auto rounded-lg border border-gray-200"
+                ></iframe>
+              ) : puzzle.solutionType === "text" && puzzle.solution ? (
+                <div className="text-base lg:text-lg mt-4 text-center text-white bg-gray-400 bg-opacity-30 p-4 rounded-lg border border-gray-200">
+                  {puzzle.solution}
+                </div>
+              ) : null}
+            </>
           )}
         </div>
       </div>
