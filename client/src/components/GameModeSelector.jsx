@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+
 import { Link } from 'react-router-dom';
 import ModeSelectorImage from '../assets/images/selector2.jpg';
 import { useSelector } from 'react-redux';
@@ -15,7 +16,8 @@ function GameModeSelector() {
     { path: '/local-multiplayer', label: 'Local Multiplayer', delay: 'delay-200' },
     { path: '/against-stockfish', label: 'Against Stockfish ', delay: 'delay-300' },
     { path: '/puzzle', label: 'Puzzles', delay: 'delay-400' },
-    { path: '/random-play', label: 'Random Play (Always win)', delay: 'delay-500' }
+    { path: '/random-play', label: 'Random Play (Always win)', delay: 'delay-500' },
+    { path: '/engine-analysis', label: 'Engine Analysis', delay: 'delay-600' }
   ];
 
   return (

@@ -67,6 +67,7 @@ function Navbar() {
                                     Puzzles
                                 </Link>
                             </li>
+                            
                             <li>
                                 <Link
                                     to="/profile"
