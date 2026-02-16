@@ -1,7 +1,7 @@
 import { login, logout } from "../store/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 
-import Cookies from "js-cookie";
+// Cookies removed: logout will call backend to clear httpOnly cookie
 import React from "react";
 import axios from "axios";
 import bg from "../assets/images/bgprofile.jpg";
@@ -94,9 +94,13 @@ function Profile() {
   };
 
   const handleLogout = () => {
-    Cookies.remove("token", { path: "/" });
-    dispatch(logout());
-    navigate("/login");
+    axios
+      .post(`${import.meta.env.VITE_BACKEND_URL}/user/logout`, {}, { withCredentials: true })
+      .catch((err) => console.error('Logout error:', err))
+      .finally(() => {
+        dispatch(logout());
+        navigate('/login');
+      });
   };
 
   return (

@@ -13,18 +13,23 @@ function Navbar() {
     const location = useLocation();
 
     React.useEffect(() => {
-        console.log("BACKEND_URL =", import.meta.env.VITE_BACKEND_URL);
-
-        axios.get(import.meta.env.VITE_BACKEND_URL, {
-            withCredentials: true
+        // Fetch authenticated user profile; don't call root which returns a string.
+        axios.get(`${import.meta.env.VITE_BACKEND_URL}/profile`, {
+            withCredentials: true,
         })
-            .then(res => {
+            .then((res) => {
                 const data = res.data;
-                dispatch(login(data));
-                console.log(data);
+                // If backend returns user object, update store
+                if (data && typeof data === 'object') {
+                    dispatch(login(data));
+                } else {
+                    dispatch(login(null));
+                }
             })
-            .catch(error => {
+            .catch((error) => {
+                // On error (e.g., 401), ensure auth is cleared
                 console.error('Error fetching profile:', error);
+                dispatch(logout());
             });
     }, [dispatch]);
 
@@ -33,7 +38,7 @@ function Navbar() {
     const effectiveAuthStatus = isAuthPage ? 'false' : authStatus;
 
     return (
-        <nav className="w-full absolute top-0 z-10 bg-purple-900 bg-opacity-40 p-2">
+        <nav className="w-full absolute top-0 z-50 pointer-events-auto bg-purple-900 bg-opacity-40 p-2">
             <div className="container mx-auto flex justify-between items-center">
                 <div className="text-gray-800 text-2xl font-semibold">
                     <Link to="/" >

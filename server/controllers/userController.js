@@ -58,11 +58,18 @@ const login = async (req, res) => {
     }, process.env.JWT_SECRET, {
     });
 
-res.cookie('token', token, {
-  httpOnly: true,
-  secure: true,
-  sameSite : 'none'
-});
+    // Persist the cookie until the user explicitly logs out.
+    // Use secure cookies only in production (HTTPS). Set a long maxAge so the
+    // cookie survives browser restarts until logout.
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      path: '/',
+      maxAge: 10 * 365 * 24 * 60 * 60 * 1000 // 10 years
+    };
+
+    res.cookie('token', token, cookieOptions);
     res.status(200).json({
       token,
     });
@@ -130,10 +137,24 @@ const getMatchHistory = async (req, res) => {
   }
 };
 
+const logout = (req, res) => {
+  const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    path: '/'
+  };
+
+  res.clearCookie('token', cookieOptions);
+  res.status(200).json({ message: 'Logged out' });
+};
+
 module.exports = {
   register,
   login,
   getUserById,
   addMatchToHistory,
-  getMatchHistory
+  getMatchHistory,
+  logout
 };
+

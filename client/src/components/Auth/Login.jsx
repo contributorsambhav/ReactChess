@@ -16,16 +16,17 @@ function Login() {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     React.useEffect(() => {
-        axios.get(import.meta.env.VITE_BACKEND_URL, {
-            withCredentials: true
-        })
+        // Try to fetch current user profile if cookie exists
+        axios.get(`${import.meta.env.VITE_BACKEND_URL}/profile`, { withCredentials: true })
             .then(res => {
                 const data = res.data;
-                dispatch(login(data));
-                console.log(data);
+                if (data && typeof data === 'object') {
+                    dispatch(login(data));
+                }
             })
             .catch(error => {
                 console.error('Error fetching profile:', error);
+                dispatch(login(null));
             });
     }, [dispatch]);
    
