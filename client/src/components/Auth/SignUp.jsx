@@ -33,12 +33,12 @@ function SignUp() {
     const postData = async (e) => {
         e.preventDefault();
         const { name, email, password, confirmPassword } = formData;
-    
+
         if (password !== confirmPassword) {
             alert("Password and Confirm Password do not match");
             return;
         }
-    
+
         const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/register`, {
             method: "POST",
             headers: {
@@ -50,32 +50,32 @@ function SignUp() {
                 password: password
             })
         });
-    
+
         const data = await res.json();
-    
+
         if (!data) {
             alert("Invalid data");
         } else {
             navigate("/login");
         }
     };
-    
+
 
     return (
         <div
             className="w-screen min-h-screen bg-cover bg-no-repeat bg-center flex items-center justify-center"
             style={{ backgroundImage: `url(${bgImage})` }}
         >
-            <div className="bg-white bg-opacity-10 backdrop-filter backdrop-blur-xl border border-gray-200 p-8 lg:p-12 lg:p-16 rounded-xl shadow-lg w-11/12 max-w-md lg:max-w-lg xl:max-w-xl">
-                <h2 className="text-4xl font-bold text-white text-center mb-8">Sign Up</h2>
+            <div className="bg-white bg-opacity-10 backdrop-filter backdrop-blur-xl border border-gray-200 p-6 lg:p-8 rounded-xl shadow-lg w-11/12 max-w-sm lg:max-w-md xl:max-w-lg">
+                <h2 className="text-3xl font-bold text-white text-center mb-6">Sign Up</h2>
                 <form className="space-y-2" onSubmit={postData}>
                     <div>
-                        <label htmlFor="username" className="block text-lg my-2 font-medium text-white">Username</label>
+                        <label htmlFor="username" className="block text-base my-2 font-medium text-white">Username</label>
                         <input
                             type="text"
                             id="username"
                             name="name"
-                            className="tracking-wider text-lg placeholder-opacity-75 placeholder-gray-100 mt-1 p-2 w-full rounded-md bg-gray-200 bg-opacity-30 text-white border border-gray-400 focus:ring focus:ring-blue-500"
+                            className="tracking-wider text-base placeholder-opacity-75 placeholder-gray-100 mt-1 p-2 w-full rounded-md bg-gray-200 bg-opacity-30 text-white border border-gray-400 focus:ring focus:ring-blue-500"
                             placeholder="Enter your username"
                             value={formData.name}
                             onChange={handleChange}
@@ -83,25 +83,25 @@ function SignUp() {
                         />
                     </div>
                     <div>
-                        <label htmlFor="email" className="block text-lg my-2 font-medium text-white">Email</label>
+                        <label htmlFor="email" className="block text-base my-2 font-medium text-white">Email</label>
                         <input
                             type="email"
                             id="email"
                             name="email"
-                            className="tracking-wider text-lg placeholder-opacity-75 placeholder-gray-100 mt-1 p-2 w-full rounded-md bg-gray-200 bg-opacity-30 text-white border border-gray-400 focus:ring focus:ring-blue-500"
+                            className="tracking-wider text-base placeholder-opacity-75 placeholder-gray-100 mt-1 p-2 w-full rounded-md bg-gray-200 bg-opacity-30 text-white border border-gray-400 focus:ring focus:ring-blue-500"
                             placeholder="Enter your email"
                             value={formData.email}
                             onChange={handleChange}
                             required
                         />
                     </div>
-                    <label htmlFor="password" className="block text-lg  font-medium text-white">Password</label>
+                    <label htmlFor="password" className="block text-base  font-medium text-white">Password</label>
                     <div className="relative">
                         <input
                             type={showPassword ? "text" : "password"}
                             id="password"
                             name="password"
-                            className="tracking-wider text-lg placeholder-opacity-75 placeholder-gray-100 mt-1 p-2 w-full rounded-md bg-gray-200 bg-opacity-30 text-white border border-gray-400 focus:ring focus:ring-blue-500"
+                            className="tracking-wider text-base placeholder-opacity-75 placeholder-gray-100 mt-1 p-2 w-full rounded-md bg-gray-200 bg-opacity-30 text-white border border-gray-400 focus:ring focus:ring-blue-500"
                             placeholder="Enter your password"
                             value={formData.password}
                             onChange={handleChange}
@@ -111,13 +111,13 @@ function SignUp() {
                             {!showPassword ? <i className="fas fa-eye-slash text-white"></i> : <i className="fas fa-eye  text-white"></i>}
                         </span>
                     </div>
-                    <label htmlFor="confirmPassword" className="block text-lg  font-medium text-white">Confirm Password</label>
+                    <label htmlFor="confirmPassword" className="block text-base  font-medium text-white">Confirm Password</label>
                     <div className="relative">
                         <input
                             type={showConfirmPassword ? "text" : "password"}
                             id="confirmPassword"
                             name="confirmPassword"
-                            className="tracking-wider text-lg placeholder-opacity-75 placeholder-gray-100 mt-1 p-2 w-full rounded-md bg-gray-200 bg-opacity-30 text-white border border-gray-400 focus:ring focus:ring-blue-500"
+                            className="tracking-wider text-base placeholder-opacity-75 placeholder-gray-100 mt-1 p-2 w-full rounded-md bg-gray-200 bg-opacity-30 text-white border border-gray-400 focus:ring focus:ring-blue-500"
                             placeholder="Confirm your password"
                             value={formData.confirmPassword}
                             onChange={handleChange}
@@ -131,12 +131,12 @@ function SignUp() {
                     <div className="text-center">
                         <button
                             type="submit"
-                            className=" mt-4 w-full hover:bg-slateblue-700 text-white font-weight-600 text-xl py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-slateblue-500"
+                            className=" mt-4 w-full hover:bg-slateblue-700 text-white font-weight-600 text-lg py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-slateblue-500"
                         >
                             Sign Up
                         </button>
                     </div>
-                    <div className="text-center text-white text-lg">
+                    <div className="text-center text-white text-base">
                         Already have an account? <Link to="/login" className="underline text-gray-100 hover:text-blue-500">Login</Link>
                     </div>
                 </form>
