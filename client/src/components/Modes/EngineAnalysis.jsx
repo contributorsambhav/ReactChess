@@ -42,7 +42,7 @@ const EngineAnalysis = () => {
   const [isTableCollapsed, setIsTableCollapsed] = useState(false);
   const [promotionPiece, setPromotionPiece] = useState("q");
   const [mobileMode, setMobileMode] = useState(window.innerWidth <= 1028);
-  
+
   // Add style to hide scrollbar
   useEffect(() => {
     const style = document.createElement('style');
@@ -58,60 +58,60 @@ const EngineAnalysis = () => {
     document.head.appendChild(style);
     return () => document.head.removeChild(style);
   }, []);
-  
+
   // Engine refs
   const whiteEngineRef = useRef(null);
   const blackEngineRef = useRef(null);
   const analyzerEngineRef = useRef(null);
-  
+
   // Selected presets
   const [whitePresetId, setWhitePresetId] = useState('stockfish-medium');
   const [blackPresetId, setBlackPresetId] = useState('stockfish-fast');
   const [analyzerPresetId, setAnalyzerPresetId] = useState('stockfish-advanced');
-  
+
   // Custom depth
   const [whiteDepth, setWhiteDepth] = useState(15);
   const [blackDepth, setBlackDepth] = useState(12);
   const [analyzerDepth, setAnalyzerDepth] = useState(16);
-  
+
   const [whiteCustom, setWhiteCustom] = useState(false);
   const [blackCustom, setBlackCustom] = useState(false);
   const [analyzerCustom, setAnalyzerCustom] = useState(false);
-  
+
   // Play mode
   const [playMode, setPlayMode] = useState("human");
   const [humanColor, setHumanColor] = useState("white");
   const [gameActive, setGameActive] = useState(false);
   const [gamePaused, setGamePaused] = useState(false);
-  
+
   // Refs for current values
   const playModeRef = useRef("human");
   const humanColorRef = useRef("white");
   const gamePausedRef = useRef(false);
-  
+
   useEffect(() => {
     playModeRef.current = playMode;
   }, [playMode]);
-  
+
   useEffect(() => {
     humanColorRef.current = humanColor;
   }, [humanColor]);
-  
+
   useEffect(() => {
     gamePausedRef.current = gamePaused;
   }, [gamePaused]);
-  
+
   // Engine status
   const [engineThinking, setEngineThinking] = useState(false);
   const [whiteEngineLoaded, setWhiteEngineLoaded] = useState(false);
   const [blackEngineLoaded, setBlackEngineLoaded] = useState(false);
   const [analyzerEngineLoaded, setAnalyzerEngineLoaded] = useState(false);
   const [analyzerThinking, setAnalyzerThinking] = useState(false);
-  
+
   // Analysis display - with smoothing
   const [currentAnalysis, setCurrentAnalysis] = useState(null);
   const previousEvalRef = useRef(0);
-  
+
   const [engineStatus, setEngineStatus] = useState({});
 
   // Helper functions
@@ -170,36 +170,36 @@ const EngineAnalysis = () => {
       const worker = new Worker(workerPath);
       let isReady = false;
       let timeoutId;
-      
+
       worker.onmessage = (event) => {
         const message = event.data;
-        
+
         if (typeof message === 'string' && message.trim() === 'uciok') {
           isReady = true;
           setEngineStatus(prev => ({ ...prev, [presetId]: 'Ready' }));
           if (timeoutId) clearTimeout(timeoutId);
           if (onLoadCallback) onLoadCallback();
         }
-        
+
         handleEngineMessage(presetId, message, engineRef);
       };
-      
+
       worker.onerror = (error) => {
         setEngineStatus(prev => ({ ...prev, [presetId]: 'Failed' }));
         setEngineThinking(false);
         if (timeoutId) clearTimeout(timeoutId);
       };
-      
+
       engineRef.current = worker;
       worker.postMessage('uci');
-      
+
       timeoutId = setTimeout(() => {
         if (!isReady) {
           setEngineStatus(prev => ({ ...prev, [presetId]: 'Timeout' }));
           setEngineThinking(false);
         }
       }, 10000);
-      
+
     } catch (error) {
       setEngineStatus(prev => ({ ...prev, [presetId]: 'Error' }));
       setEngineThinking(false);
@@ -214,14 +214,14 @@ const EngineAnalysis = () => {
           const from = match[1];
           const to = match[2];
           const promotion = match[3] || 'q';
-          
+
           if (engineRef === whiteEngineRef || engineRef === blackEngineRef) {
             setTimeout(() => makeEngineMove(from, to, promotion), 500);
           }
         }
         setEngineThinking(false);
       }
-      
+
       if (message.startsWith('info') && message.includes('pv') && engineRef === analyzerEngineRef) {
         parseEngineAnalysis(message);
       }
@@ -235,39 +235,39 @@ const EngineAnalysis = () => {
       const mateMatch = message.match(/score mate (-?\d+)/);
       const pvMatch = message.match(/pv (.+)/);
       const nodesMatch = message.match(/nodes (\d+)/);
-      
+
       // Only update if we have sufficient depth and nodes for stability
       const depth = depthMatch ? parseInt(depthMatch[1]) : 0;
       const nodes = nodesMatch ? parseInt(nodesMatch[1]) : 0;
-      
+
       if (pvMatch && depth >= 12 && nodes > 5000) {
         let evaluation = 0;
         let evalText = '0.0';
-        
+
         if (mateMatch) {
           const mateIn = parseInt(mateMatch[1]);
           evaluation = mateIn > 0 ? 10000 : -10000;
           evalText = `M${mateIn}`;
         } else if (scoreMatch) {
           const rawEval = parseInt(scoreMatch[1]) / 100;
-          
+
           // Smooth evaluation changes to prevent rapid fluctuations
           const previousEval = previousEvalRef.current;
           const maxChange = 0.8; // Maximum change per update
-          
+
           if (Math.abs(rawEval - previousEval) > maxChange) {
             evaluation = previousEval + (rawEval > previousEval ? maxChange : -maxChange);
           } else {
             evaluation = rawEval;
           }
-          
+
           previousEvalRef.current = evaluation;
           evalText = evaluation.toFixed(1);
         }
-        
+
         const moves = pvMatch[1].split(' ');
         const pv = moves.slice(0, 8).join(' ');
-        
+
         setCurrentAnalysis({
           depth,
           evaluation,
@@ -284,20 +284,20 @@ const EngineAnalysis = () => {
 
   const analyzePosition = useCallback(() => {
     if (!analyzerEngineRef.current) return;
-    
+
     const game = gameRef.current;
     const fen = game.fen();
     const preset = getPresetById(analyzerPresetId);
-    
+
     if (!preset) return;
-    
+
     const depth = analyzerCustom && analyzerDepth ? analyzerDepth : preset.depth;
-    
+
     setAnalyzerThinking(true);
-    
+
     analyzerEngineRef.current.postMessage(`position fen ${fen}`);
     analyzerEngineRef.current.postMessage(`go depth ${depth}`);
-    
+
     setTimeout(() => {
       if (analyzerEngineRef.current) {
         analyzerEngineRef.current.postMessage('stop');
@@ -308,11 +308,11 @@ const EngineAnalysis = () => {
 
   const requestEngineMove = useCallback((color) => {
     const game = gameRef.current;
-    
+
     if (engineThinking || gamePausedRef.current) return;
-    
+
     let engineRef, presetId, depth, isCustom;
-    
+
     if (color === 'white') {
       engineRef = whiteEngineRef;
       presetId = whitePresetId;
@@ -324,16 +324,16 @@ const EngineAnalysis = () => {
       depth = blackDepth;
       isCustom = blackCustom;
     }
-    
+
     if (!engineRef.current || game.isGameOver()) return;
-    
+
     const preset = getPresetById(presetId);
     if (!preset) return;
-    
+
     setEngineThinking(true);
     const fen = game.fen();
     const finalDepth = isCustom && depth ? depth : preset.depth;
-    
+
     engineRef.current.postMessage(`position fen ${fen}`);
     engineRef.current.postMessage(`go depth ${finalDepth}`);
   }, [engineThinking, whitePresetId, blackPresetId, whiteDepth, blackDepth, whiteCustom, blackCustom]);
@@ -342,42 +342,42 @@ const EngineAnalysis = () => {
     const currentPlayMode = playModeRef.current;
     const currentHumanColor = humanColorRef.current;
     const isPaused = gamePausedRef.current;
-    
+
     if (isPaused) {
       setEngineThinking(false);
       return;
     }
-    
+
     const game = gameRef.current;
-    
+
     try {
       const move = game.move({ from, to, promotion });
-      
+
       if (move) {
         if (boardRef.current) {
           boardRef.current.position(game.fen());
         }
         setMoves((prevMoves) => [...prevMoves, { from: move.from, to: move.to }]);
         updateStatus();
-        
+
         if (move.captured) {
           captureSound.play();
         } else {
           moveSound.play();
         }
-        
+
         setTimeout(() => analyzePosition(), 500);
-        
+
         if (currentPlayMode === 'engine-battle' && !game.isGameOver() && !isPaused) {
           const nextColor = game.turn() === 'w' ? 'white' : 'black';
           setTimeout(() => requestEngineMove(nextColor), 1000);
         }
-        
+
         if (currentPlayMode === 'vs-engine' && !game.isGameOver() && !isPaused) {
           const currentTurn = game.turn();
           const isEngineTurn = (currentHumanColor === 'white' && currentTurn === 'b') ||
-                               (currentHumanColor === 'black' && currentTurn === 'w');
-          
+            (currentHumanColor === 'black' && currentTurn === 'w');
+
           if (isEngineTurn) {
             const engineColor = currentHumanColor === 'white' ? 'black' : 'white';
             setTimeout(() => requestEngineMove(engineColor), 1000);
@@ -483,14 +483,14 @@ const EngineAnalysis = () => {
       }
       if (playMode === 'engine-battle') return false;
       if ((game.turn() === "w" && piece.search(/^b/) !== -1) ||
-          (game.turn() === "b" && piece.search(/^w/) !== -1)) {
+        (game.turn() === "b" && piece.search(/^w/) !== -1)) {
         return false;
       }
     };
 
     const onDrop = async (source, target) => {
       if (mobileMode || engineThinking || gamePaused) return "snapback";
-      
+
       removeGreySquares();
       let move = game.move({ from: source, to: target, promotion: promotionPiece });
       if (move === null) return "snapback";
@@ -503,14 +503,14 @@ const EngineAnalysis = () => {
       } else {
         moveSound.play();
       }
-      
+
       setTimeout(() => analyzePosition(), 500);
-      
+
       if (playMode === 'vs-engine' && !game.isGameOver() && !gamePaused) {
         const currentTurn = game.turn();
         const isEngineTurn = (humanColor === 'white' && currentTurn === 'b') ||
-                             (humanColor === 'black' && currentTurn === 'w');
-        
+          (humanColor === 'black' && currentTurn === 'w');
+
         if (isEngineTurn) {
           const engineColor = humanColor === 'white' ? 'black' : 'white';
           setTimeout(() => requestEngineMove(engineColor), 800);
@@ -567,9 +567,9 @@ const EngineAnalysis = () => {
       const isDraggable = !mobileMode && playMode !== 'engine-battle';
       const game = gameRef.current;
       const currentFen = game.fen();
-      
+
       boardRef.current.destroy();
-      
+
       const onDragStart = (source, piece) => {
         if (mobileMode || game.isGameOver() || engineThinking || gamePaused) return false;
         if (playMode === 'vs-engine') {
@@ -578,14 +578,14 @@ const EngineAnalysis = () => {
         }
         if (playMode === 'engine-battle') return false;
         if ((game.turn() === "w" && piece.search(/^b/) !== -1) ||
-            (game.turn() === "b" && piece.search(/^w/) !== -1)) {
+          (game.turn() === "b" && piece.search(/^w/) !== -1)) {
           return false;
         }
       };
 
       const onDrop = async (source, target) => {
         if (mobileMode || engineThinking || gamePaused) return "snapback";
-        
+
         removeGreySquares();
         let move = game.move({ from: source, to: target, promotion: promotionPiece });
         if (move === null) return "snapback";
@@ -598,14 +598,14 @@ const EngineAnalysis = () => {
         } else {
           moveSound.play();
         }
-        
+
         setTimeout(() => analyzePosition(), 500);
-        
+
         if (playMode === 'vs-engine' && !game.isGameOver() && !gamePaused) {
           const currentTurn = game.turn();
           const isEngineTurn = (humanColor === 'white' && currentTurn === 'b') ||
-                               (humanColor === 'black' && currentTurn === 'w');
-          
+            (humanColor === 'black' && currentTurn === 'w');
+
           if (isEngineTurn) {
             const engineColor = humanColor === 'white' ? 'black' : 'white';
             setTimeout(() => requestEngineMove(engineColor), 800);
@@ -662,9 +662,9 @@ const EngineAnalysis = () => {
     setEngineThinking(false);
     setGameActive(true);
     setGamePaused(false);
-    
+
     setTimeout(() => analyzePosition(), 500);
-    
+
     if (playMode === 'engine-battle' && whiteEngineLoaded) {
       setTimeout(() => requestEngineMove('white'), 500);
     }
@@ -672,7 +672,7 @@ const EngineAnalysis = () => {
 
   const handlePauseResume = () => {
     setGamePaused(!gamePaused);
-    
+
     if (gamePaused) {
       // Resuming
       if (playMode === 'engine-battle' && !gameRef.current.isGameOver()) {
@@ -681,8 +681,8 @@ const EngineAnalysis = () => {
       } else if (playMode === 'vs-engine' && !gameRef.current.isGameOver()) {
         const currentTurn = gameRef.current.turn();
         const isEngineTurn = (humanColor === 'white' && currentTurn === 'b') ||
-                             (humanColor === 'black' && currentTurn === 'w');
-        
+          (humanColor === 'black' && currentTurn === 'w');
+
         if (isEngineTurn) {
           const engineColor = humanColor === 'white' ? 'black' : 'white';
           setTimeout(() => requestEngineMove(engineColor), 500);
@@ -694,16 +694,16 @@ const EngineAnalysis = () => {
   // Evaluation bar calculation
   const getEvalBarHeight = () => {
     if (!currentAnalysis) return 50;
-    
+
     const eval_num = currentAnalysis.evaluation;
-    
+
     // Clamp between -10 and +10
     const clamped = Math.max(-10, Math.min(10, eval_num));
-    
+
     // Convert to percentage (0-100)
     // -10 = 0%, 0 = 50%, +10 = 100%
     const percentage = ((clamped + 10) / 20) * 100;
-    
+
     return percentage;
   };
 
@@ -720,7 +720,7 @@ const EngineAnalysis = () => {
 
         {/* CENTER - BOARD AND ENGINE INFO */}
         <div className="lg:mx-16 w-full mx-auto lg:w-2/5 flex flex-col items-center justify-center px-2 py-4 mt-16 lg:mt-6 lg:overflow-hidden lg:h-screen">
-          
+
           {/* BLACK ENGINE INFO (TOP) */}
           {(playMode === 'engine-battle' || playMode === 'vs-engine') && (
             <div className="mb-2 w-full max-w-lg bg-gray-900 bg-opacity-60 rounded-lg p-2 border border-gray-700">
@@ -740,35 +740,35 @@ const EngineAnalysis = () => {
               </div>
             </div>
           )}
-          
+
           {/* CHESSBOARD WITH ATTACHED EVAL BAR */}
           <div className="relative flex items-center">
             {/* Evaluation bar - attached to left side */}
-            <div className="hidden lg:block relative bg-gray-800 rounded-l-lg shadow-2xl mr-1" 
-                 style={{ width: '14px', height: window.innerWidth > 1028 ? '28vw' : '90vw' }}>
+            <div className="relative bg-gray-800 rounded-l shadow-2xl mr-1"
+              style={{ width: '14px', height: boardSize }}>
               {/* White advantage (top) */}
-              <div 
+              <div
                 className="absolute top-0 left-0 right-0 bg-white transition-all duration-500 ease-in-out"
                 style={{ height: `${100 - getEvalBarHeight()}%` }}
               ></div>
               {/* Black advantage (bottom) */}
-              <div 
+              <div
                 className="absolute bottom-0 left-0 right-0 bg-gray-900 transition-all duration-500 ease-in-out"
                 style={{ height: `${getEvalBarHeight()}%` }}
               ></div>
               {/* Evaluation text */}
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="bg-gray-700 bg-opacity-95 px-1 py-3 rounded text-white font-bold transform -rotate-90 whitespace-nowrap" 
-                     style={{ fontSize: '11px' }}>
+                <div className="bg-gray-700 bg-opacity-95 px-1 py-3 rounded text-white font-bold transform -rotate-90 whitespace-nowrap"
+                  style={{ fontSize: '11px' }}>
                   {currentAnalysis ? currentAnalysis.evalText : '0.0'}
                 </div>
               </div>
             </div>
-            
+
             {/* Chessboard */}
             <div ref={chessRef} style={{ width: boardSize }}></div>
           </div>
-          
+
           {/* WHITE ENGINE INFO (BOTTOM) */}
           {(playMode === 'engine-battle' || playMode === 'vs-engine') && (
             <div className="mt-2 w-full max-w-lg bg-gray-100 bg-opacity-90 rounded-lg p-2 border border-gray-300">
@@ -792,18 +792,18 @@ const EngineAnalysis = () => {
 
         {/* RIGHT SIDEBAR - CONTROLS AND ANALYSIS */}
         <div className="lg:mx-4 w-full  mx-2 lg:w-2/5 mt-8 lg:mt-16 lg:h-screen lg:overflow-y-auto lg:pb-8 scrollbar-hide">
-          
+
           <MobileToggle mobileMode={mobileMode} onChange={handleCheckboxChange} className="mb-4 mt-16 lg:mt-0" />
-          
+
           {/* GAME STATUS */}
           <div className="mb-3 rounded-xl shadow-lg text-center p-4 text-lg lg:text-xl bg-gray-400 bg-opacity-30 text-white border border-gray-200">
             {gamePaused ? "⏸️ Game Paused" : (currentStatus || "White to move")}
           </div>
-          
+
           {/* GAME CONTROLS */}
           <div className="mb-3 p-3 rounded-xl shadow-lg bg-gray-400 bg-opacity-30 border border-gray-200">
             <h3 className="text-white text-lg font-bold mb-2">⚙️ Game Setup</h3>
-            
+
             <div className="mb-2">
               <label className="text-white text-base block mb-1">Play Mode:</label>
               <select
@@ -822,7 +822,7 @@ const EngineAnalysis = () => {
                 <div className="text-yellow-300 text-xs mt-1">🔒 Finish or reset game to change</div>
               )}
             </div>
-            
+
             {playMode === 'vs-engine' && (
               <div className="mb-2">
                 <label className="text-white text-base block mb-1">Play as:</label>
@@ -839,7 +839,7 @@ const EngineAnalysis = () => {
                 </select>
               </div>
             )}
-            
+
             {(playMode === 'engine-battle' || playMode === 'vs-engine') && (
               <>
                 <div className="mb-2">
@@ -857,7 +857,7 @@ const EngineAnalysis = () => {
                     ))}
                   </select>
                 </div>
-                
+
                 <div className="mb-2">
                   <label className="text-white text-base block mb-1">⬛ Black Engine:</label>
                   <select
@@ -875,7 +875,7 @@ const EngineAnalysis = () => {
                 </div>
               </>
             )}
-            
+
             <div className="flex gap-2">
               <button
                 onClick={handleNewGame}
@@ -883,7 +883,7 @@ const EngineAnalysis = () => {
               >
                 🎮 New Game
               </button>
-              
+
               {gameActive && (playMode === 'engine-battle' || playMode === 'vs-engine') && (
                 <button
                   onClick={handlePauseResume}
@@ -894,11 +894,11 @@ const EngineAnalysis = () => {
               )}
             </div>
           </div>
-          
+
           {/* ANALYSIS */}
           <div className="mb-3 p-3 rounded-xl shadow-lg bg-gray-400 bg-opacity-30 border border-gray-200">
             <h3 className="text-white text-lg font-bold mb-2">🔍 Analysis (Auto-enabled)</h3>
-            
+
             <div className="mb-2">
               <label className="text-white text-base block mb-1">Analyzer Strength:</label>
               <select
@@ -911,7 +911,7 @@ const EngineAnalysis = () => {
                 ))}
               </select>
             </div>
-            
+
             {currentAnalysis && (
               <div className="bg-black bg-opacity-30 p-3 rounded-lg border border-gray-300">
                 <div className="text-white text-sm space-y-1">
@@ -940,14 +940,14 @@ const EngineAnalysis = () => {
                 </div>
               </div>
             )}
-            
+
             {analyzerThinking && (
               <div className="text-blue-300 text-sm text-center mt-2 animate-pulse">
                 🔍 Analyzing...
               </div>
             )}
           </div>
-          
+
           {/* MOVE HISTORY */}
           <div className="p-3 rounded-xl shadow-lg bg-gray-400 bg-opacity-30 border border-gray-200">
             <div className="flex items-center justify-between mb-2">
@@ -959,7 +959,7 @@ const EngineAnalysis = () => {
                 {isTableCollapsed ? '▼ Show' : '▲ Hide'}
               </button>
             </div>
-            
+
             <div
               style={{
                 maxHeight: isTableCollapsed ? "0" : "20vh",
@@ -996,7 +996,7 @@ const EngineAnalysis = () => {
                   </table>
                 </div>
               )}
-              
+
               {moves.length === 0 && (
                 <div className="text-gray-300 text-sm text-center py-4 bg-black bg-opacity-20 rounded-lg border border-gray-500">
                   No moves yet
@@ -1004,7 +1004,7 @@ const EngineAnalysis = () => {
               )}
             </div>
           </div>
-          
+
           {/* PROMOTION */}
           <div className="mt-3">
             <label className="text-white text-base block mb-1">Promotion Piece:</label>
