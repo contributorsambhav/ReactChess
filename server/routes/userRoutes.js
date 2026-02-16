@@ -6,6 +6,8 @@ router.post('/register', userController.register);
 
 router.post('/login', userController.login);
 
+router.post('/google-login', userController.googleLogin);
+
 router.post('/logout', userController.logout);
 
 router.get('/:userId', userController.getUserById);

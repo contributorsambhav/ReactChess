@@ -1,9 +1,12 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
+const { OAuth2Client } = require('google-auth-library');
+
+const googleClient = new OAuth2Client((process.env.GOOGLE_CLIENT_ID || '').trim());
 
 const register = async (req, res) => {
-const {username,password,email} = req.body
+  const { username, password, email } = req.body
   // Convert to lowercase
   const lowerCaseUsername = username.toLowerCase();
   const lowerCaseEmail = email.toLowerCase();
@@ -76,6 +79,68 @@ const login = async (req, res) => {
 
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+};
+
+const googleLogin = async (req, res) => {
+  const { credential } = req.body;
+  const clientId = (process.env.GOOGLE_CLIENT_ID || '').trim();
+
+  try {
+    // Verify the Google ID token
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: clientId,
+    });
+
+    const payload = ticket.getPayload();
+    const { sub: googleId, email, name, picture } = payload;
+    const lowerCaseEmail = email.toLowerCase();
+
+    // Check if a user with this Google ID or email already exists
+    let user = await User.findOne({ $or: [{ googleId }, { email: lowerCaseEmail }] });
+
+    if (user) {
+      // If user exists by email but hasn't linked Google yet, link it
+      if (!user.googleId) {
+        user.googleId = googleId;
+        await user.save();
+      }
+    } else {
+      // Create a new user (no password needed for Google auth)
+      user = new User({
+        username: name.toLowerCase(),
+        email: lowerCaseEmail,
+        googleId,
+      });
+      await user.save();
+    }
+
+    // Generate JWT token same as normal login
+    const token = jwt.sign({
+      userId: user._id,
+      username: user.username,
+      email: user.email,
+      matchHistory: user.matchHistory,
+      wins: user.wins,
+      loses: user.loses,
+      draws: user.draws
+    }, process.env.JWT_SECRET, {});
+
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      path: '/',
+      maxAge: 10 * 365 * 24 * 60 * 60 * 1000 // 10 years
+    };
+
+    res.cookie('token', token, cookieOptions);
+    res.status(200).json({ token });
+
+  } catch (err) {
+    console.error('Google login error:', err);
+    res.status(401).json({ error: 'Google authentication failed' });
   }
 };
 
@@ -152,6 +217,7 @@ const logout = (req, res) => {
 module.exports = {
   register,
   login,
+  googleLogin,
   getUserById,
   addMatchToHistory,
   getMatchHistory,

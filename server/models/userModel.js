@@ -6,14 +6,15 @@ const matchSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 const userSchema = new mongoose.Schema({
-  username: { type: String,  required: true },
-  password: { type: String, required: true },
+  username: { type: String, required: true },
+  password: { type: String, required: false },
   email: { type: String, unique: true, required: true },
+  googleId: { type: String, default: null },
   createdAt: { type: Date, default: Date.now },
   wins: { type: Number, default: 0 },
   loses: { type: Number, default: 0 },
   draws: { type: Number, default: 0 },
-  matchHistory: [matchSchema]  
+  matchHistory: [matchSchema]
 });
 
 module.exports = mongoose.model('User', userSchema);
