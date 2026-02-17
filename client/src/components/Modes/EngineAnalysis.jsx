@@ -67,12 +67,12 @@ const EngineAnalysis = () => {
   // Selected presets
   const [whitePresetId, setWhitePresetId] = useState('stockfish-medium');
   const [blackPresetId, setBlackPresetId] = useState('stockfish-fast');
-  const [analyzerPresetId, setAnalyzerPresetId] = useState('stockfish-advanced');
+  const [analyzerPresetId, setAnalyzerPresetId] = useState('stockfish-ultra');
 
   // Custom depth
   const [whiteDepth, setWhiteDepth] = useState(15);
   const [blackDepth, setBlackDepth] = useState(12);
-  const [analyzerDepth, setAnalyzerDepth] = useState(16);
+  const [analyzerDepth, setAnalyzerDepth] = useState(25);
 
   const [whiteCustom, setWhiteCustom] = useState(false);
   const [blackCustom, setBlackCustom] = useState(false);
@@ -233,39 +233,48 @@ const EngineAnalysis = () => {
       const depthMatch = message.match(/depth (\d+)/);
       const scoreMatch = message.match(/score cp (-?\d+)/);
       const mateMatch = message.match(/score mate (-?\d+)/);
-      const pvMatch = message.match(/pv (.+)/);
+      const pvMatch = message.match(/\bpv\s+(.+)/);
       const nodesMatch = message.match(/nodes (\d+)/);
 
       // Only update if we have sufficient depth and nodes for stability
       const depth = depthMatch ? parseInt(depthMatch[1]) : 0;
       const nodes = nodesMatch ? parseInt(nodesMatch[1]) : 0;
 
-      if (pvMatch && depth >= 12 && nodes > 5000) {
+      if (pvMatch && depth >= 10 && nodes > 5000) {
         let evaluation = 0;
         let evalText = '0.0';
 
         if (mateMatch) {
           const mateIn = parseInt(mateMatch[1]);
-          evaluation = mateIn > 0 ? 10000 : -10000;
-          evalText = `M${mateIn}`;
+          // Convert relative to absolute mate calculation
+          const sideToMove = gameRef.current.turn();
+          const absoluteMateIn = sideToMove === 'w' ? mateIn : -mateIn;
+
+          evaluation = absoluteMateIn > 0 ? 10000 : -10000;
+          evalText = `M${Math.abs(mateIn)}`;
         } else if (scoreMatch) {
           const rawEval = parseInt(scoreMatch[1]) / 100;
+
+          // Stockfish returns evaluation from the perspective of the side whose turn it is
+          // We convert it to absolute evaluation (from White's perspective)
+          const sideToMove = gameRef.current.turn();
+          const absoluteEval = sideToMove === 'w' ? rawEval : -rawEval;
 
           // Smooth evaluation changes to prevent rapid fluctuations
           const previousEval = previousEvalRef.current;
           const maxChange = 0.8; // Maximum change per update
 
-          if (Math.abs(rawEval - previousEval) > maxChange) {
-            evaluation = previousEval + (rawEval > previousEval ? maxChange : -maxChange);
+          if (Math.abs(absoluteEval - previousEval) > maxChange) {
+            evaluation = previousEval + (absoluteEval > previousEval ? maxChange : -maxChange);
           } else {
-            evaluation = rawEval;
+            evaluation = absoluteEval;
           }
 
           previousEvalRef.current = evaluation;
-          evalText = evaluation.toFixed(1);
+          evalText = evaluation > 0 ? `+${evaluation.toFixed(1)}` : evaluation.toFixed(1);
         }
 
-        const moves = pvMatch[1].split(' ');
+        const moves = pvMatch[1].trim().split(/\s+/);
         const pv = moves.slice(0, 8).join(' ');
 
         setCurrentAnalysis({
@@ -391,6 +400,12 @@ const EngineAnalysis = () => {
   }, [updateStatus, analyzePosition, requestEngineMove]);
 
   const handleWhitePresetChange = (presetId) => {
+    // Terminate old engine so useEffect re-triggers load
+    if (whiteEngineRef.current) {
+      whiteEngineRef.current.terminate();
+      whiteEngineRef.current = null;
+    }
+    setWhiteEngineLoaded(false);
     setWhitePresetId(presetId);
     setWhiteCustom(false);
     const preset = getPresetById(presetId);
@@ -400,6 +415,12 @@ const EngineAnalysis = () => {
   };
 
   const handleBlackPresetChange = (presetId) => {
+    // Terminate old engine so useEffect re-triggers load
+    if (blackEngineRef.current) {
+      blackEngineRef.current.terminate();
+      blackEngineRef.current = null;
+    }
+    setBlackEngineLoaded(false);
     setBlackPresetId(presetId);
     setBlackCustom(false);
     const preset = getPresetById(presetId);
@@ -409,6 +430,11 @@ const EngineAnalysis = () => {
   };
 
   const handleAnalyzerPresetChange = (presetId) => {
+    if (analyzerEngineRef.current) {
+      analyzerEngineRef.current.terminate();
+      analyzerEngineRef.current = null;
+    }
+    setAnalyzerEngineLoaded(false);
     setAnalyzerPresetId(presetId);
     setAnalyzerCustom(false);
     const preset = getPresetById(presetId);
@@ -442,6 +468,15 @@ const EngineAnalysis = () => {
       }
     };
   }, [analyzerPresetId, loadEngine]);
+
+  // Re-analyze when analyzer engine finishes loading (e.g. after mid-game swap)
+  useEffect(() => {
+    if (analyzerEngineLoaded && analyzerEngineRef.current) {
+      // Small delay to ensure engine is fully ready
+      const timer = setTimeout(() => analyzePosition(), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [analyzerEngineLoaded, analyzePosition]);
 
   useEffect(() => {
     if (playMode !== 'human') {
@@ -734,9 +769,23 @@ const EngineAnalysis = () => {
                     <span className="text-gray-400 text-xs">(D{blackDepth})</span>
                   </div>
                 </div>
-                {engineThinking && gameRef.current.turn() === 'b' && !gamePaused && (
-                  <div className="text-yellow-400 text-xs animate-pulse">⚡ Thinking...</div>
-                )}
+                <div className="flex items-center gap-2">
+                  {!blackEngineLoaded && (
+                    <div className="flex items-center gap-1 text-blue-400 text-xs animate-pulse">
+                      <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                      </svg>
+                      Loading {blackPreset?.name || 'Engine'}...
+                    </div>
+                  )}
+                  {blackEngineLoaded && engineThinking && gameRef.current.turn() === 'b' && !gamePaused && (
+                    <div className="text-yellow-400 text-xs animate-pulse">⚡ Thinking...</div>
+                  )}
+                  {blackEngineLoaded && !(engineThinking && gameRef.current.turn() === 'b' && !gamePaused) && (
+                    <div className="text-green-400 text-xs">● Ready</div>
+                  )}
+                </div>
               </div>
             </div>
           )}
@@ -746,14 +795,14 @@ const EngineAnalysis = () => {
             {/* Evaluation bar - attached to left side */}
             <div className="relative bg-gray-800 rounded-l shadow-2xl mr-1"
               style={{ width: '14px', height: boardSize }}>
-              {/* White advantage (top) */}
+              {/* Black advantage (top) */}
               <div
-                className="absolute top-0 left-0 right-0 bg-white transition-all duration-500 ease-in-out"
+                className="absolute top-0 left-0 right-0 bg-gray-900 transition-all duration-500 ease-in-out"
                 style={{ height: `${100 - getEvalBarHeight()}%` }}
               ></div>
-              {/* Black advantage (bottom) */}
+              {/* White advantage (bottom) */}
               <div
-                className="absolute bottom-0 left-0 right-0 bg-gray-900 transition-all duration-500 ease-in-out"
+                className="absolute bottom-0 left-0 right-0 bg-white transition-all duration-500 ease-in-out"
                 style={{ height: `${getEvalBarHeight()}%` }}
               ></div>
               {/* Evaluation text */}
@@ -782,9 +831,23 @@ const EngineAnalysis = () => {
                     <span className="text-gray-600 text-xs">(D{whiteDepth})</span>
                   </div>
                 </div>
-                {engineThinking && gameRef.current.turn() === 'w' && !gamePaused && (
-                  <div className="text-yellow-600 text-xs animate-pulse">⚡ Thinking...</div>
-                )}
+                <div className="flex items-center gap-2">
+                  {!whiteEngineLoaded && (
+                    <div className="flex items-center gap-1 text-blue-600 text-xs animate-pulse">
+                      <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                      </svg>
+                      Loading {whitePreset?.name || 'Engine'}...
+                    </div>
+                  )}
+                  {whiteEngineLoaded && engineThinking && gameRef.current.turn() === 'w' && !gamePaused && (
+                    <div className="text-yellow-600 text-xs animate-pulse">⚡ Thinking...</div>
+                  )}
+                  {whiteEngineLoaded && !(engineThinking && gameRef.current.turn() === 'w' && !gamePaused) && (
+                    <div className="text-green-600 text-xs">● Ready</div>
+                  )}
+                </div>
               </div>
             </div>
           )}
@@ -846,32 +909,34 @@ const EngineAnalysis = () => {
                   <label className="text-white text-base block mb-1">⬜ White Engine:</label>
                   <select
                     value={whitePresetId}
-                    onChange={(e) => {
-                      if (!gameActive) handleWhitePresetChange(e.target.value);
-                    }}
-                    disabled={gameActive}
-                    className="bg-gray-400 bg-opacity-30 text-white border border-gray-200 px-3 py-1.5 rounded-lg w-full text-sm disabled:opacity-50"
+                    onChange={(e) => handleWhitePresetChange(e.target.value)}
+                    disabled={engineThinking && gameRef.current.turn() === 'w'}
+                    className="bg-gray-400 bg-opacity-30 text-white border border-gray-200 px-3 py-1.5 rounded-lg w-full text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {ALL_ENGINE_PRESETS.map(p => (
                       <option key={p.id} value={p.id} className="bg-blue-900 bg-opacity-50 text-white">{p.name} (D{p.depth})</option>
                     ))}
                   </select>
+                  {engineThinking && gameRef.current.turn() === 'w' && (
+                    <div className="text-yellow-300 text-xs mt-1">⏳ Wait for current move to finish</div>
+                  )}
                 </div>
 
                 <div className="mb-2">
                   <label className="text-white text-base block mb-1">⬛ Black Engine:</label>
                   <select
                     value={blackPresetId}
-                    onChange={(e) => {
-                      if (!gameActive) handleBlackPresetChange(e.target.value);
-                    }}
-                    disabled={gameActive}
-                    className="bg-gray-400 bg-opacity-30 text-white border border-gray-200 px-3 py-1.5 rounded-lg w-full text-sm disabled:opacity-50"
+                    onChange={(e) => handleBlackPresetChange(e.target.value)}
+                    disabled={engineThinking && gameRef.current.turn() === 'b'}
+                    className="bg-gray-400 bg-opacity-30 text-white border border-gray-200 px-3 py-1.5 rounded-lg w-full text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {ALL_ENGINE_PRESETS.map(p => (
                       <option key={p.id} value={p.id} className="bg-blue-900 bg-opacity-50 text-white">{p.name} (D{p.depth})</option>
                     ))}
                   </select>
+                  {engineThinking && gameRef.current.turn() === 'b' && (
+                    <div className="text-yellow-300 text-xs mt-1">⏳ Wait for current move to finish</div>
+                  )}
                 </div>
               </>
             )}
@@ -900,7 +965,21 @@ const EngineAnalysis = () => {
             <h3 className="text-white text-lg font-bold mb-2">🔍 Analysis (Auto-enabled)</h3>
 
             <div className="mb-2">
-              <label className="text-white text-base block mb-1">Analyzer Strength:</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-white text-base">Analyzer Strength:</label>
+                {!analyzerEngineLoaded && (
+                  <div className="flex items-center gap-1 text-blue-400 text-xs animate-pulse">
+                    <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                    Loading...
+                  </div>
+                )}
+                {analyzerEngineLoaded && (
+                  <span className="text-green-400 text-xs">● Ready (Target D{analyzerDepth})</span>
+                )}
+              </div>
               <select
                 value={analyzerPresetId}
                 onChange={(e) => handleAnalyzerPresetChange(e.target.value)}
@@ -925,7 +1004,7 @@ const EngineAnalysis = () => {
                   </div>
                   <div className="flex justify-between">
                     <span>Depth:</span>
-                    <span>{currentAnalysis.depth}</span>
+                    <span>{currentAnalysis.depth} / {analyzerDepth}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Nodes:</span>
