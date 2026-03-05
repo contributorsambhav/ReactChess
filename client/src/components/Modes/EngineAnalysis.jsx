@@ -4,6 +4,7 @@ import { Chess } from "chess.js";
 import Chessboard from "chessboardjs";
 import { Howl } from "howler";
 import MobileToggle from "../MobileToggle";
+import ExportPGN from "../ExportPGN";
 import boardbg from "../../assets/images/bgboard.jpeg";
 import captureSoundFile from "../../assets/sounds/capture.mp3";
 import checkSoundFile from "../../assets/sounds/check.mp3";
@@ -113,6 +114,15 @@ const EngineAnalysis = () => {
   const previousEvalRef = useRef(0);
 
   const [engineStatus, setEngineStatus] = useState({});
+
+  // PGN Import / Analyze state
+  const [pgnImportMode, setPgnImportMode] = useState(false);
+  const [pgnInputText, setPgnInputText] = useState("");
+  const [pgnMoves, setPgnMoves] = useState([]); // Array of move objects from parsed PGN
+  const [pgnMoveIndex, setPgnMoveIndex] = useState(-1); // -1 = starting position
+  const [pgnError, setPgnError] = useState("");
+  const pgnGameRef = useRef(new Chess()); // Separate game instance for PGN replay
+  const pgnFileInputRef = useRef(null); // Hidden file input for importing .pgn files
 
   // Helper functions
   const getPresetById = (presetId) => {
@@ -742,6 +752,246 @@ const EngineAnalysis = () => {
     return percentage;
   };
 
+  // === PGN Import Handlers ===
+  const handleLoadPGN = useCallback(() => {
+    setPgnError("");
+    const testGame = new Chess();
+
+    try {
+      // Try loading with headers
+      testGame.loadPgn(pgnInputText);
+    } catch (e) {
+      // Try loading moves only (without headers)
+      try {
+        const cleanedMoves = pgnInputText
+          .replace(/\[.*?\]/g, '')  // Remove headers
+          .replace(/\{.*?\}/g, '')  // Remove comments
+          .replace(/\(.*?\)/g, '')  // Remove variations
+          .replace(/(1-0|0-1|1\/2-1\/2|\*)\s*$/, '') // Remove result
+          .trim();
+        testGame.loadPgn(cleanedMoves);
+      } catch (e2) {
+        setPgnError("Invalid PGN. Please check the format and try again.");
+        return;
+      }
+    }
+
+    const history = testGame.history({ verbose: true });
+    if (history.length === 0) {
+      setPgnError("No valid moves found in the PGN.");
+      return;
+    }
+
+    // Store the full move list
+    setPgnMoves(history);
+    setPgnMoveIndex(-1);
+    setPgnImportMode(true);
+
+    // Reset main game to starting position
+    pgnGameRef.current = new Chess();
+    gameRef.current.reset();
+    if (boardRef.current) {
+      boardRef.current.start();
+    }
+    setMoves([]);
+    setCurrentStatus("PGN loaded — use arrows to navigate");
+    setCurrentAnalysis(null);
+    previousEvalRef.current = 0;
+    setEngineThinking(false);
+    setGameActive(false);
+    setGamePaused(false);
+    removeGreySquares();
+
+    setTimeout(() => analyzePosition(), 500);
+  }, [pgnInputText, analyzePosition]);
+
+  const handlePgnStepForward = useCallback(() => {
+    if (!pgnImportMode || pgnMoveIndex >= pgnMoves.length - 1) return;
+
+    const nextIndex = pgnMoveIndex + 1;
+    const move = pgnMoves[nextIndex];
+
+    // Apply the move to both game instances
+    const result = gameRef.current.move({
+      from: move.from,
+      to: move.to,
+      promotion: move.promotion || 'q',
+    });
+
+    pgnGameRef.current.move({
+      from: move.from,
+      to: move.to,
+      promotion: move.promotion || 'q',
+    });
+
+    if (result) {
+      if (boardRef.current) {
+        boardRef.current.position(gameRef.current.fen());
+      }
+      setPgnMoveIndex(nextIndex);
+      setMoves(prev => [...prev, { from: result.from, to: result.to }]);
+
+      // Play sound
+      if (result.captured) {
+        captureSound.play();
+      } else {
+        moveSound.play();
+      }
+
+      // Update status
+      const moveColor = gameRef.current.turn() === 'w' ? 'White' : 'Black';
+      let status = `Move ${nextIndex + 1}/${pgnMoves.length} — ${moveColor} to move`;
+      if (gameRef.current.isCheckmate()) {
+        status = `Move ${nextIndex + 1}/${pgnMoves.length} — Checkmate!`;
+      } else if (gameRef.current.inCheck()) {
+        status += " (Check)";
+      } else if (gameRef.current.isDraw()) {
+        status = `Move ${nextIndex + 1}/${pgnMoves.length} — Draw`;
+      }
+      setCurrentStatus(status);
+
+      // Analyze this position
+      previousEvalRef.current = 0;
+      setTimeout(() => analyzePosition(), 300);
+    }
+  }, [pgnImportMode, pgnMoveIndex, pgnMoves, analyzePosition]);
+
+  const handlePgnStepBackward = useCallback(() => {
+    if (!pgnImportMode || pgnMoveIndex < 0) return;
+
+    // Rebuild position by replaying moves up to (pgnMoveIndex - 1)
+    const targetIndex = pgnMoveIndex - 1;
+    const freshGame = new Chess();
+
+    for (let i = 0; i <= targetIndex; i++) {
+      const m = pgnMoves[i];
+      freshGame.move({ from: m.from, to: m.to, promotion: m.promotion || 'q' });
+    }
+
+    // Sync both game refs
+    gameRef.current.load(freshGame.fen());
+    pgnGameRef.current = freshGame;
+
+    if (boardRef.current) {
+      boardRef.current.position(freshGame.fen());
+    }
+
+    setPgnMoveIndex(targetIndex);
+
+    // Rebuild moves array
+    const newMoves = [];
+    for (let i = 0; i <= targetIndex; i++) {
+      newMoves.push({ from: pgnMoves[i].from, to: pgnMoves[i].to });
+    }
+    setMoves(newMoves);
+
+    moveSound.play();
+
+    // Update status
+    if (targetIndex < 0) {
+      setCurrentStatus("PGN loaded — Starting position");
+    } else {
+      const moveColor = freshGame.turn() === 'w' ? 'White' : 'Black';
+      let status = `Move ${targetIndex + 1}/${pgnMoves.length} — ${moveColor} to move`;
+      if (freshGame.inCheck()) status += " (Check)";
+      setCurrentStatus(status);
+    }
+
+    previousEvalRef.current = 0;
+    setTimeout(() => analyzePosition(), 300);
+  }, [pgnImportMode, pgnMoveIndex, pgnMoves, analyzePosition]);
+
+  const handlePgnGoToStart = useCallback(() => {
+    if (!pgnImportMode) return;
+
+    gameRef.current.reset();
+    pgnGameRef.current = new Chess();
+
+    if (boardRef.current) {
+      boardRef.current.start();
+    }
+    setPgnMoveIndex(-1);
+    setMoves([]);
+    setCurrentStatus("PGN loaded — Starting position");
+    setCurrentAnalysis(null);
+    previousEvalRef.current = 0;
+    setTimeout(() => analyzePosition(), 300);
+  }, [pgnImportMode, analyzePosition]);
+
+  const handlePgnGoToEnd = useCallback(() => {
+    if (!pgnImportMode || pgnMoves.length === 0) return;
+
+    const freshGame = new Chess();
+    const allMoves = [];
+
+    for (let i = 0; i < pgnMoves.length; i++) {
+      const m = pgnMoves[i];
+      freshGame.move({ from: m.from, to: m.to, promotion: m.promotion || 'q' });
+      allMoves.push({ from: m.from, to: m.to });
+    }
+
+    gameRef.current.load(freshGame.fen());
+    pgnGameRef.current = freshGame;
+
+    if (boardRef.current) {
+      boardRef.current.position(freshGame.fen());
+    }
+
+    setPgnMoveIndex(pgnMoves.length - 1);
+    setMoves(allMoves);
+
+    const moveColor = freshGame.turn() === 'w' ? 'White' : 'Black';
+    let status = `Move ${pgnMoves.length}/${pgnMoves.length} — ${moveColor} to move`;
+    if (freshGame.isCheckmate()) status = `Move ${pgnMoves.length}/${pgnMoves.length} — Checkmate!`;
+    else if (freshGame.isDraw()) status = `Move ${pgnMoves.length}/${pgnMoves.length} — Draw`;
+    else if (freshGame.inCheck()) status += " (Check)";
+    setCurrentStatus(status);
+
+    previousEvalRef.current = 0;
+    setTimeout(() => analyzePosition(), 300);
+  }, [pgnImportMode, pgnMoves, analyzePosition]);
+
+  const handleExitPgnMode = useCallback(() => {
+    setPgnImportMode(false);
+    setPgnMoves([]);
+    setPgnMoveIndex(-1);
+    setPgnInputText("");
+    setPgnError("");
+    gameRef.current.reset();
+    pgnGameRef.current = new Chess();
+    if (boardRef.current) {
+      boardRef.current.start();
+    }
+    setMoves([]);
+    setCurrentStatus("White to move");
+    setCurrentAnalysis(null);
+    previousEvalRef.current = 0;
+  }, []);
+
+  // Keyboard navigation for PGN mode
+  useEffect(() => {
+    if (!pgnImportMode) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        handlePgnStepForward();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        handlePgnStepBackward();
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        handlePgnGoToStart();
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        handlePgnGoToEnd();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [pgnImportMode, handlePgnStepForward, handlePgnStepBackward, handlePgnGoToStart, handlePgnGoToEnd]);
+
   const whitePreset = getPresetById(whitePresetId);
   const blackPreset = getPresetById(blackPresetId);
   const boardSize = window.innerWidth > 1028 ? '28vw' : '90vw';
@@ -960,6 +1210,184 @@ const EngineAnalysis = () => {
             </div>
           </div>
 
+          {/* ANALYZE VIA PGN */}
+          <div className="mb-3 p-3 rounded-xl shadow-lg bg-gray-400 bg-opacity-30 border border-gray-200">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-white text-lg font-bold">📥 Analyze via PGN</h3>
+              {pgnImportMode && (
+                <button
+                  onClick={handleExitPgnMode}
+                  className="text-red-400 hover:text-red-300 text-sm font-semibold transition-colors"
+                >
+                  ✕ Exit PGN Mode
+                </button>
+              )}
+            </div>
+
+            {!pgnImportMode ? (
+              <>
+                {/* Hidden file input */}
+                <input
+                  ref={pgnFileInputRef}
+                  type="file"
+                  accept=".pgn,text/plain"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                      const text = ev.target?.result || "";
+                      setPgnInputText(text);
+                      setPgnError("");
+                    };
+                    reader.onerror = () => setPgnError("Could not read the file. Please try again.");
+                    reader.readAsText(file);
+                    // Reset input so the same file can be re-selected
+                    e.target.value = "";
+                  }}
+                />
+
+                {/* Textarea + Import button row */}
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-gray-300 text-xs">Paste PGN or import a file:</span>
+                  <button
+                    onClick={() => pgnFileInputRef.current?.click()}
+                    className="ml-auto flex items-center gap-1.5 bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 shadow-md"
+                    title="Import a .pgn file from your device"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4-4m0 0l4 4m-4-4v12" />
+                    </svg>
+                    Import .pgn File
+                  </button>
+                </div>
+
+                <textarea
+                  value={pgnInputText}
+                  onChange={(e) => { setPgnInputText(e.target.value); setPgnError(""); }}
+                  placeholder={`Paste PGN here...\n\ne.g.:\n1. e4 e5 2. Nf3 Nc6 3. Bb5 a6`}
+                  className="w-full bg-black bg-opacity-40 text-green-300 font-mono text-sm p-3 rounded-lg border border-gray-600 focus:border-blue-400 focus:outline-none resize-y min-h-[100px] max-h-[200px] placeholder-gray-500"
+                  rows={4}
+                />
+                {pgnError && (
+                  <div className="mt-1 text-red-400 text-xs">{pgnError}</div>
+                )}
+                <button
+                  onClick={handleLoadPGN}
+                  disabled={!pgnInputText.trim()}
+                  className="mt-2 w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-3 py-2 rounded-lg font-bold text-sm shadow-lg transition-all duration-200"
+                >
+                  📂 Load PGN & Analyze
+                </button>
+              </>
+            ) : (
+              <>
+                {/* Move counter */}
+                <div className="mb-2 text-center">
+                  <span className="text-gray-300 text-sm">
+                    Position: <span className="text-white font-bold">{pgnMoveIndex + 1}</span> / {pgnMoves.length}
+                  </span>
+                </div>
+
+                {/* Navigation Controls */}
+                <div className="flex items-center gap-2 mb-3">
+                  <button
+                    onClick={handlePgnGoToStart}
+                    disabled={pgnMoveIndex < 0}
+                    className="flex-none bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed text-white w-10 h-10 rounded-lg font-bold text-lg shadow-md transition-all duration-200 flex items-center justify-center"
+                    title="Go to start (Home)"
+                  >
+                    ⏮
+                  </button>
+                  <button
+                    onClick={handlePgnStepBackward}
+                    disabled={pgnMoveIndex < 0}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed text-white h-10 rounded-lg font-bold text-xl shadow-md transition-all duration-200 flex items-center justify-center gap-1"
+                    title="Step back (←)"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Back
+                  </button>
+                  <button
+                    onClick={handlePgnStepForward}
+                    disabled={pgnMoveIndex >= pgnMoves.length - 1}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed text-white h-10 rounded-lg font-bold text-xl shadow-md transition-all duration-200 flex items-center justify-center gap-1"
+                    title="Step forward (→)"
+                  >
+                    Next
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={handlePgnGoToEnd}
+                    disabled={pgnMoveIndex >= pgnMoves.length - 1}
+                    className="flex-none bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed text-white w-10 h-10 rounded-lg font-bold text-lg shadow-md transition-all duration-200 flex items-center justify-center"
+                    title="Go to end (End)"
+                  >
+                    ⏭
+                  </button>
+                </div>
+
+                {/* PGN Move List with highlighting */}
+                <div className="bg-black bg-opacity-40 rounded-lg border border-gray-600 p-3 max-h-[150px] overflow-y-auto">
+                  <div className="flex flex-wrap gap-1">
+                    {pgnMoves.map((move, idx) => {
+                      const isWhiteMove = idx % 2 === 0;
+                      const moveNumber = Math.floor(idx / 2) + 1;
+                      return (
+                        <React.Fragment key={idx}>
+                          {isWhiteMove && (
+                            <span className="text-gray-500 text-xs font-mono mr-0.5">{moveNumber}.</span>
+                          )}
+                          <button
+                            onClick={() => {
+                              // Jump to specific move
+                              const freshGame = new Chess();
+                              const newMoves = [];
+                              for (let i = 0; i <= idx; i++) {
+                                const m = pgnMoves[i];
+                                freshGame.move({ from: m.from, to: m.to, promotion: m.promotion || 'q' });
+                                newMoves.push({ from: m.from, to: m.to });
+                              }
+                              gameRef.current.load(freshGame.fen());
+                              pgnGameRef.current = freshGame;
+                              if (boardRef.current) boardRef.current.position(freshGame.fen());
+                              setPgnMoveIndex(idx);
+                              setMoves(newMoves);
+                              const mc = freshGame.turn() === 'w' ? 'White' : 'Black';
+                              let s = `Move ${idx + 1}/${pgnMoves.length} — ${mc} to move`;
+                              if (freshGame.isCheckmate()) s = `Move ${idx + 1}/${pgnMoves.length} — Checkmate!`;
+                              else if (freshGame.inCheck()) s += " (Check)";
+                              setCurrentStatus(s);
+                              previousEvalRef.current = 0;
+                              setTimeout(() => analyzePosition(), 300);
+                            }}
+                            className={`text-xs font-mono px-1.5 py-0.5 rounded transition-all duration-150 cursor-pointer ${idx === pgnMoveIndex
+                              ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30 scale-105'
+                              : idx < pgnMoveIndex
+                                ? 'text-gray-300 hover:bg-gray-700'
+                                : 'text-gray-500 hover:bg-gray-700'
+                              }`}
+                          >
+                            {move.san}
+                          </button>
+                        </React.Fragment>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="mt-2 text-gray-400 text-xs text-center">
+                  💡 Use <kbd className="bg-gray-700 px-1.5 py-0.5 rounded text-gray-300 text-[10px]">←</kbd> <kbd className="bg-gray-700 px-1.5 py-0.5 rounded text-gray-300 text-[10px]">→</kbd> arrow keys to navigate
+                </div>
+              </>
+            )}
+          </div>
+
           {/* ANALYSIS */}
           <div className="mb-3 p-3 rounded-xl shadow-lg bg-gray-400 bg-opacity-30 border border-gray-200">
             <h3 className="text-white text-lg font-bold mb-2">🔍 Analysis (Auto-enabled)</h3>
@@ -1098,6 +1526,13 @@ const EngineAnalysis = () => {
               <option className="bg-blue-900 bg-opacity-50 text-white" value="n">♘ Promote to Knight</option>
             </select>
           </div>
+
+          <ExportPGN
+            gameRef={gameRef}
+            event="Engine Analysis"
+            white={playMode === 'engine-battle' ? (whitePreset?.name || 'White Engine') : (playMode === 'vs-engine' && humanColor === 'white' ? 'Human' : (whitePreset?.name || 'White Engine'))}
+            black={playMode === 'engine-battle' ? (blackPreset?.name || 'Black Engine') : (playMode === 'vs-engine' && humanColor === 'black' ? 'Human' : (blackPreset?.name || 'Black Engine'))}
+          />
         </div>
       </div>
     </div>

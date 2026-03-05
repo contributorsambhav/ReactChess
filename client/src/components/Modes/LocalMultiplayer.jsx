@@ -4,6 +4,7 @@ import { Chess } from "chess.js";
 import Chessboard from "chessboardjs";
 import { Howl } from "howler";
 import MobileToggle from "../MobileToggle";
+import ExportPGN from "../ExportPGN";
 import boardbg from "../../assets/images/bgboard.jpeg";
 import captureSoundFile from "../../assets/sounds/capture.mp3";
 import checkSoundFile from "../../assets/sounds/check.mp3";
@@ -36,7 +37,7 @@ const LocalMultiplayer = () => {
   const [promotionPiece, setPromotionPiece] = useState("q");
   const [mobileMode, setMobileMode] = useState(window.innerWidth <= 1028);
   const [selectedSquare, setSelectedSquare] = useState(null);
-  
+
   const handleCheckboxChange = () => {
     setMobileMode(!mobileMode);
     setSelectedSquare(null);
@@ -63,7 +64,7 @@ const LocalMultiplayer = () => {
       squareEl.style.background = "#ffff00"; // Yellow for selected piece
     }
   };
-  
+
   useEffect(() => {
     const game = gameRef.current;
 
@@ -87,7 +88,7 @@ const LocalMultiplayer = () => {
     const onDrop = async (source, target) => {
       // Only allow drag in non-mobile mode
       if (mobileMode) return "snapback";
-      
+
       removeGreySquares();
 
       let move = game.move({
@@ -186,7 +187,7 @@ const LocalMultiplayer = () => {
   // Handle touch/click on squares for mobile mode
   useEffect(() => {
     console.log("Touch handler effect running. Mobile mode:", mobileMode, "Board ref exists:", !!boardRef.current);
-    
+
     if (!mobileMode || !chessRef.current) return;
 
     // Wait a bit to ensure the board is fully rendered
@@ -203,7 +204,7 @@ const LocalMultiplayer = () => {
           console.log("Game not initialized");
           return;
         }
-        
+
         if (game.isGameOver()) {
           console.log("Game is over");
           return;
@@ -211,7 +212,7 @@ const LocalMultiplayer = () => {
 
         // Find the clicked square element
         let squareEl = e.target;
-        
+
         // Traverse up to find the square div
         let attempts = 0;
         while (squareEl && !squareEl.classList.contains("square-55d63")) {
@@ -230,7 +231,7 @@ const LocalMultiplayer = () => {
           const match = cls.match(/^square-([a-h][1-8])$/);
           return match !== null;
         });
-        
+
         if (!squareClass) return;
 
         const clickedSquare = squareClass.replace("square-", "");
@@ -392,14 +393,14 @@ const LocalMultiplayer = () => {
             style={{ width: window.innerWidth > 1028 ? "40vw" : "100vw" }}
           ></div>
         </div>
-        
+
         <div className="lg:mx-4 w-fit mx-2 lg:w-1/3 mt-4 lg:mt-0">
-          <MobileToggle 
-            mobileMode={mobileMode} 
+          <MobileToggle
+            mobileMode={mobileMode}
             onChange={handleCheckboxChange}
             className="mb-4"
           />
-          
+
           <div className="rounded-xl shadow-lg text-center p-8 px-16 lg:w-full text-xl lg:text-2xl lg:text-3xl xl:text-4xl bg-gray-400 bg-opacity-30 text-white border border-gray-200 flex-shrink-0">
             Current Status: {currentStatus ? currentStatus : "White to move"}
           </div>
@@ -498,6 +499,13 @@ const LocalMultiplayer = () => {
               </table>
             </div>
           </div>
+
+          <ExportPGN
+            gameRef={gameRef}
+            event="Local Multiplayer"
+            white="Player 1"
+            black="Player 2"
+          />
         </div>
       </div>
     </div>

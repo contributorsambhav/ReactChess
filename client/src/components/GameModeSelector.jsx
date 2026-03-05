@@ -17,7 +17,8 @@ function GameModeSelector() {
     { path: '/against-stockfish', label: 'Against Stockfish ', delay: 'delay-300' },
     { path: '/puzzle', label: 'Puzzles', delay: 'delay-400' },
     { path: '/random-play', label: 'Random Play (Always win)', delay: 'delay-500' },
-    { path: '/engine-analysis', label: 'Engine Analysis', delay: 'delay-600' }
+    { path: '/analyze-game', label: '🔍 Analyze Game (PGN)', delay: 'delay-600' },
+    { path: '/engine-play', label: '🤖 Engine Play', delay: 'delay-700' },
   ];
 
   return (

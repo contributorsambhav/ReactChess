@@ -4,6 +4,7 @@ import { Chess } from "chess.js";
 import Chessboard from "chessboardjs";
 import { Howl } from "howler";
 import MobileToggle from "../MobileToggle";
+import ExportPGN from "../ExportPGN";
 import axios from "axios";
 import bg from "../../assets/images/bgprofile.jpg";
 import captureSoundFile from "../../assets/sounds/capture.mp3";
@@ -120,7 +121,7 @@ const AgainstStockfish = () => {
     const onDragStart = (source, piece, position, orientation) => {
       // Disable drag in mobile mode
       if (mobileMode) return false;
-      
+
       if (game.isGameOver()) {
         console.log("Start a new game from the menu");
         return false;
@@ -142,7 +143,7 @@ const AgainstStockfish = () => {
     const onDrop = async (source, target) => {
       // Only allow drag in non-mobile mode
       if (mobileMode) return "snapback";
-      
+
       removeGreySquares();
 
       let move = game.move({
@@ -207,7 +208,7 @@ const AgainstStockfish = () => {
     const onMouseoverSquare = (square, piece) => {
       // Disable hover in mobile mode
       if (mobileMode) return;
-      
+
       const moves = game.moves({
         square: square,
         verbose: true,
@@ -256,7 +257,7 @@ const AgainstStockfish = () => {
   // Handle touch/click on squares for mobile mode
   useEffect(() => {
     console.log("Touch handler effect running. Mobile mode:", mobileMode, "Board ref exists:", !!boardRef.current);
-    
+
     if (!mobileMode || !chessRef.current) return;
 
     // Wait a bit to ensure the board is fully rendered
@@ -270,13 +271,13 @@ const AgainstStockfish = () => {
         console.log("=== CLICK DETECTED ===");
         console.log("Event target:", e.target);
         console.log("Mobile mode:", mobileMode);
-        
+
         const game = gameRef.current;
         if (!game) {
           console.log("Game not initialized");
           return;
         }
-        
+
         if (game.isGameOver() || isThinking) {
           console.log("Game is over or thinking");
           return;
@@ -285,7 +286,7 @@ const AgainstStockfish = () => {
         // Find the clicked square element
         let squareEl = e.target;
         console.log("Starting element:", squareEl);
-        
+
         // Traverse up to find the square div
         let attempts = 0;
         while (squareEl && !squareEl.classList.contains("square-55d63")) {
@@ -307,13 +308,13 @@ const AgainstStockfish = () => {
         // Extract square name from class (e.g., "square-g2" -> "g2")
         const classList = Array.from(squareEl.classList);
         console.log("Square classes:", classList);
-        
+
         // Find the class that matches the pattern "square-[a-h][1-8]"
         const squareClass = classList.find((cls) => {
           const match = cls.match(/^square-([a-h][1-8])$/);
           return match !== null;
         });
-        
+
         if (!squareClass) {
           console.log("Could not find square class");
           return;
@@ -331,7 +332,7 @@ const AgainstStockfish = () => {
         if (!selectedSquare) {
           // No piece selected yet - try to select this square
           console.log("No piece currently selected");
-          
+
           if (!piece) {
             console.log("No piece on clicked square");
             return;
@@ -370,7 +371,7 @@ const AgainstStockfish = () => {
         } else {
           // A piece is already selected
           console.log("Piece already selected:", selectedSquare);
-          
+
           if (clickedSquare === selectedSquare) {
             // Clicked the same square - deselect
             console.log("DESELECTING - clicked same square");
@@ -563,12 +564,12 @@ const AgainstStockfish = () => {
         </div>
 
         <div className="lg:mx-4 w-fit mx-2 lg:w-1/3 mt-4 lg:mt-0">
-          <MobileToggle 
-            mobileMode={mobileMode} 
+          <MobileToggle
+            mobileMode={mobileMode}
             onChange={handleCheckboxChange}
             className="mb-4"
           />
-          
+
           <div className="rounded-xl shadow-lg text-center p-6 px-12 lg:w-full text-xl lg:text-2xl bg-gray-400 bg-opacity-30 text-white border border-gray-200 flex-shrink-0">
             Current Status: {currentStatus ? currentStatus : "White to move"}
             {isThinking && (
@@ -672,6 +673,13 @@ const AgainstStockfish = () => {
               </table>
             </div>
           </div>
+
+          <ExportPGN
+            gameRef={gameRef}
+            event="Against Stockfish"
+            white="Player"
+            black="Stockfish"
+          />
 
           <div className="mt-4 text-white text-center">
             <button

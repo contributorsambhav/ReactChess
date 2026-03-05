@@ -1,7 +1,9 @@
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 
 import AgainstStockfish from './components/Modes/AgainstStockfish';
+import AnalyzeGame from './components/Modes/AnalyzeGame';
 import EngineAnalysis from './components/Modes/EngineAnalysis';
+import EnginePlay from './components/Modes/EnginePlay';
 import GameModeSelector from './components/GameModeSelector';
 import GlobalMultiplayer from './components/Modes/GlobalMultiplayer';
 import Home from './components/Home';
@@ -36,6 +38,8 @@ function App() {
             <Route path="/puzzle" element={<Puzzles />} />
             <Route path="/against-stockfish" element={<AgainstStockfish />} />
             <Route path="/engine-analysis" element={<EngineAnalysis />} />
+            <Route path="/analyze-game" element={<AnalyzeGame />} />
+            <Route path="/engine-play" element={<EnginePlay />} />
             <Route path="/puzzle/:puzzleId" element={<Puzzle />} />
           </Routes>
         </div>

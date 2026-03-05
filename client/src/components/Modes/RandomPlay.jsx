@@ -4,6 +4,7 @@ import { Chess } from "chess.js";
 import Chessboard from "chessboardjs";
 import { Howl } from "howler";
 import MobileToggle from "../MobileToggle";
+import ExportPGN from "../ExportPGN";
 import bg from "../../assets/images/bgprofile.jpg";
 import captureSoundFile from "../../assets/sounds/capture.mp3";
 import checkSoundFile from "../../assets/sounds/check.mp3";
@@ -609,6 +610,13 @@ const ChessboardComponent = () => {
               </table>
             </div>
           </div>
+
+          <ExportPGN
+            gameRef={gameRef}
+            event="Random Play"
+            white="Player"
+            black="Random Bot"
+          />
         </div>
       </div>
     </div>

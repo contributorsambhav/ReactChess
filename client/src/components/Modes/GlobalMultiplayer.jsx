@@ -4,6 +4,7 @@ import { Chess } from "chess.js";
 import Chessboard from "chessboardjs";
 import { Howl } from "howler";
 import MobileToggle from "../MobileToggle";
+import ExportPGN from "../ExportPGN";
 import WaitQueue from "../WaitQueue";
 import axios from "axios";
 import boardbg from "../../assets/images/bgboard.jpeg";
@@ -43,6 +44,7 @@ const GlobalMultiplayer = () => {
   };
 
   const user = useSelector((state) => state.auth.userData);
+  const gameRef = useRef(null);
   const chessRef = useRef(null);
   const boardRef = useRef(null);
   const [currentStatus, setCurrentStatus] = useState(null);
@@ -91,6 +93,7 @@ const GlobalMultiplayer = () => {
 
   useEffect(() => {
     const newGame = new Chess();
+    gameRef.current = newGame;
     setGame(newGame);
     const newSocket = socketIOClient(import.meta.env.VITE_BACKEND_URL, {
       query: { user: JSON.stringify(user) },
@@ -192,9 +195,9 @@ const GlobalMultiplayer = () => {
         const piece = position[clickedSquare];
 
         // Check if it's player's turn
-        const isPlayerTurn = (playerColor === "white" && game.turn() === "w") || 
-                             (playerColor === "black" && game.turn() === "b");
-        
+        const isPlayerTurn = (playerColor === "white" && game.turn() === "w") ||
+          (playerColor === "black" && game.turn() === "b");
+
         if (!isPlayerTurn && !selectedSquare) return;
 
         if (!selectedSquare) {
@@ -448,14 +451,14 @@ const GlobalMultiplayer = () => {
                 </div>
               )}
             </div>
-            
+
             <div className="lg:mx-4 w-fit mx-2 lg:w-1/3 mt-4 lg:mt-0">
-              <MobileToggle 
-                mobileMode={mobileMode} 
+              <MobileToggle
+                mobileMode={mobileMode}
                 onChange={handleCheckboxChange}
                 className="mb-4"
               />
-              
+
               <div className="rounded-xl shadow-lg text-center p-6 px-12 lg:w-full text-xl lg:text-2xl bg-gray-400 bg-opacity-30 text-white border border-gray-200 flex-shrink-0">
                 Current Status: {currentStatus ? currentStatus : "White to move"}
               </div>
@@ -554,6 +557,13 @@ const GlobalMultiplayer = () => {
                   </table>
                 </div>
               </div>
+
+              <ExportPGN
+                gameRef={gameRef}
+                event="Global Multiplayer"
+                white={playerColor === "white" ? (user?.username || "You") : (opponent?.username || "Opponent")}
+                black={playerColor === "black" ? (user?.username || "You") : (opponent?.username || "Opponent")}
+              />
             </div>
           </div>
         </div>
